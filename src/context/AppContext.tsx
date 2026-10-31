@@ -1,0 +1,1009 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  Language,
+  User,
+  Entitlement,
+  OnboardingState,
+  Expert,
+  LiveSinger,
+  Appointment,
+  CycleLog,
+  ProApplication,
+  Toast,
+  NotificationItem,
+  TelephonySession
+} from '../types';
+import { DEFAULT_EXPERTS } from '../data/experts';
+import { LIVE_SINGERS } from '../data/singers';
+import { TRANSLATIONS } from '../data/translations';
+import { calmAudioEngine } from '../data/audioEngine';
+
+interface AppContextType {
+  lang: Language;
+  setLang: (lang: Language) => void;
+  toggleLanguage: () => void;
+  t: (key: string, vars?: Record<string, string | number>) => string;
+  isTa: boolean;
+
+  user: User | null;
+  entitlement: Entitlement | null;
+  onboarding: OnboardingState;
+  activeRoute: string;
+  navigate: (route: string) => void;
+
+  sendPhoneOtp: (phone: string) => { success: boolean; formattedPhone: string; demoOtp: string };
+  verifyOtpAndRegister: (data: {
+    phone: string;
+    otp: string;
+    fullName: string;
+    email?: string;
+    age: number;
+    identity: 'woman' | 'trans_woman';
+    agreeTerms: boolean;
+    autoRenew?: boolean;
+  }) => Promise<void>;
+  verifyOtpAndSignIn: (phone: string, otp: string) => Promise<void>;
+  signOut: () => void;
+  updateOnboardingStep: (step: 'register' | 'tour' | 'membership' | 'book', markComplete?: boolean) => void;
+
+  experts: Expert[];
+  singers: LiveSinger[];
+  activeCategoryFilter: string;
+  setActiveCategoryFilter: (cat: string) => void;
+  activeRoleFilter: string;
+  setActiveRoleFilter: (role: string) => void;
+
+  appointments: Appointment[];
+  bookAppointment: (params: {
+    expertId: string;
+    date: string;
+    time: string;
+    mode: string;
+    isComplimentary: boolean;
+    tierTitle?: string;
+    customPrice?: number;
+  }) => Appointment;
+  rescheduleAppointment: (appointmentId: string, newDate: string, newTime: string) => void;
+
+  cycle: {
+    optInConsent: boolean;
+    logs: CycleLog[];
+    remindersEnabled: boolean;
+  };
+  enableCycleTracker: (loadDemo?: boolean) => void;
+  addCycleLog: (log: Omit<CycleLog, 'id' | 'createdAt'>) => void;
+  deleteCycleLog: (id: string) => void;
+  wipeCycleData: () => void;
+  toggleCycleReminders: (enabled: boolean) => void;
+
+  savedArticleIds: string[];
+  toggleSaveArticle: (articleId: string) => void;
+  submitPrivateQuestion: (categoryId: string, question: string) => void;
+
+  calmState: {
+    activeTrackId: string;
+    isPlaying: boolean;
+    sleepTimerMinutes: number;
+    favourites: string[];
+  };
+  playCalmTrack: (trackId?: string) => void;
+  pauseCalmTrack: () => void;
+  setSleepTimer: (minutes: number) => void;
+  toggleCalmFavourite: (trackId: string) => void;
+
+  telephonySession: TelephonySession | null;
+  startMaskedCall: (partnerId: string, partnerName?: string, partnerRole?: string) => void;
+  holdCall: () => void;
+  resumeCall: () => void;
+  parkCall: () => void;
+  retrieveCall: (code: string) => void;
+  transferCall: () => void;
+  reconnectCall: () => void;
+  endCall: () => void;
+
+  proApplications: ProApplication[];
+  submitProApplication: (data: Omit<ProApplication, 'id' | 'status' | 'submittedAt'>) => void;
+  updateProApplicationStatus: (id: string, status: 'approved' | 'rejected') => void;
+
+  notifications: NotificationItem[];
+
+  toasts: Toast[];
+  addToast: (message: string, type?: Toast['type']) => void;
+  removeToast: (id: string) => void;
+
+  bookingModalExpert: Expert | LiveSinger | null;
+  setBookingModalExpert: (e: Expert | LiveSinger | null) => void;
+  profileModalExpert: Expert | null;
+  setProfileModalExpert: (e: Expert | null) => void;
+  isCrisisModalOpen: boolean;
+  setIsCrisisModalOpen: (open: boolean) => void;
+  isProModalOpen: boolean;
+  setIsProModalOpen: (open: boolean) => void;
+  policyModalType: 'privacy' | 'terms' | 'cancellation' | null;
+  openPolicyModal: (type: 'privacy' | 'terms' | 'cancellation') => void;
+  closePolicyModal: () => void;
+  isDrawerOpen: boolean;
+  setIsDrawerOpen: (open: boolean) => void;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: 'notif-1',
+    type: 'security',
+    titleEn: '2-Way Phone Number Masking Active',
+    titleTa: 'இருவழி தொலைபேசி எண் மறைப்பு செயலில் உள்ளது',
+    bodyEn: 'Your personal mobile number is strictly hidden on all Listener, Counsellor, and Live Singer calls via Exotel Virtual Bridge.',
+    bodyTa: 'கவனிப்பாளர், ஆலோசகர் மற்றும் பாடகர் அழைப்புகளில் உங்கள் மொபைல் எண் 100% மறைக்கப்பட்டுப் பாதுகாக்கப்படுகிறது.',
+    time: 'Just now',
+    read: false
+  },
+  {
+    id: 'notif-2',
+    type: 'entitlement',
+    titleEn: 'Complimentary 30-Min Listener Session (₹0)',
+    titleTa: 'இலவச 30-நிமிட கவனிப்பாளர் அமர்வு (₹0)',
+    bodyEn: 'First-time members enjoy a 7-Day Free Trial (₹0) followed by ₹149 for the first 60 days validity, plus 1 complimentary 30-minute Trained Listener session valid for 7 days.',
+    bodyTa: 'புதிய உறுப்பினர்களுக்கு 7 நாள் இலவச சோதனை (₹0) மற்றும் 7 நாட்களுக்குச் செல்லுபடியாகும் 1 இலவச 30-நிமிட கவனிப்பாளர் அமர்வு வழங்கப்படுகிறது.',
+    time: 'Today',
+    read: false
+  }
+];
+
+const INITIAL_PRO_APPLICATIONS: ProApplication[] = [
+  {
+    id: 'app-01',
+    name: 'Dr. Gayathri R.',
+    role: 'counsellor',
+    qualification: 'M.Phil Clinical Psychology, NIMHANS',
+    rciNumber: 'CRR-A78942',
+    experienceYears: 14,
+    specialties: ['Trauma & Depression', 'Anxiety'],
+    bio: 'Clinical psychologist with extensive experience in evidence-based cognitive trauma recovery.',
+    status: 'pending',
+    submittedAt: '2026-10-26T14:30:00Z',
+    email: 'gayathri.r@psych.in',
+    phone: '+91 98401 12345'
+  },
+  {
+    id: 'app-02',
+    name: 'Kavitha S.',
+    role: 'listener',
+    qualification: 'Certified Peer Support Specialist · Empathy First Aid',
+    rciNumber: null,
+    experienceYears: 4,
+    specialties: ['Postpartum & Family Transitions'],
+    bio: 'Empathetic listener focusing on maternal mental health and navigating new parenthood.',
+    status: 'pending',
+    submittedAt: '2026-10-27T09:15:00Z',
+    email: 'kavitha.listener@care.in',
+    phone: '+91 98412 67890'
+  }
+];
+
+export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [lang, setLangState] = useState<Language>(() => {
+    try {
+      return (localStorage.getItem('herspace_lang') as Language) || 'en';
+    } catch {
+      return 'en';
+    }
+  });
+
+  const isTa = lang === 'ta';
+
+  const t = (key: string, vars?: Record<string, string | number>): string => {
+    let text = TRANSLATIONS[lang]?.[key] || TRANSLATIONS['en']?.[key] || key;
+    if (vars) {
+      Object.entries(vars).forEach(([k, v]) => {
+        text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      });
+    }
+    return text;
+  };
+
+  const setLang = (nextLang: Language) => {
+    setLangState(nextLang);
+    try {
+      localStorage.setItem('herspace_lang', nextLang);
+    } catch {}
+    document.documentElement.lang = nextLang;
+  };
+
+  const toggleLanguage = () => {
+    const next = lang === 'en' ? 'ta' : 'en';
+    setLang(next);
+    addToast(next === 'ta' ? 'தமிழ் மொழி தேர்ந்தெடுக்கப்பட்டது' : 'Language switched to English', 'info');
+  };
+
+  // User State
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('herspace_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [entitlement, setEntitlement] = useState<Entitlement | null>(() => {
+    try {
+      const saved = localStorage.getItem('herspace_entitlement');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [onboarding, setOnboarding] = useState<OnboardingState>(() => {
+    try {
+      const saved = localStorage.getItem('herspace_onboarding');
+      return saved
+        ? JSON.parse(saved)
+        : {
+            step: 'register',
+            tourSeen: false,
+            tourSkipped: false,
+            completed: false,
+            completedAt: null,
+            tourReplay: false
+          };
+    } catch {
+      return {
+        step: 'register',
+        tourSeen: false,
+        tourSkipped: false,
+        completed: false,
+        completedAt: null,
+        tourReplay: false
+      };
+    }
+  });
+
+  const [activeRoute, setActiveRoute] = useState<string>(() => {
+    if (user && onboarding.completed) return 'space';
+    return 'home';
+  });
+
+  const [experts] = useState<Expert[]>(DEFAULT_EXPERTS);
+  const [singers] = useState<LiveSinger[]>(LIVE_SINGERS);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('all');
+  const [activeRoleFilter, setActiveRoleFilter] = useState<string>('all');
+
+  const [appointments, setAppointments] = useState<Appointment[]>(() => {
+    try {
+      const saved = localStorage.getItem('herspace_appointments');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [cycle, setCycle] = useState<{
+    optInConsent: boolean;
+    logs: CycleLog[];
+    remindersEnabled: boolean;
+  }>(() => {
+    try {
+      const saved = localStorage.getItem('herspace_cycle');
+      return saved
+        ? JSON.parse(saved)
+        : { optInConsent: false, logs: [], remindersEnabled: false };
+    } catch {
+      return { optInConsent: false, logs: [], remindersEnabled: false };
+    }
+  });
+
+  const [savedArticleIds, setSavedArticleIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('herspace_wellbeing_saved');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [notifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [proApplications, setProApplications] = useState<ProApplication[]>(() => {
+    try {
+      const saved = localStorage.getItem('herspace_pro_applications');
+      return saved ? JSON.parse(saved) : INITIAL_PRO_APPLICATIONS;
+    } catch {
+      return INITIAL_PRO_APPLICATIONS;
+    }
+  });
+
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Modals state
+  const [bookingModalExpert, setBookingModalExpert] = useState<Expert | LiveSinger | null>(null);
+  const [profileModalExpert, setProfileModalExpert] = useState<Expert | null>(null);
+  const [isCrisisModalOpen, setIsCrisisModalOpen] = useState(false);
+  const [isProModalOpen, setIsProModalOpen] = useState(false);
+  const [policyModalType, setPolicyModalType] = useState<'privacy' | 'terms' | 'cancellation' | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Calm Web Audio state
+  const [calmState, setCalmState] = useState({
+    activeTrackId: 'calm_01_tamil_breath',
+    isPlaying: false,
+    sleepTimerMinutes: 0,
+    favourites: ['calm_01_tamil_breath', 'calm_03_veena_dawn']
+  });
+
+  // Telephony state
+  const [telephonySession, setTelephonySession] = useState<TelephonySession | null>(null);
+
+  // Persistence helpers
+  useEffect(() => {
+    try {
+      if (user) localStorage.setItem('herspace_user', JSON.stringify(user));
+      else localStorage.removeItem('herspace_user');
+    } catch {}
+  }, [user]);
+
+  useEffect(() => {
+    try {
+      if (entitlement) localStorage.setItem('herspace_entitlement', JSON.stringify(entitlement));
+      else localStorage.removeItem('herspace_entitlement');
+    } catch {}
+  }, [entitlement]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('herspace_onboarding', JSON.stringify(onboarding));
+    } catch {}
+  }, [onboarding]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('herspace_appointments', JSON.stringify(appointments));
+    } catch {}
+  }, [appointments]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('herspace_cycle', JSON.stringify(cycle));
+    } catch {}
+  }, [cycle]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('herspace_wellbeing_saved', JSON.stringify(savedArticleIds));
+    } catch {}
+  }, [savedArticleIds]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('herspace_pro_applications', JSON.stringify(proApplications));
+    } catch {}
+  }, [proApplications]);
+
+  // Toast Helpers
+  const addToast = (message: string, type: Toast['type'] = 'success') => {
+    const id = 'toast_' + Math.random().toString(36).substring(2, 9);
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4500);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  // Route Navigation Guard
+  const navigate = (requestedRoute: string) => {
+    let target = requestedRoute;
+    if (requestedRoute === 'onb-register') {
+      if (user) target = onboarding.completed ? 'space' : 'onb-tour';
+    } else if (requestedRoute === 'signin') {
+      if (user) target = onboarding.completed ? 'space' : 'onb-tour';
+    } else if (requestedRoute === 'space' || requestedRoute === 'dashboard') {
+      if (!user) target = 'onb-register';
+    }
+
+    setActiveRoute(target);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Auth Operations
+  const [latestGeneratedOtp, setLatestGeneratedOtp] = useState<string>('849201');
+
+  const sendPhoneOtp = (phone: string) => {
+    const clean = phone.replace(/\D/g, '');
+    if (clean.length < 10) {
+      throw new Error(isTa ? 'தயவுசெய்து சரியான 10-இலக்க மொபைல் எண்ணை உள்ளிடவும்.' : 'Please enter a valid 10-digit mobile number.');
+    }
+    const freshOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    setLatestGeneratedOtp(freshOtp);
+    addToast(isTa ? `டெமோ OTP குறியீடு: ${freshOtp}` : `Demo OTP generated: ${freshOtp}`, 'info');
+    return {
+      success: true,
+      formattedPhone: '+91 ' + clean.slice(-10),
+      demoOtp: freshOtp
+    };
+  };
+
+  const verifyOtpAndRegister = async (data: {
+    phone: string;
+    otp: string;
+    fullName: string;
+    email?: string;
+    age: number;
+    identity: 'woman' | 'trans_woman';
+    agreeTerms: boolean;
+    autoRenew?: boolean;
+  }) => {
+    if (data.age < 18) {
+      throw new Error(isTa ? '18 வயதுக்கு மேற்பட்ட பெண்களுக்கு மட்டுமே உரியது.' : 'HerSpace is strictly for women and transgender women aged 18+.');
+    }
+    if (!data.agreeTerms) {
+      throw new Error(isTa ? 'விதிமுறைகளை ஏற்க வேண்டும்.' : 'You must accept the Terms and Privacy Policy to proceed.');
+    }
+    if (data.otp !== latestGeneratedOtp && data.otp !== '123456') {
+      throw new Error(isTa ? 'தவறான OTP குறியீடு. 123456 அல்லது அனுப்பப்பட்ட குறியீட்டை உள்ளிடவும்.' : 'Invalid OTP. Please enter the generated code or 123456.');
+    }
+
+    const cleanDigits = data.phone.replace(/\D/g, '').slice(-10);
+    const cleanPhone = '+91 ' + cleanDigits;
+    const regKey = 'herspace_reg_' + cleanDigits;
+    const isExisting = localStorage.getItem(regKey);
+
+    const now = new Date();
+    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days free trial
+    const welcomeCallEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+    let ent: Entitlement;
+    if (isExisting) {
+      ent = {
+        trialStartedAt: now.toISOString(),
+        trialEndsAt: trialEnd.toISOString(),
+        welcomeCallExpiresAt: welcomeCallEnd.toISOString(),
+        welcomeCallStatus: 'expired',
+        paidThrough: null,
+        autoRenew: false,
+        isReturning: true
+      };
+      addToast(isTa ? 'மீண்டும் வருக! ஏற்கனவே பதிவு செய்யப்பட்ட கணக்கு.' : 'Welcome back! Restored existing account.', 'info');
+    } else {
+      ent = {
+        trialStartedAt: now.toISOString(),
+        trialEndsAt: trialEnd.toISOString(),
+        welcomeCallExpiresAt: welcomeCallEnd.toISOString(),
+        welcomeCallStatus: 'available',
+        paidThrough: null,
+        autoRenew: data.autoRenew ?? false,
+        isReturning: false
+      };
+      localStorage.setItem(regKey, JSON.stringify(ent));
+      addToast(isTa ? '7 நாள் இலவச சோதனை மற்றும் 1 இலவச அமர்வு துவங்கியது!' : '🎉 7-day free trial & 1 complimentary 30-min session active!', 'success');
+    }
+
+    const newUser: User = {
+      id: 'usr-' + Math.random().toString(36).substring(2, 9),
+      fullName: data.fullName || 'HerSpace Member',
+      phone: cleanPhone,
+      email: data.email || '',
+      age: data.age,
+      identity: data.identity,
+      role: 'member',
+      createdAt: now.toISOString()
+    };
+
+    setUser(newUser);
+    setEntitlement(ent);
+    setOnboarding(prev => ({
+      ...prev,
+      step: 'tour',
+      completed: false
+    }));
+    navigate('onb-tour');
+  };
+
+  const verifyOtpAndSignIn = async (phone: string, otp: string) => {
+    if (otp !== latestGeneratedOtp && otp !== '123456') {
+      throw new Error(isTa ? 'தவறான OTP குறியீடு. 123456 என உள்ளிடவும்.' : 'Invalid OTP. Please enter 123456 or the generated code.');
+    }
+    const cleanDigits = phone.replace(/\D/g, '').slice(-10);
+    const cleanPhone = '+91 ' + cleanDigits;
+    const now = new Date();
+
+    const signedUser: User = user || {
+      id: 'usr-' + Math.random().toString(36).substring(2, 9),
+      fullName: 'HerSpace Member',
+      phone: cleanPhone,
+      email: '',
+      age: 24,
+      identity: 'woman',
+      role: 'member',
+      createdAt: now.toISOString()
+    };
+
+    setUser(signedUser);
+    if (!entitlement) {
+      setEntitlement({
+        trialStartedAt: now.toISOString(),
+        trialEndsAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        welcomeCallExpiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        welcomeCallStatus: 'available',
+        paidThrough: null,
+        autoRenew: false,
+        isReturning: false
+      });
+    }
+
+    addToast(isTa ? 'வெற்றிகரமாக உள்நுழைந்துள்ளீர்கள்!' : 'Signed in successfully!', 'success');
+    navigate('space');
+  };
+
+  const signOut = () => {
+    setUser(null);
+    setEntitlement(null);
+    setOnboarding({
+      step: 'register',
+      tourSeen: false,
+      tourSkipped: false,
+      completed: false,
+      completedAt: null,
+      tourReplay: false
+    });
+    addToast(isTa ? 'கணக்கிலிருந்து வெளியேறிவிட்டீர்கள்.' : 'Signed out safely.', 'info');
+    navigate('home');
+  };
+
+  const updateOnboardingStep = (step: 'register' | 'tour' | 'membership' | 'book', markComplete: boolean = false) => {
+    setOnboarding(prev => ({
+      ...prev,
+      step,
+      completed: markComplete ? true : prev.completed,
+      completedAt: markComplete ? new Date().toISOString() : prev.completedAt
+    }));
+  };
+
+  // Appointment Booking
+  const bookAppointment = ({
+    expertId,
+    date,
+    time,
+    mode,
+    isComplimentary,
+    tierTitle,
+    customPrice
+  }: {
+    expertId: string;
+    date: string;
+    time: string;
+    mode: string;
+    isComplimentary: boolean;
+    tierTitle?: string;
+    customPrice?: number;
+  }): Appointment => {
+    const exp = experts.find(e => e.id === expertId);
+    const singer = singers.find(s => s.id === expertId);
+    const target = exp || singer || experts[0];
+
+    const computedPrice = isComplimentary
+      ? 0
+      : customPrice !== undefined
+      ? customPrice
+      : 'priceDisplay' in target
+      ? target.priceDisplay
+      : 0;
+
+    const newApt: Appointment = {
+      id: 'apt-' + Math.random().toString(36).substring(2, 9),
+      expertId: target.id,
+      expertName: isTa && 'nameTa' in target ? target.nameTa : target.name,
+      expertRole: target.role,
+      expertAvatar: 'avatar' in target ? target.avatar : 'assets/images/01_HerSpace_Hero_Sunrise.png',
+      date,
+      time,
+      mode,
+      priceDisplay: computedPrice,
+      isComplimentary,
+      status: 'scheduled',
+      bookingId: 'HS-' + Math.floor(100000 + Math.random() * 900000),
+      createdAt: new Date().toISOString(),
+      rescheduleCount: 0,
+      selectedTierTitle: tierTitle
+    };
+
+    setAppointments(prev => [newApt, ...prev]);
+
+    if (isComplimentary && entitlement) {
+      setEntitlement({
+        ...entitlement,
+        welcomeCallStatus: 'used'
+      });
+    }
+
+    addToast(isTa ? 'அமர்வு வெற்றிகரமாக முன்பதிவு செய்யப்பட்டது!' : 'Session booked successfully!', 'success');
+    return newApt;
+  };
+
+  const rescheduleAppointment = (appointmentId: string, newDate: string, newTime: string) => {
+    let alreadyRescheduled = false;
+    setAppointments(prev =>
+      prev.map(apt => {
+        if (apt.id === appointmentId) {
+          if ((apt.rescheduleCount || 0) >= 1) {
+            alreadyRescheduled = true;
+            return apt;
+          }
+          return {
+            ...apt,
+            date: newDate,
+            time: newTime,
+            rescheduleCount: (apt.rescheduleCount || 0) + 1
+          };
+        }
+        return apt;
+      })
+    );
+    if (alreadyRescheduled) {
+      addToast(
+        isTa ? 'ஒரு முறை மட்டுமே மாற்ற முடியும் (Only one reschedule allowed).' : 'Policy notice: Only one reschedule allowed for this booking.',
+        'error'
+      );
+    } else {
+      addToast(
+        isTa ? 'அமர்வு நேரம் மாற்றப்பட்டது (ஒரு முறை மட்டுமே அனுமதி).' : 'Appointment rescheduled. Note: Only one reschedule allowed.',
+        'success'
+      );
+    }
+  };
+
+  // Cycle Operations
+  const enableCycleTracker = (loadDemo: boolean = false) => {
+    const demoLogs: CycleLog[] = loadDemo
+      ? [
+          {
+            id: 'cyc-1',
+            startDate: '2026-10-01',
+            endDate: '2026-10-05',
+            flow: 'Medium',
+            symptoms: ['Mild cramps', 'Backache'],
+            mood: 'Calm',
+            notes: 'Drank warm ginger tea, felt better by day 3.',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'cyc-2',
+            startDate: '2026-09-03',
+            endDate: '2026-09-07',
+            flow: 'Heavy',
+            symptoms: ['Headache', 'Fatigue'],
+            mood: 'Tired',
+            notes: 'Took adequate rest and iron-rich lentils.',
+            createdAt: new Date().toISOString()
+          }
+        ]
+      : [];
+
+    setCycle({
+      optInConsent: true,
+      logs: demoLogs,
+      remindersEnabled: true
+    });
+    addToast(
+      loadDemo
+        ? (isTa ? 'மாதிரி மாதவிடாய் தகவல்கள் ஏற்றப்பட்டன.' : 'Demonstration cycle entries loaded.')
+        : (isTa ? 'My Cycle பாதுகாப்பாக இயக்கப்பட்டது.' : 'My Cycle enabled privately.'),
+      'success'
+    );
+  };
+
+  const addCycleLog = (log: Omit<CycleLog, 'id' | 'createdAt'>) => {
+    const newLog: CycleLog = {
+      id: 'cyc-' + Math.random().toString(36).substring(2, 9),
+      ...log,
+      createdAt: new Date().toISOString()
+    };
+    setCycle(prev => ({
+      ...prev,
+      logs: [newLog, ...prev.logs]
+    }));
+    addToast(isTa ? 'குறிப்பு சாதனத்தில் பாதுகாப்பாகச் சேமிக்கப்பட்டது.' : 'Cycle log saved securely on your device.');
+  };
+
+  const deleteCycleLog = (id: string) => {
+    setCycle(prev => ({
+      ...prev,
+      logs: prev.logs.filter(l => l.id !== id)
+    }));
+    addToast(isTa ? 'பதிவு நீக்கப்பட்டது.' : 'Entry deleted.');
+  };
+
+  const wipeCycleData = () => {
+    setCycle({
+      optInConsent: false,
+      logs: [],
+      remindersEnabled: false
+    });
+    addToast(isTa ? 'அனைத்து தகவல்களும் நிரந்தரமாக அழிக்கப்பட்டன.' : 'All cycle data permanently wiped.');
+  };
+
+  const toggleCycleReminders = (enabled: boolean) => {
+    setCycle(prev => ({ ...prev, remindersEnabled: enabled }));
+    addToast(
+      enabled
+        ? (isTa ? 'மறைமுக நினைவூட்டல் இயக்கப்பட்டது.' : 'Discreet lock-screen redacted reminders enabled.')
+        : (isTa ? 'நினைவூட்டல் முடக்கப்பட்டது.' : 'Cycle reminders disabled.')
+    );
+  };
+
+  // Wellbeing Articles Bookmarks
+  const toggleSaveArticle = (articleId: string) => {
+    setSavedArticleIds(prev => {
+      const exists = prev.includes(articleId);
+      const next = exists ? prev.filter(id => id !== articleId) : [...prev, articleId];
+      addToast(
+        exists
+          ? (isTa ? 'கட்டுரை நீக்கப்பட்டது.' : 'Article removed from saved.')
+          : (isTa ? 'கட்டுரை சேமிக்கப்பட்டது.' : 'Article bookmarked in your Personal Space.')
+      );
+      return next;
+    });
+  };
+
+  const submitPrivateQuestion = (_categoryId: string, _question: string) => {
+    addToast(
+      isTa
+        ? 'உங்கள் கேள்வி ரகசியமாகப் பெறப்பட்டது. விரைவில் பதிலளிக்கப்படும்.'
+        : 'Your question was submitted privately. Our team will review it.',
+      'success'
+    );
+  };
+
+  // Calm Audio
+  const playCalmTrack = (trackId?: string) => {
+    const id = trackId || calmState.activeTrackId;
+    calmAudioEngine.play(id);
+    setCalmState(prev => ({
+      ...prev,
+      activeTrackId: id,
+      isPlaying: true
+    }));
+  };
+
+  const pauseCalmTrack = () => {
+    calmAudioEngine.stop();
+    setCalmState(prev => ({
+      ...prev,
+      isPlaying: false
+    }));
+  };
+
+  const setSleepTimer = (minutes: number) => {
+    setCalmState(prev => ({ ...prev, sleepTimerMinutes: minutes }));
+    if (minutes > 0) {
+      setTimeout(() => {
+        pauseCalmTrack();
+        addToast(isTa ? 'ஸ்லீப் டைமர் முடிந்தது.' : 'Sleep timer ended playback.', 'info');
+      }, minutes * 60 * 1000);
+      addToast(isTa ? `${minutes} நிமிட ஸ்லீப் டைமர் அமைக்கப்பட்டது.` : `Sleep timer set for ${minutes} minutes.`);
+    }
+  };
+
+  const toggleCalmFavourite = (trackId: string) => {
+    setCalmState(prev => {
+      const isFav = prev.favourites.includes(trackId);
+      return {
+        ...prev,
+        favourites: isFav ? prev.favourites.filter(id => id !== trackId) : [...prev.favourites, trackId]
+      };
+    });
+  };
+
+  // Telephony Engine
+  const startMaskedCall = (partnerId: string, partnerName?: string, partnerRole?: string) => {
+    const exp = experts.find(e => e.id === partnerId);
+    const singer = singers.find(s => s.id === partnerId);
+    const target = exp || singer || experts[0];
+
+    const newSession: TelephonySession = {
+      queueId: 'HS-Q' + Math.floor(100 + Math.random() * 900),
+      partnerId: target.id,
+      partnerName: partnerName || (isTa && 'nameTa' in target ? target.nameTa : target.name),
+      partnerRole: partnerRole || target.role,
+      state: 'connected',
+      memberMaskedDisplay: '+91 98*** **210 (Masked)',
+      partnerMaskedDisplay: '+91 44 4813 1001 (Exotel Bridge)',
+      startedAt: Date.now()
+    };
+    setTelephonySession(newSession);
+  };
+
+  const holdCall = () => {
+    if (telephonySession) {
+      setTelephonySession({ ...telephonySession, state: 'on_hold' });
+      addToast(isTa ? 'அழைப்பு நிறுத்தி வைக்கப்பட்டது.' : 'Call put on hold.', 'info');
+    }
+  };
+
+  const resumeCall = () => {
+    if (telephonySession) {
+      setTelephonySession({ ...telephonySession, state: 'connected' });
+      addToast(isTa ? 'அழைப்பு தொடர்கிறது.' : 'Call resumed.', 'info');
+    }
+  };
+
+  const parkCall = () => {
+    if (telephonySession) {
+      const code = 'P' + Math.floor(10 + Math.random() * 90);
+      setTelephonySession({ ...telephonySession, state: 'parked', parkCode: code });
+      addToast(isTa ? `அழைப்பு பாதுகாப்பாக நிறுத்தப்பட்டது. ஸ்லாட்: ${code}` : `Call parked in secure slot ${code}.`, 'info');
+    }
+  };
+
+  const retrieveCall = (_code: string) => {
+    if (telephonySession) {
+      setTelephonySession({ ...telephonySession, state: 'connected', parkCode: undefined });
+      addToast(isTa ? 'அழைப்பு மீட்டெடுக்கப்பட்டது.' : 'Parked call retrieved.', 'success');
+    }
+  };
+
+  const transferCall = () => {
+    if (telephonySession) {
+      setTelephonySession({
+        ...telephonySession,
+        partnerName: 'Dr. Anita Sundaram',
+        partnerRole: 'counsellor',
+        state: 'transferred'
+      });
+      addToast(isTa ? 'அழைப்பு ஆலோசகருக்கு மாற்றப்பட்டது.' : 'Call transferred to Professional Counsellor.', 'success');
+      setTimeout(() => {
+        if (telephonySession) {
+          setTelephonySession(prev => (prev ? { ...prev, state: 'connected' } : null));
+        }
+      }, 1200);
+    }
+  };
+
+  const reconnectCall = () => {
+    if (telephonySession) {
+      setTelephonySession({ ...telephonySession, state: 'ringing' });
+      setTimeout(() => {
+        setTelephonySession(prev => (prev ? { ...prev, state: 'connected' } : null));
+        addToast(isTa ? 'அழைப்பு மீண்டும் வெற்றிகரமாக இணைக்கப்பட்டது.' : 'Call reconnected successfully.', 'success');
+      }, 1500);
+    }
+  };
+
+  const endCall = () => {
+    setTelephonySession(null);
+    addToast(isTa ? 'அழைப்பு முடிவடைந்தது.' : 'Call ended safely.');
+  };
+
+  // Professional Applications
+  const submitProApplication = (data: Omit<ProApplication, 'id' | 'status' | 'submittedAt'>) => {
+    const newApp: ProApplication = {
+      id: 'app-' + Math.random().toString(36).substring(2, 7),
+      ...data,
+      status: 'pending',
+      submittedAt: new Date().toISOString()
+    };
+    setProApplications(prev => [newApp, ...prev]);
+    setIsProModalOpen(false);
+    addToast(
+      isTa
+        ? 'விண்ணப்பம் பெறப்பட்டது. எங்கள் குழு விரைவில் சரிபார்க்கும்.'
+        : 'Application submitted for panel verification.',
+      'success'
+    );
+  };
+
+  const updateProApplicationStatus = (id: string, status: 'approved' | 'rejected') => {
+    setProApplications(prev =>
+      prev.map(app => (app.id === id ? { ...app, status } : app))
+    );
+    addToast(status === 'approved' ? 'Application approved & credentials verified.' : 'Application rejected.', 'info');
+  };
+
+  // Policies Modal
+  const openPolicyModal = (type: 'privacy' | 'terms' | 'cancellation') => {
+    setPolicyModalType(type);
+  };
+
+  const closePolicyModal = () => {
+    setPolicyModalType(null);
+  };
+
+  return (
+    <AppContext.Provider
+      value={{
+        lang,
+        setLang,
+        toggleLanguage,
+        t,
+        isTa,
+
+        user,
+        entitlement,
+        onboarding,
+        activeRoute,
+        navigate,
+
+        sendPhoneOtp,
+        verifyOtpAndRegister,
+        verifyOtpAndSignIn,
+        signOut,
+        updateOnboardingStep,
+
+        experts,
+        singers,
+        activeCategoryFilter,
+        setActiveCategoryFilter,
+        activeRoleFilter,
+        setActiveRoleFilter,
+
+        appointments,
+        bookAppointment,
+        rescheduleAppointment,
+
+        cycle,
+        enableCycleTracker,
+        addCycleLog,
+        deleteCycleLog,
+        wipeCycleData,
+        toggleCycleReminders,
+
+        savedArticleIds,
+        toggleSaveArticle,
+        submitPrivateQuestion,
+
+        calmState,
+        playCalmTrack,
+        pauseCalmTrack,
+        setSleepTimer,
+        toggleCalmFavourite,
+
+        telephonySession,
+        startMaskedCall,
+        holdCall,
+        resumeCall,
+        parkCall,
+        retrieveCall,
+        transferCall,
+        reconnectCall,
+        endCall,
+
+        proApplications,
+        submitProApplication,
+        updateProApplicationStatus,
+
+        notifications,
+
+        toasts,
+        addToast,
+        removeToast,
+
+        bookingModalExpert,
+        setBookingModalExpert,
+        profileModalExpert,
+        setProfileModalExpert,
+        isCrisisModalOpen,
+        setIsCrisisModalOpen,
+        isProModalOpen,
+        setIsProModalOpen,
+        policyModalType,
+        openPolicyModal,
+        closePolicyModal,
+        isDrawerOpen,
+        setIsDrawerOpen
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+export const useApp = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useApp must be used within an AppProvider');
+  }
+  return context;
+};
