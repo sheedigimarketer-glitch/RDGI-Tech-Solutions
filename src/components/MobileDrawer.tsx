@@ -32,7 +32,7 @@ export const MobileDrawer: React.FC = () => {
       <aside className="mobile-drawer open" aria-label="Mobile menu">
         <div className="drawer-header">
           <div>
-            <img src="/assets/herspace-client-logo.webp" alt="HerSpace" style={{ height: '32px', width: 'auto' }} />
+            <img src="/logo.png" alt="HerSpace" style={{ height: '32px', width: 'auto' }} />
             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
               {t('drawerSubTitle')}
             </div>

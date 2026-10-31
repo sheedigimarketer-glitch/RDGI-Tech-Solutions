@@ -1,9 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { HERSPACE_CONFIG } from '../data/config';
 
+const PLANS_FAQS = [
+  {
+    q: 'How does the 7-Day Free Trial work?',
+    qTa: '7 நாள் இலவச சோதனை எப்படி செயல்படுகிறது?',
+    a: 'Every new member receives 7 days of full sanctuary access at ₹0, including 1 complimentary 30-minute session with a Trained Listener, the encrypted My Cycle tracker, and the Calm Audio Sanctuary.',
+    aTa: 'ஒவ்வொரு புதிய உறுப்பினரும் ₹0 கட்டணத்தில் 7 நாட்கள் முழு அணுகலைப் பெறுவார்கள், இதில் பயிற்சி பெற்ற கேட்பவருடன் 1 இலவச 30 நிமிட அமர்வும் அடங்கும்.'
+  },
+  {
+    q: 'What happens after my 7-day free trial?',
+    qTa: '7 நாள் இலவச சோதனைக்குப் பிறகு என்ன நடக்கும்?',
+    a: 'You can continue with our Extended Validity Plan at ₹149 for your first 60 days of validity, followed by ₹149/month auto-renewal. You can cancel anytime in one tap with zero penalty.',
+    aTa: 'முதல் 60 நாட்களுக்கு ₹149 கட்டணத்தில் தொடரலாம், அதைத் தொடர்ந்து மாதம் ₹149 மட்டுமே. எப்போது வேண்டுமானாலும் ஒரே கிளிக்கில் ரத்து செய்யலாம்.'
+  },
+  {
+    q: 'Is my phone number really hidden during calls?',
+    qTa: 'அழைப்பின் போது எனது தொலைபேசி எண் உண்மையிலேயே மறைக்கப்படுமா?',
+    a: 'Yes, 100%. All sessions connect through our 2-way Exotel virtual telephony bridge. Neither you nor the listener/counsellor ever sees each other’s personal phone number.',
+    aTa: 'ஆம், 100%. அனைத்து அழைப்புகளும் எங்கள் இருவழி மறைக்கப்பட்ட தொலைபேசி பாலம் வழியாக இணைக்கப்படுகின்றன. உங்கள் எண் யாருக்கும் தெரியாது.'
+  },
+  {
+    q: 'What is the difference between a Trained Listener (₹399) and a Counsellor (₹999)?',
+    qTa: 'பயிற்சி பெற்ற கேட்பவருக்கும் (₹399) ஆலோசகருக்கும் (₹999) என்ன வித்தியாசம்?',
+    a: 'Trained Listeners provide empathetic, non-judgmental emotional venting and comfort for 60 minutes (₹399). Licensed Counsellors are RCI/postgraduate psychologists offering structured clinical therapy for 60 minutes (₹999).',
+    aTa: 'பயிற்சி பெற்ற கேட்பவர்கள் 60 நிமிடங்கள் (₹399) ஆறுதல் மற்றும் உணர்வுபூர்வமான ஆதரவை வழங்குகிறார்கள். ஆலோசகர்கள் 60 நிமிடங்கள் (₹999) உளவியல் சிகிச்சை வழங்குகிறார்கள்.'
+  },
+  {
+    q: 'Can I reschedule or cancel a booked session?',
+    qTa: 'முன்பதிவு செய்த அமர்வை மாற்றியமைக்க முடியுமா?',
+    a: 'One reschedule is permitted per booking up to 4 hours prior to the appointment start time. If your care provider fails to join, you receive a 100% full refund automatically.',
+    aTa: 'அமர்வு தொடங்குவதற்கு 4 மணி நேரத்திற்கு முன்பு வரை ஒரு முறை நேரத்தை மாற்றிக்கொள்ளலாம். நிபுணர் வரவில்லை என்றால் 100% முழு பணமும் திரும்பப் பெறப்படும்.'
+  }
+];
+
 export const PricingView: React.FC = () => {
   const { t, isTa, user, navigate, openPolicyModal } = useApp();
+  const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
 
   // Dynamically compute validity dates
   const today = new Date();
@@ -338,6 +372,67 @@ export const PricingView: React.FC = () => {
           >
             Call Support ({HERSPACE_CONFIG.support.phone})
           </a>
+        </div>
+      </div>
+
+      {/* 5. Frequently Asked Questions (Moved Exclusively to Plans Tab) */}
+      <div style={{ marginTop: '56px' }}>
+        <div className="section-header" style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 32px' }}>
+          <div className="eyebrow">FREQUENTLY ASKED QUESTIONS</div>
+          <h2 style={{ fontSize: 'clamp(1.6rem, 2.5vw, 2.1rem)', color: 'var(--color-primary-dark)', margin: '8px 0' }}>
+            {isTa ? 'அடிக்கடி கேட்கப்படும் கேள்விகள்' : 'Membership, Privacy & Session FAQs'}
+          </h2>
+          <p style={{ fontSize: '0.95rem', color: 'var(--color-ink-muted)', margin: 0 }}>
+            {t('faqSubTitle')}
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '820px', margin: '0 auto' }}>
+          {PLANS_FAQS.map((item, idx) => {
+            const isOpen = openFaqIdx === idx;
+            return (
+              <div
+                key={idx}
+                className="card"
+                style={{
+                  padding: '18px 22px',
+                  borderRadius: '16px',
+                  border: '1px solid rgba(94, 39, 80, 0.14)',
+                  background: '#FFFFFF'
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaqIdx(isOpen ? null : idx)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px',
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    color: '#3b1d36'
+                  }}
+                >
+                  <span>{isTa ? item.qTa : item.q}</span>
+                  <span style={{ fontSize: '1.1rem', color: '#5E2750', flexShrink: 0 }}>
+                    {isOpen ? '−' : '+'}
+                  </span>
+                </button>
+                {isOpen && (
+                  <p style={{ margin: '12px 0 0 0', fontSize: '0.92rem', color: '#555', lineHeight: 1.6 }}>
+                    {isTa ? item.aTa : item.a}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

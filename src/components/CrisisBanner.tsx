@@ -2,27 +2,29 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { HERSPACE_CONFIG } from '../data/config';
 
-export const CrisisBanner: React.FC = () => {
+export const CrisisBanner: React.FC<{ hideBannerBar?: boolean }> = ({ hideBannerBar = false }) => {
   const { t, isTa, isCrisisModalOpen, setIsCrisisModalOpen } = useApp();
 
   return (
     <>
-      <div className="crisis-top-banner" role="alert">
-        <span>{t('crisisAlert')}</span>
-        <button
-          className="btn btn-sm btn-outline"
-          style={{
-            color: '#FFF',
-            borderColor: 'rgba(255,255,255,0.5)',
-            padding: '3px 12px',
-            fontSize: '0.76rem',
-            minHeight: '30px'
-          }}
-          onClick={() => setIsCrisisModalOpen(true)}
-        >
-          {t('crisisBannerBtn')}
-        </button>
-      </div>
+      {!hideBannerBar && (
+        <div className="crisis-top-banner" role="alert">
+          <span>{t('crisisAlert')}</span>
+          <button
+            className="btn btn-sm btn-outline"
+            style={{
+              color: '#FFF',
+              borderColor: 'rgba(255,255,255,0.5)',
+              padding: '3px 12px',
+              fontSize: '0.76rem',
+              minHeight: '30px'
+            }}
+            onClick={() => setIsCrisisModalOpen(true)}
+          >
+            {t('crisisBannerBtn')}
+          </button>
+        </div>
+      )}
 
       {isCrisisModalOpen && (
         <div className="modal-overlay open" role="dialog" aria-modal="true">

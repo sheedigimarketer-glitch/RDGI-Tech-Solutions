@@ -316,15 +316,15 @@ main, #main-view {
    2. MOBILE BOTTOM NAVIGATION BAR & DRAWER
    ========================================================================== */
 .mobile-bottom-nav {
-  display: none;
+  display: flex;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   min-height: var(--bottom-bar-height);
-  padding: 12px 0;
-  padding-bottom: calc(12px + var(--safe-bottom));
-  background: #ffffff;
+  padding: 10px 0;
+  padding-bottom: calc(10px + var(--safe-bottom));
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--color-border);
@@ -741,28 +741,31 @@ html[lang="ta"] .bottom-nav-item {
 
 @media (max-width: 840px) {
   .hero-portal-section {
-    min-height: auto !important;
+    min-height: calc(100vh - 60px) !important;
     flex-direction: column !important;
+    justify-content: center !important;
     align-items: stretch !important;
-    padding-bottom: 24px !important;
+    padding-bottom: 16px !important;
   }
   .hero-portal-bg {
-    position: relative !important;
+    position: absolute !important;
+    inset: 0 !important;
     width: 100% !important;
-    height: 280px !important;
+    height: 100% !important;
     object-fit: cover !important;
-    object-position: center 25% !important;
+    object-position: 78% center !important;
   }
   .hero-portal-vignette {
-    display: none !important;
+    display: block !important;
+    background: linear-gradient(180deg, rgba(253, 251, 247, 0.35) 0%, rgba(253, 251, 247, 0.12) 60%, rgba(253, 251, 247, 0.25) 100%) !important;
   }
   .hero-portal-section .container {
     min-height: auto !important;
-    padding-top: 16px !important;
+    padding-top: 12px !important;
     padding-bottom: 16px !important;
   }
   .hero-sky-panel {
-    max-width: 100% !important;
+    max-width: 380px !important;
     margin: 0 auto !important;
   }
   .hero-sky-panel .hero-auth-card {

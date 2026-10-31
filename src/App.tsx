@@ -77,6 +77,8 @@ export const App: React.FC = () => {
       case 'singers':
         return <SingersView />;
       case 'pricing':
+      case 'plans':
+      case 'how':
         return <PricingView />;
       case 'contact':
         return <ContactView />;
@@ -84,7 +86,6 @@ export const App: React.FC = () => {
         return <DashboardView />;
       case 'admin':
         return <AdminView />;
-      case 'how':
       case 'policies':
       case 'home':
       default:
@@ -170,10 +171,12 @@ export const App: React.FC = () => {
     );
   }
 
+  const isHomeRoute = activeRoute === 'home' || !activeRoute;
+
   return (
     <div id="app">
-      {/* Top Crisis Notification Banner */}
-      <CrisisBanner />
+      {/* Top Crisis Banner & Modal (Banner hidden on single-screen Home view since Header has Helpline shortcut; Modal always mounted) */}
+      <CrisisBanner hideBannerBar={isHomeRoute} />
 
       {isOnboardingRoute ? (
         <>
@@ -187,7 +190,7 @@ export const App: React.FC = () => {
                   navigate('home');
                 }}
               >
-                <img src="assets/herspace-client-logo.webp" alt="HerSpace" />
+                <img src="/logo.png" alt="HerSpace" />
               </a>
 
               {getStepNumber() > 0 && (
@@ -219,7 +222,7 @@ export const App: React.FC = () => {
           <main id="main-content">
             {renderMainView()}
           </main>
-          <Footer />
+          {!isHomeRoute && <Footer />}
           <MobileBottomNav />
         </>
       )}

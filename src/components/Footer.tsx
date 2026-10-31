@@ -39,7 +39,7 @@ export const Footer: React.FC = () => {
         >
           <div style={{ maxWidth: '380px' }}>
             <img
-              src="/assets/herspace-client-logo.webp"
+              src="/logo.png"
               alt="HerSpace Logo"
               style={{ height: '34px', width: 'auto', marginBottom: '10px' }}
             />

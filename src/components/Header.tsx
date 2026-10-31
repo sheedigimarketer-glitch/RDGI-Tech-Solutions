@@ -13,6 +13,7 @@ export const Header: React.FC = () => {
     notifications,
     setIsDrawerOpen,
     setIsProModalOpen,
+    setIsCrisisModalOpen,
     signOut
   } = useApp();
 
@@ -31,7 +32,7 @@ export const Header: React.FC = () => {
             navigate('home');
           }}
         >
-          <img src="/assets/herspace-client-logo.webp" alt="HerSpace Logo" />
+          <img src="/logo.png" alt="HerSpace Logo" />
         </a>
 
         {isMember ? (
@@ -244,6 +245,31 @@ export const Header: React.FC = () => {
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
             {notifCount > 0 && <span className="notif-badge">{notifCount}</span>}
+          </button>
+
+          {/* Crisis Helpline Shortcut */}
+          <button
+            type="button"
+            onClick={() => setIsCrisisModalOpen(true)}
+            aria-label="24/7 Crisis Helpline"
+            title="24/7 Crisis Helpline"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              background: 'rgba(220, 38, 38, 0.08)',
+              border: '1px solid rgba(220, 38, 38, 0.25)',
+              color: '#B91C1C',
+              borderRadius: '9999px',
+              padding: '6px 11px',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <span>🆘</span>
+            <span>{lang === 'en' ? 'Helpline' : 'உதவி எண்'}</span>
           </button>
 
           {/* Language Switcher */}
