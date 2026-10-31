@@ -5,6 +5,8 @@ export type UserRole = 'member' | 'listener' | 'counsellor' | 'singer' | 'admin'
 export interface User {
   id: string;
   fullName: string;
+  username?: string;
+  isAuthenticated?: boolean;
   phone: string;
   email: string;
   age: number;

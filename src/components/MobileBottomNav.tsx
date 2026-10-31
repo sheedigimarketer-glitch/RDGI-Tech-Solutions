@@ -2,10 +2,8 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 
 export const MobileBottomNav: React.FC = () => {
-  const { t, user, onboarding, activeRoute, navigate } = useApp();
-  const isMember = user && onboarding.completed;
+  const { user, activeRoute, navigate } = useApp();
 
-  // Icons SVG definitions
   const homeIcon = (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -21,106 +19,72 @@ export const MobileBottomNav: React.FC = () => {
 
   const melodiesIcon = (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-      <line x1="12" y1="19" x2="12" y2="23"></line>
+      <path d="M9 18V5l12-2v13"></path>
+      <circle cx="6" cy="18" r="3"></circle>
+      <circle cx="18" cy="16" r="3"></circle>
     </svg>
   );
 
-  const bookingsIcon = (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-      <line x1="16" y1="2" x2="16" y2="6"></line>
-      <line x1="8" y1="2" x2="8" y2="6"></line>
-      <line x1="3" y1="10" x2="21" y2="10"></line>
-    </svg>
-  );
-
-  const spaceIcon = (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-    </svg>
-  );
-
-  const membershipIcon = (
+  const plansIcon = (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
       <rect x="2" y="5" width="20" height="14" rx="2"></rect>
       <line x1="2" y1="10" x2="22" y2="10"></line>
     </svg>
   );
 
-  const joinIcon = (
+  const spaceIcon = (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-      <circle cx="8.5" cy="7" r="4"></circle>
-      <line x1="20" y1="8" x2="20" y2="14"></line>
-      <line x1="23" y1="11" x2="17" y2="11"></line>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
     </svg>
   );
 
   return (
     <nav className="mobile-bottom-nav" aria-label="Primary Mobile Navigation">
+      {/* 1. Home Tab */}
       <button
-        className={`bottom-nav-item ${activeRoute === 'home' || activeRoute === 'wellbeing' ? 'active' : ''}`}
+        className={`bottom-nav-item ${activeRoute === 'home' ? 'active' : ''}`}
         onClick={() => navigate('home')}
       >
         <span className="nav-svg-icon">{homeIcon}</span>
-        <span>{t('navHome')}</span>
+        <span>Home</span>
       </button>
 
+      {/* 2. Support Tab (Care Directory) */}
       <button
         className={`bottom-nav-item ${activeRoute === 'support' ? 'active' : ''}`}
         onClick={() => navigate('support')}
       >
         <span className="nav-svg-icon">{supportIcon}</span>
-        <span>{t('navSupport')}</span>
+        <span>Support</span>
       </button>
 
+      {/* 3. Melodies Tab */}
       <button
-        className={`bottom-nav-item ${activeRoute === 'singers' ? 'active' : ''}`}
+        className={`bottom-nav-item ${activeRoute === 'singers' || activeRoute === 'calm' ? 'active' : ''}`}
         onClick={() => navigate('singers')}
       >
         <span className="nav-svg-icon">{melodiesIcon}</span>
-        <span>{t('navMelodies')}</span>
+        <span>Melodies</span>
       </button>
 
-      {isMember ? (
-        <>
-          <button
-            className={`bottom-nav-item ${activeRoute === 'dashboard' ? 'active' : ''}`}
-            onClick={() => navigate('dashboard')}
-          >
-            <span className="nav-svg-icon">{bookingsIcon}</span>
-            <span>{t('navBookings')}</span>
-          </button>
+      {/* 4. Plans Tab */}
+      <button
+        className={`bottom-nav-item ${activeRoute === 'pricing' ? 'active' : ''}`}
+        onClick={() => navigate('pricing')}
+      >
+        <span className="nav-svg-icon">{plansIcon}</span>
+        <span>Plans</span>
+      </button>
 
-          <button
-            className={`bottom-nav-item ${activeRoute === 'space' || activeRoute === 'calm' || activeRoute === 'cycle' ? 'active' : ''}`}
-            onClick={() => navigate('space')}
-          >
-            <span className="nav-svg-icon">{spaceIcon}</span>
-            <span>{t('navSpace')}</span>
-          </button>
-        </>
-      ) : (
-        <>
-          <button
-            className={`bottom-nav-item ${activeRoute === 'pricing' ? 'active' : ''}`}
-            onClick={() => navigate('pricing')}
-          >
-            <span className="nav-svg-icon">{membershipIcon}</span>
-            <span>{t('navPlans')}</span>
-          </button>
-
-          <button
-            className={`bottom-nav-item ${activeRoute === 'onb-register' || activeRoute === 'signin' ? 'active' : ''}`}
-            onClick={() => navigate('onb-register')}
-          >
-            <span className="nav-svg-icon">{joinIcon}</span>
-            <span>{t('navJoin')}</span>
-          </button>
-        </>
-      )}
+      {/* 5. My Space Tab */}
+      <button
+        className={`bottom-nav-item ${activeRoute === 'space' || activeRoute === 'dashboard' || activeRoute === 'cycle' ? 'active' : ''}`}
+        onClick={() => navigate(user ? 'space' : 'onb-register')}
+      >
+        <span className="nav-svg-icon">{spaceIcon}</span>
+        <span>My Space</span>
+      </button>
     </nav>
   );
 };

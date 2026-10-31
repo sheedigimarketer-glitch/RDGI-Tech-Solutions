@@ -18,7 +18,7 @@ export const Header: React.FC = () => {
 
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const notifCount = notifications.filter(n => !n.read).length;
-  const isMember = user && onboarding.completed;
+  const isMember = Boolean(user && (onboarding.completed || user.isAuthenticated));
 
   return (
     <header className="app-header">
@@ -52,19 +52,19 @@ export const Header: React.FC = () => {
               className={`nav-item ${activeRoute === 'singers' ? 'active' : ''}`}
               onClick={() => navigate('singers')}
             >
-              {t('navSingers')}
+              Melodies
             </button>
             <button
-              className={`nav-item ${activeRoute === 'dashboard' ? 'active' : ''}`}
-              onClick={() => navigate('dashboard')}
+              className={`nav-item ${activeRoute === 'pricing' ? 'active' : ''}`}
+              onClick={() => navigate('pricing')}
             >
-              {t('navBookings')}
+              Plans
             </button>
             <button
               className={`nav-item ${activeRoute === 'space' ? 'active' : ''}`}
               onClick={() => navigate('space')}
             >
-              {t('spaceTitle')}
+              My Space
             </button>
 
             <div className={`nav-dropdown ${isMoreOpen ? 'open' : ''}`}>
@@ -79,6 +79,15 @@ export const Header: React.FC = () => {
                 </svg>
               </button>
               <div className="nav-dropdown-menu" role="menu">
+                <button
+                  className={`nav-dropdown-item ${activeRoute === 'dashboard' ? 'active' : ''}`}
+                  onClick={() => {
+                    navigate('dashboard');
+                    setIsMoreOpen(false);
+                  }}
+                >
+                  <span>{t('navBookings')}</span>
+                </button>
                 <button
                   className={`nav-dropdown-item ${activeRoute === 'wellbeing' ? 'active' : ''}`}
                   onClick={() => {
@@ -107,15 +116,6 @@ export const Header: React.FC = () => {
                   <span>{t('navMyCycle')}</span>
                 </button>
                 <button
-                  className={`nav-dropdown-item ${activeRoute === 'pricing' ? 'active' : ''}`}
-                  onClick={() => {
-                    navigate('pricing');
-                    setIsMoreOpen(false);
-                  }}
-                >
-                  <span>{t('navPricing')}</span>
-                </button>
-                <button
                   className={`nav-dropdown-item ${activeRoute === 'contact' ? 'active' : ''}`}
                   onClick={() => {
                     navigate('contact');
@@ -131,7 +131,7 @@ export const Header: React.FC = () => {
                     setIsMoreOpen(false);
                   }}
                 >
-                  <span>{t('navFAQs')}</span>
+                  <span>How It Works & FAQs</span>
                 </button>
               </div>
             </div>
@@ -154,19 +154,19 @@ export const Header: React.FC = () => {
               className={`nav-item ${activeRoute === 'singers' ? 'active' : ''}`}
               onClick={() => navigate('singers')}
             >
-              {t('navSingers')}
-            </button>
-            <button
-              className={`nav-item ${activeRoute === 'wellbeing' ? 'active' : ''}`}
-              onClick={() => navigate('wellbeing')}
-            >
-              {t('navWellbeing')}
+              Melodies
             </button>
             <button
               className={`nav-item ${activeRoute === 'pricing' ? 'active' : ''}`}
               onClick={() => navigate('pricing')}
             >
-              {t('navPricing')}
+              Plans
+            </button>
+            <button
+              className={`nav-item ${activeRoute === 'space' ? 'active' : ''}`}
+              onClick={() => navigate(user ? 'space' : 'onb-register')}
+            >
+              My Space
             </button>
 
             <div className={`nav-dropdown ${isMoreOpen ? 'open' : ''}`}>
@@ -265,9 +265,21 @@ export const Header: React.FC = () => {
             <>
               <button
                 className="btn btn-sm btn-secondary btn-desktop-only"
-                onClick={() => navigate(isMember ? 'space' : 'onb-tour')}
+                onClick={() => navigate('space')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '7px',
+                  background: 'rgba(94, 39, 80, 0.08)',
+                  borderColor: 'rgba(94, 39, 80, 0.22)',
+                  color: '#5E2750',
+                  fontWeight: 700,
+                  borderRadius: '9999px',
+                  padding: '6px 14px'
+                }}
               >
-                <span>{user.fullName ? user.fullName.split(' ')[0] : t('navDashboard')}</span>
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }}></span>
+                <span>@{user.username || (user.fullName ? user.fullName.split(' ')[0] : 'Member')}</span>
               </button>
               <button className="btn btn-sm btn-outline btn-desktop-only" onClick={signOut}>
                 {t('navSignOut')}

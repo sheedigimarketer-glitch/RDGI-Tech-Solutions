@@ -55,6 +55,12 @@ interface AppContextType {
     autoRenew?: boolean;
   }) => Promise<void>;
   verifyOtpAndSignIn: (phone: string, otp: string) => Promise<void>;
+  anonymousAuth: (data: {
+    username: string;
+    password?: string;
+    phone?: string;
+    mode: 'register' | 'signin';
+  }) => Promise<void>;
   signOut: () => void;
   updateOnboardingStep: (step: 'register' | 'tour' | 'membership' | 'book', markComplete?: boolean) => void;
 
@@ -643,6 +649,80 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     navigate('space');
   };
 
+  const anonymousAuth = async (data: {
+    username: string;
+    password?: string;
+    phone?: string;
+    mode: 'register' | 'signin';
+  }) => {
+    const cleanUsername = sanitizeInput(data.username, 32);
+    if (!cleanUsername || cleanUsername.length < 3) {
+      throw new Error(isTa ? 'தயவுசெய்து குறைந்தது 3 எழுத்துக்களைக் கொண்ட புனைப்பெயரை உள்ளிடவும்.' : 'Please choose an anonymous handle with at least 3 characters (e.g. Maya_92).');
+    }
+
+    const now = new Date();
+    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const welcomeCallEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    const cleanDigits = (data.phone || '9840199999').replace(/\D/g, '').slice(-10);
+    const cleanPhone = '+91 ' + (cleanDigits.length === 10 ? cleanDigits : '9840199999');
+
+    const authUser: User = {
+      id: generateSecureId('usr', 8),
+      username: cleanUsername,
+      fullName: cleanUsername,
+      phone: cleanPhone,
+      email: `${cleanUsername.toLowerCase().replace(/[^a-z0-9]/g, '')}@safe.herspace.local`,
+      age: 24,
+      identity: 'woman',
+      role: 'member',
+      isAuthenticated: true,
+      createdAt: now.toISOString()
+    };
+
+    const ent: Entitlement = entitlement || {
+      trialStartedAt: now.toISOString(),
+      trialEndsAt: trialEnd.toISOString(),
+      welcomeCallExpiresAt: welcomeCallEnd.toISOString(),
+      welcomeCallStatus: 'available',
+      paidThrough: null,
+      autoRenew: false,
+      isReturning: data.mode === 'signin'
+    };
+
+    setUser(authUser);
+    setEntitlement(ent);
+    setOnboarding({
+      step: 'book',
+      tourSeen: true,
+      tourSkipped: true,
+      completed: true,
+      completedAt: now.toISOString(),
+      tourReplay: false
+    });
+
+    try {
+      localStorage.setItem('herspace_user', JSON.stringify(authUser));
+      localStorage.setItem('herspace_entitlement', JSON.stringify(ent));
+      localStorage.setItem('herspace_onboarding', JSON.stringify({
+        step: 'book',
+        tourSeen: true,
+        tourSkipped: true,
+        completed: true,
+        completedAt: now.toISOString(),
+        tourReplay: false
+      }));
+    } catch {}
+
+    addToast(
+      data.mode === 'register'
+        ? (isTa ? `வரவேற்கிறோம் @${cleanUsername}! உங்கள் பாதுகாப்பான தளம் திறக்கப்பட்டது.` : `Welcome to HerSpace, @${cleanUsername}! Your safe space is unlocked.`)
+        : (isTa ? `மீண்டும் வருக @${cleanUsername}!` : `Welcome back, @${cleanUsername}! Access granted.`),
+      'success'
+    );
+    navigate('space');
+  };
+
   const signOut = () => {
     setUser(null);
     setEntitlement(null);
@@ -1206,6 +1286,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         sendPhoneOtp,
         verifyOtpAndRegister,
         verifyOtpAndSignIn,
+        anonymousAuth,
         signOut,
         updateOnboardingStep,
 

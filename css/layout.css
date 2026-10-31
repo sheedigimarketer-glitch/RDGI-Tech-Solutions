@@ -691,6 +691,163 @@ html[lang="ta"] .bottom-nav-item {
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Serene Fixed-Viewport Hero Portal (85vh) */
+.hero-portal-section {
+  position: relative;
+  width: 100%;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: #FDFBF7;
+}
+
+.hero-portal-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-portal-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(253, 251, 247, 0.55) 0%, rgba(253, 251, 247, 0.2) 48%, rgba(253, 251, 247, 0) 80%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-sky-panel {
+  width: 100%;
+  max-width: 390px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quick-pill-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+.quick-pill-btn:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 840px) {
+  .hero-portal-section {
+    min-height: auto !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding-bottom: 24px !important;
+  }
+  .hero-portal-bg {
+    position: relative !important;
+    width: 100% !important;
+    height: 280px !important;
+    object-fit: cover !important;
+    object-position: center 25% !important;
+  }
+  .hero-portal-vignette {
+    display: none !important;
+  }
+  .hero-portal-section .container {
+    min-height: auto !important;
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+  }
+  .hero-sky-panel {
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+  .hero-sky-panel .hero-auth-card {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}
+
+/* Unified Panoramic Hero Canvas with Frosted Glass Auth Gate */
+.hero-banner-container {
+  position: relative;
+  width: 100%;
+  min-height: 560px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px -8px rgba(45, 22, 66, 0.16);
+  display: flex;
+  align-items: center;
+  padding: 40px 48px;
+  background: #FDFBF7;
+}
+
+.hero-banner-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-banner-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(253, 251, 247, 0.45) 0%, rgba(253, 251, 247, 0.15) 45%, rgba(253, 251, 247, 0) 80%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-card-wrapper {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 380px;
+}
+
+@media (max-width: 768px) {
+  .hero-banner-container {
+    flex-direction: column !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    border-radius: 20px !important;
+    background: #FFFFFF !important;
+  }
+  .hero-banner-bg {
+    position: relative !important;
+    width: 100% !important;
+    height: 240px !important;
+    object-fit: cover !important;
+    object-position: center 25% !important;
+    border-radius: 20px 20px 0 0 !important;
+  }
+  .hero-banner-vignette {
+    display: none !important;
+  }
+  .hero-card-wrapper {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+  }
+  .hero-card-wrapper .hero-auth-card {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 18px 12px !important;
+    background: transparent !important;
+  }
+}
+
 .hero-caption-bar {
   display: flex;
   align-items: center;
@@ -994,5 +1151,91 @@ html[lang="ta"] .bottom-nav-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+}
+
+/* Modern Compact Mobile Footer Accordion & Desktop Grid */
+.footer-links-container {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.footer-accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0 0 12px 0;
+  text-align: left;
+  cursor: default;
+}
+
+.footer-chevron {
+  display: none;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 0.2s ease;
+}
+
+.footer-link-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.footer-link-btn:hover {
+  color: #FFFFFF;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .footer-links-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .footer-accordion-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .footer-accordion-header {
+    cursor: pointer;
+    padding: 14px 0;
+    font-size: 0.88rem;
+  }
+  .footer-chevron {
+    display: inline-block;
+  }
+  .footer-chevron.open {
+    transform: rotate(180deg);
+  }
+  .footer-accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s cubic-bezier(0.16, 1, 0.3, 1), padding 0.2s ease;
+  }
+  .footer-accordion-body.open {
+    max-height: 250px;
+    padding-bottom: 14px;
   }
 }
