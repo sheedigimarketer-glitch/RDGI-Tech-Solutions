@@ -6,7 +6,10 @@
 (function() {
   'use strict';
 
-  const cfg = window.HERSPACE_CONFIG.supabase;
+  const cfg = (window.HERSPACE_CONFIG && window.HERSPACE_CONFIG.supabase) || {
+    url: (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.url) || 'https://placeholder-herspace.supabase.co',
+    publishableKey: (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.publishableKey) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy-anon-key-herspace'
+  };
   let client = null;
   let isLive = false;
 
@@ -14,22 +17,28 @@
   let forceOffline = false;
   try { forceOffline = localStorage.getItem('herspace_force_offline') === '1'; } catch (e) {}
 
+  // Check if credentials are placeholders or dummy
+  const isPlaceholder = !cfg.url || cfg.url.includes('placeholder') || !cfg.publishableKey || cfg.publishableKey.includes('dummy');
+
   try {
-    if (!forceOffline && window.supabase && typeof window.supabase.createClient === 'function') {
-      if (/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(cfg.url) && /^sb_publishable_/.test(cfg.publishableKey)) {
-        client = window.supabase.createClient(cfg.url, cfg.publishableKey, {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true
-          }
-        });
-        isLive = true;
-        console.log('HerSpace Supabase initialized in LIVE mode:', cfg.url);
-      }
+    if (!forceOffline && !isPlaceholder && window.supabase && typeof window.supabase.createClient === 'function') {
+      client = window.supabase.createClient(cfg.url, cfg.publishableKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      });
+      isLive = true;
+      console.log('HerSpace Supabase initialized in LIVE mode:', cfg.url);
+    } else {
+      isLive = false;
+      // Seamless simulated mock mode for UI preview
     }
   } catch (err) {
-    console.warn('Supabase initialization failed, falling back to simulated mode:', err);
+    isLive = false;
+    client = null;
+    console.info('Supabase using simulated fallback mode for preview/development.');
   }
 
   window.herSpaceSupabase = {
@@ -48,9 +57,14 @@
           }
         });
       }
-      // Offline/Local Simulated Auth
+      let mockUserId = 'usr-' + Date.now().toString(36);
+      if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+        const bytes = new Uint8Array(8);
+        window.crypto.getRandomValues(bytes);
+        mockUserId = 'usr-' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+      }
       const mockUser = {
-        id: 'usr-' + Math.random().toString(36).substring(2, 9),
+        id: mockUserId,
         email: email.trim().toLowerCase(),
         user_metadata: metadata,
         email_confirmed_at: new Date().toISOString()

@@ -14,8 +14,7 @@ export const HomeView: React.FC = () => {
     setActiveRoleFilter,
     navigate,
     setProfileModalExpert,
-    setBookingModalExpert,
-    openPolicyModal
+    setBookingModalExpert
   } = useApp();
 
   const formattedHeroTitle = t('heroTitle').split('\n').map((line, i) => (
@@ -37,12 +36,79 @@ export const HomeView: React.FC = () => {
   });
 
   const categories = [
-    { id: 'mental', title: t('catMental'), desc: t('catMentalDesc'), icon: '🧠', color: '#5B8BD9' },
-    { id: 'relationships', title: t('catRelationships'), desc: t('catRelationshipsDesc'), icon: '🤝', color: '#C85A8E' },
-    { id: 'career', title: t('catCareer'), desc: t('catCareerDesc'), icon: '💼', color: '#5C6BC0' },
-    { id: 'grief', title: t('catGrief'), desc: t('catGriefDesc'), icon: '🕊️', color: '#7C5CBF' },
-    { id: 'motherhood', title: t('catMotherhood'), desc: t('catMotherhoodDesc'), icon: '🌸', color: '#D86C9B' },
-    { id: 'wellness', title: t('catWellness'), desc: t('catWellnessDesc'), icon: '🌱', color: '#4EA898' }
+    {
+      id: 'mental',
+      title: t('catMental'),
+      desc: t('catMentalDesc'),
+      color: '#5B8BD9',
+      renderIcon: () => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="22" height="22">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 7v5l3 3"></path>
+        </svg>
+      )
+    },
+    {
+      id: 'relationships',
+      title: t('catRelationships'),
+      desc: t('catRelationshipsDesc'),
+      color: '#C85A8E',
+      renderIcon: () => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="22" height="22">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      )
+    },
+    {
+      id: 'career',
+      title: t('catCareer'),
+      desc: t('catCareerDesc'),
+      color: '#5C6BC0',
+      renderIcon: () => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="22" height="22">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
+      )
+    },
+    {
+      id: 'grief',
+      title: t('catGrief'),
+      desc: t('catGriefDesc'),
+      color: '#7C5CBF',
+      renderIcon: () => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="22" height="22">
+          <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+          <line x1="16" y1="8" x2="2" y2="22"></line>
+        </svg>
+      )
+    },
+    {
+      id: 'motherhood',
+      title: t('catMotherhood'),
+      desc: t('catMotherhoodDesc'),
+      color: '#D86C9B',
+      renderIcon: () => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="22" height="22">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+        </svg>
+      )
+    },
+    {
+      id: 'wellness',
+      title: t('catWellness'),
+      desc: t('catWellnessDesc'),
+      color: '#4EA898',
+      renderIcon: () => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="22" height="22">
+          <path d="M11 20A7 7 0 0 1 4 13a7 7 0 0 1 7-7c4.5 0 9 2 9 7 0 5-4.5 7-9 7z"></path>
+          <path d="M11 20V6"></path>
+        </svg>
+      )
+    }
   ];
 
   return (
@@ -56,113 +122,67 @@ export const HomeView: React.FC = () => {
               <span>{t('eyebrow')}</span>
             </div>
 
-            <h1 className="hero-title">{formattedHeroTitle}</h1>
+            <h1 className="hero-title" style={{ paddingTop: '28px', lineHeight: 1.25, overflow: 'visible' }}>
+              {formattedHeroTitle}
+            </h1>
 
             <p className="hero-subtitle">{t('heroSubtitle')}</p>
 
-            <div className="hero-badge-row">
-              <span className="badge badge-lavender">{t('heroFreeTrialChip')}</span>
-              <span className="badge badge-pink">{t('heroComplimentaryChip')}</span>
-            </div>
-
             <div className="hero-cta-group">
-              {user ? (
-                <>
-                  <button className="btn btn-primary btn-lg" onClick={() => navigate('space')}>
-                    <span>{t('heroMemberCTA')}</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="20" height="20">
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                      <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                  </button>
-                  <button className="btn btn-secondary btn-lg" onClick={() => navigate('support')}>
-                    <span>{t('heroMemberSecondary')}</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="btn btn-primary btn-lg" onClick={() => navigate('onb-register')}>
-                    <span>Create Account</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="20" height="20">
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                      <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                  </button>
-                  <button className="btn btn-secondary btn-lg" onClick={() => navigate('support')}>
-                    <span>{t('heroCTA')}</span>
-                  </button>
-                </>
-              )}
-            </div>
-
-            <div className="hero-trust-strip">
-              <div className="hero-trust-item">
-                <div className="hero-trust-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="20" height="20">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                  </svg>
-                </div>
-                <div className="hero-trust-text">
-                  <strong>{t('trustSafe')}</strong>
-                  <span>{isTa ? '18+ பெண்கள் & திருநங்கைகள்' : 'Women & Trans Women 18+'}</span>
-                </div>
-              </div>
-
-              <div className="hero-trust-item">
-                <div className="hero-trust-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="20" height="20">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                  </svg>
-                </div>
-                <div className="hero-trust-text">
-                  <strong>{t('trustListeners')}</strong>
-                  <span>{isTa ? 'பரிவுமிக்க மனித கவனிப்பு' : 'Empathetic Peer Listening'}</span>
-                </div>
-              </div>
-
-              <div className="hero-trust-item">
-                <div className="hero-trust-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="20" height="20">
-                    <circle cx="12" cy="8" r="7"></circle>
-                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-                  </svg>
-                </div>
-                <div className="hero-trust-text">
-                  <strong>{t('trustCounsellors')}</strong>
-                  <span>{isTa ? 'பரிசீலிக்கப்பட்ட தகுதிகள்' : 'Reviewed Credentials'}</span>
-                </div>
-              </div>
+              <button
+                className="btn btn-primary btn-lg"
+                onClick={() => navigate(user ? 'space' : 'onb-register')}
+              >
+                <span>Go to My Personal Space →</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="20" height="20">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+              <button
+                className="btn btn-secondary btn-lg"
+                onClick={() => navigate('support')}
+              >
+                <span>Browse Directory</span>
+              </button>
             </div>
           </div>
 
-          <div className="hero-visual-col">
-            <div className="hero-image-frame">
-              <img src={HERSPACE_CONFIG.images.heroSunrise} alt={t('heroBannerAlt')} />
-            </div>
-
-            <div className="hero-caption-bar">
-              <div className="hero-caption-bar-left">
-                <span className="hero-caption-dot"></span>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--color-text-dark)' }}>
-                    {t('floatingCardText')}
-                  </div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
-                    {t('floatingCardSub')}
-                  </div>
-                </div>
-              </div>
-              <button className="btn btn-sm btn-outline" onClick={() => navigate(user ? 'space' : 'onb-register')}>
-                {user ? t('spaceTitle') : 'Create Account'}
-              </button>
+          <div className="hero-visual-col" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'stretch' }}>
+            <div
+              className="hero-image-frame"
+              style={{
+                width: '100%',
+                height: '100%',
+                minHeight: '480px',
+                overflow: 'hidden',
+                borderRadius: '24px',
+                display: 'block',
+                position: 'relative',
+                border: 'none',
+                boxShadow: '0 16px 36px -6px rgba(45, 22, 66, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.4) inset'
+              }}
+            >
+              <img
+                src={HERSPACE_CONFIG.images.heroSunrise}
+                alt={t('heroBannerAlt')}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                  borderRadius: '24px',
+                  aspectRatio: '4/3',
+                  display: 'block'
+                }}
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2. ECOSYSTEM SPOTLIGHTS */}
-      <section className="section" style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+      {/* 2. ECOSYSTEM SPOTLIGHTS - Equalized 24px Gap Grid */}
+      <section className="section" style={{ paddingTop: '36px', paddingBottom: '36px' }}>
         <div className="container">
           <div className="section-header">
             <div className="eyebrow">HERSPACE 4.0 ECOSYSTEM</div>
@@ -170,16 +190,18 @@ export const HomeView: React.FC = () => {
             <p>{t('spotlightSectionSub')}</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(265px,1fr))', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px', alignItems: 'stretch' }}>
             {/* Card 1: Life & Wellbeing */}
-            <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid rgba(124,92,191,0.22)' }}>
-              <img src={HERSPACE_CONFIG.images.reflectionOutdoor} alt={t('spotlightWellbeingTitle')} style={{ width: '100%', height: '155px', objectFit: 'cover' }} />
-              <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-                <div>
-                  <span className="badge badge-verified" style={{ marginBottom: '8px' }}>🌸 11 Topics · EN & தமிழ்</span>
-                  <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>{t('spotlightWellbeingTitle')}</h3>
-                  <p style={{ fontSize: '0.86rem', color: 'var(--color-ink-muted)', marginBottom: '14px' }}>{t('spotlightWellbeingSub')}</p>
+            <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid rgba(124, 92, 191, 0.22)', height: '100%' }}>
+              <div>
+                <img src={HERSPACE_CONFIG.images.reflectionOutdoor} alt={t('spotlightWellbeingTitle')} style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+                <div style={{ padding: '20px' }}>
+                  <span className="badge badge-verified" style={{ marginBottom: '10px' }}>11 Topics · EN & தமிழ்</span>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '6px' }}>{t('spotlightWellbeingTitle')}</h3>
+                  <p style={{ fontSize: '0.88rem', color: 'var(--color-ink-muted)', marginBottom: '16px', lineHeight: 1.5 }}>{t('spotlightWellbeingSub')}</p>
                 </div>
+              </div>
+              <div style={{ padding: '0 20px 20px' }}>
                 <button className="btn btn-primary btn-block" onClick={() => navigate('wellbeing')}>
                   {t('spotlightWellbeingCTA')} →
                 </button>
@@ -187,14 +209,16 @@ export const HomeView: React.FC = () => {
             </div>
 
             {/* Card 2: My Cycle */}
-            <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid rgba(216,108,155,0.28)' }}>
-              <img src={HERSPACE_CONFIG.images.hopePortrait} alt={t('spotlightCycleTitle')} style={{ width: '100%', height: '155px', objectFit: 'cover' }} />
-              <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-                <div>
-                  <span className="badge badge-listener" style={{ marginBottom: '8px' }}>📅 Opt-In & Private</span>
-                  <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>{t('spotlightCycleTitle')}</h3>
-                  <p style={{ fontSize: '0.86rem', color: 'var(--color-ink-muted)', marginBottom: '14px' }}>{t('spotlightCycleSub')}</p>
+            <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid rgba(216, 108, 155, 0.28)', height: '100%' }}>
+              <div>
+                <img src={HERSPACE_CONFIG.images.hopePortrait} alt={t('spotlightCycleTitle')} style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+                <div style={{ padding: '20px' }}>
+                  <span className="badge badge-listener" style={{ marginBottom: '10px' }}>Opt-In & Private</span>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '6px' }}>{t('spotlightCycleTitle')}</h3>
+                  <p style={{ fontSize: '0.88rem', color: 'var(--color-ink-muted)', marginBottom: '16px', lineHeight: 1.5 }}>{t('spotlightCycleSub')}</p>
                 </div>
+              </div>
+              <div style={{ padding: '0 20px 20px' }}>
                 <button className="btn btn-secondary btn-block" onClick={() => navigate('cycle')}>
                   {t('spotlightCycleCTA')} →
                 </button>
@@ -202,14 +226,16 @@ export const HomeView: React.FC = () => {
             </div>
 
             {/* Card 3: Calm Audio Sanctuary */}
-            <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid rgba(91,139,217,0.28)' }}>
-              <img src={HERSPACE_CONFIG.images.calmCup} alt={t('spotlightCalmTitle')} style={{ width: '100%', height: '155px', objectFit: 'cover' }} />
-              <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-                <div>
-                  <span className="badge badge-counsellor" style={{ marginBottom: '8px' }}>🎵 Meditation & Sleep</span>
-                  <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>{t('spotlightCalmTitle')}</h3>
-                  <p style={{ fontSize: '0.86rem', color: 'var(--color-ink-muted)', marginBottom: '14px' }}>{t('spotlightCalmSub')}</p>
+            <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid rgba(91, 139, 217, 0.28)', height: '100%' }}>
+              <div>
+                <img src={HERSPACE_CONFIG.images.calmCup} alt={t('spotlightCalmTitle')} style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+                <div style={{ padding: '20px' }}>
+                  <span className="badge badge-counsellor" style={{ marginBottom: '10px' }}>Meditation & Sleep</span>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '6px' }}>{t('spotlightCalmTitle')}</h3>
+                  <p style={{ fontSize: '0.88rem', color: 'var(--color-ink-muted)', marginBottom: '16px', lineHeight: 1.5 }}>{t('spotlightCalmSub')}</p>
                 </div>
+              </div>
+              <div style={{ padding: '0 20px 20px' }}>
                 <button className="btn btn-secondary btn-block" onClick={() => navigate('calm')}>
                   {t('spotlightCalmCTA')} →
                 </button>
@@ -217,14 +243,16 @@ export const HomeView: React.FC = () => {
             </div>
 
             {/* Card 4: Live Melodies */}
-            <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid rgba(78,168,152,0.28)' }}>
-              <img src={HERSPACE_CONFIG.images.heroSunrise} alt={t('spotlightSingersTitle')} style={{ width: '100%', height: '155px', objectFit: 'cover' }} />
-              <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-                <div>
-                  <span className="badge badge-verified" style={{ marginBottom: '8px' }}>🎤 Masked Telephone Melodies</span>
-                  <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>{t('spotlightSingersTitle')}</h3>
-                  <p style={{ fontSize: '0.86rem', color: 'var(--color-ink-muted)', marginBottom: '14px' }}>{t('spotlightSingersSub')}</p>
+            <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid rgba(78, 168, 152, 0.28)', height: '100%' }}>
+              <div>
+                <img src={HERSPACE_CONFIG.images.heroSunrise} alt={t('spotlightSingersTitle')} style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+                <div style={{ padding: '20px' }}>
+                  <span className="badge badge-verified" style={{ marginBottom: '10px' }}>Masked Telephone Melodies</span>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '6px' }}>{t('spotlightSingersTitle')}</h3>
+                  <p style={{ fontSize: '0.88rem', color: 'var(--color-ink-muted)', marginBottom: '16px', lineHeight: 1.5 }}>{t('spotlightSingersSub')}</p>
                 </div>
+              </div>
+              <div style={{ padding: '0 20px 20px' }}>
                 <button className="btn btn-secondary btn-block" onClick={() => navigate('singers')}>
                   {t('spotlightSingersCTA')} →
                 </button>
@@ -234,7 +262,7 @@ export const HomeView: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. CATEGORIES SECTION */}
+      {/* 3. CATEGORIES SECTION - Clean Minimalist Icons (No Cartoon Emojis) */}
       <section className="section" style={{ background: 'var(--color-bg-lavender)' }}>
         <div className="container">
           <div className="section-header">
@@ -243,27 +271,57 @@ export const HomeView: React.FC = () => {
             <p>{t('categoriesSubtitle')}</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', alignItems: 'stretch' }}>
             {categories.map(c => (
               <div
                 key={c.id}
                 className="card"
-                style={{ cursor: 'pointer', transition: 'transform 0.2s ease', borderLeft: `4px solid ${c.color}` }}
+                style={{
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  borderLeft: `4px solid ${c.color}`,
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  height: '100%'
+                }}
                 onClick={() => {
                   setActiveCategoryFilter(c.id);
                   navigate('support');
                 }}
               >
-                <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>{c.icon}</div>
-                <h3 style={{ fontSize: '1.15rem', marginBottom: '6px' }}>{c.title}</h3>
-                <p style={{ fontSize: '0.86rem', color: 'var(--color-ink-muted)', margin: 0 }}>{c.desc}</p>
+                <div>
+                  <div
+                    style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.85)',
+                      border: '0.5px solid rgba(0, 0, 0, 0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: c.color,
+                      marginBottom: '14px',
+                      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)'
+                    }}
+                  >
+                    {c.renderIcon()}
+                  </div>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', color: 'var(--color-primary-dark)' }}>{c.title}</h3>
+                  <p style={{ fontSize: '0.88rem', color: 'var(--color-ink-muted)', margin: 0, lineHeight: 1.55 }}>{c.desc}</p>
+                </div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: c.color, marginTop: '16px' }}>
+                  Explore Care →
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 4. DUAL-TIER SECTION */}
+      {/* 4. DUAL-TIER SECTION - Equalized 24px Gap Cards */}
       <section className="section">
         <div className="container">
           <div className="section-header">
@@ -272,35 +330,46 @@ export const HomeView: React.FC = () => {
             <p>{t('dualTierSubtitle')}</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', alignItems: 'stretch' }}>
             {/* Listener Tier */}
-            <div className="card" style={{ border: '2px solid var(--color-primary-soft)', padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div
+              className="card"
+              style={{
+                border: '1.5px solid var(--color-primary-soft)',
+                padding: '32px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                borderRadius: '20px',
+                height: '100%'
+              }}
+            >
               <div>
-                <span className="badge badge-listener" style={{ marginBottom: '12px' }}>
+                <span className="badge badge-listener" style={{ marginBottom: '14px', fontWeight: 700 }}>
                   PEER SUPPORT · EMOTIONAL FIRST AID
                 </span>
-                <h3 style={{ fontSize: '1.6rem', marginBottom: '6px' }}>{t('tierListenerTitle')}</h3>
-                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-primary)', marginBottom: '4px' }}>
-                  {t('tierListenerPrice')} <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--color-ink-muted)' }}>/ {t('tierListenerDuration')}</span>
+                <h3 style={{ fontSize: '1.65rem', marginBottom: '6px' }}>{t('tierListenerTitle')}</h3>
+                <div style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--color-primary)', marginBottom: '6px', letterSpacing: '-0.02em' }}>
+                  {t('tierListenerPrice')} <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--color-ink-muted)' }}>/ {t('tierListenerDuration')}</span>
                 </div>
-                <p style={{ fontSize: '0.92rem', color: 'var(--color-ink-muted)', margin: '12px 0 16px' }}>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-ink-muted)', margin: '10px 0 18px', lineHeight: 1.55 }}>
                   {t('tierListenerDesc')}
                 </p>
 
-                <ul style={{ listStyle: 'none', padding: 0, margin: '16px 0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.88rem' }}>
-                  <li>✓ {t('tierListenerF1')}</li>
-                  <li>✓ {t('tierListenerF2')}</li>
-                  <li>✓ {t('tierListenerF3')}</li>
-                  <li>✓ <strong>{t('tierListenerF4')}</strong></li>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '16px 0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.9rem' }}>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>✓</span> {t('tierListenerF1')}</li>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>✓</span> {t('tierListenerF2')}</li>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>✓</span> {t('tierListenerF3')}</li>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>✓</span> <strong>{t('tierListenerF4')}</strong></li>
                 </ul>
               </div>
 
-              <div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--color-ink-muted)', fontStyle: 'italic', marginBottom: '16px' }}>
+              <div style={{ marginTop: '24px' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-ink-muted)', fontStyle: 'italic', marginBottom: '16px' }}>
                   {t('tierListenerBoundary')}
                 </div>
                 <button
-                  className="btn btn-secondary btn-block"
+                  className="btn btn-secondary btn-block btn-lg"
                   onClick={() => {
                     setActiveRoleFilter('listener');
                     navigate('support');
@@ -312,33 +381,44 @@ export const HomeView: React.FC = () => {
             </div>
 
             {/* Counsellor Tier */}
-            <div className="card" style={{ border: '2px solid var(--color-accent-blue)', padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div
+              className="card"
+              style={{
+                border: '1.5px solid var(--color-accent-blue)',
+                padding: '32px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                borderRadius: '20px',
+                height: '100%'
+              }}
+            >
               <div>
-                <span className="badge badge-counsellor" style={{ marginBottom: '12px' }}>
+                <span className="badge badge-counsellor" style={{ marginBottom: '14px', fontWeight: 700 }}>
                   LICENSED CLINICAL THERAPY · RCI
                 </span>
-                <h3 style={{ fontSize: '1.6rem', marginBottom: '6px' }}>{t('tierCounsellorTitle')}</h3>
-                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#3B6AB8', marginBottom: '4px' }}>
-                  {t('tierCounsellorPrice')} <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--color-ink-muted)' }}>/ {t('tierCounsellorDuration')}</span>
+                <h3 style={{ fontSize: '1.65rem', marginBottom: '6px' }}>{t('tierCounsellorTitle')}</h3>
+                <div style={{ fontSize: '2.2rem', fontWeight: 800, color: '#3B6AB8', marginBottom: '6px', letterSpacing: '-0.02em' }}>
+                  {t('tierCounsellorPrice')} <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--color-ink-muted)' }}>/ {t('tierCounsellorDuration')}</span>
                 </div>
-                <p style={{ fontSize: '0.92rem', color: 'var(--color-ink-muted)', margin: '12px 0 16px' }}>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-ink-muted)', margin: '10px 0 18px', lineHeight: 1.55 }}>
                   {t('tierCounsellorDesc')}
                 </p>
 
-                <ul style={{ listStyle: 'none', padding: 0, margin: '16px 0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.88rem' }}>
-                  <li>✓ {t('tierCounsellorF1')}</li>
-                  <li>✓ {t('tierCounsellorF2')}</li>
-                  <li>✓ {t('tierCounsellorF3')}</li>
-                  <li>✓ {t('tierCounsellorF4')}</li>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '16px 0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.9rem' }}>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: '#3B6AB8', fontWeight: 700 }}>✓</span> {t('tierCounsellorF1')}</li>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: '#3B6AB8', fontWeight: 700 }}>✓</span> {t('tierCounsellorF2')}</li>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: '#3B6AB8', fontWeight: 700 }}>✓</span> {t('tierCounsellorF3')}</li>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: '#3B6AB8', fontWeight: 700 }}>✓</span> {t('tierCounsellorF4')}</li>
                 </ul>
               </div>
 
-              <div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--color-ink-muted)', fontStyle: 'italic', marginBottom: '16px' }}>
+              <div style={{ marginTop: '24px' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-ink-muted)', fontStyle: 'italic', marginBottom: '16px' }}>
                   {t('tierCounsellorBoundary')}
                 </div>
                 <button
-                  className="btn btn-primary btn-block"
+                  className="btn btn-primary btn-block btn-lg"
                   onClick={() => {
                     setActiveRoleFilter('counsellor');
                     navigate('support');
@@ -361,30 +441,33 @@ export const HomeView: React.FC = () => {
             <p>{t('directorySubtitle')}</p>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', margin: '24px 0 32px 0', flexWrap: 'wrap' }}>
             <button
               className={`btn btn-sm ${activeRoleFilter === 'all' ? 'btn-primary' : 'btn-outline'}`}
+              style={{ padding: '10px 22px', borderRadius: '9999px' }}
               onClick={() => setActiveRoleFilter('all')}
             >
               {t('filterAll')}
             </button>
             <button
               className={`btn btn-sm ${activeRoleFilter === 'listener' ? 'btn-primary' : 'btn-outline'}`}
+              style={{ padding: '10px 22px', borderRadius: '9999px' }}
               onClick={() => setActiveRoleFilter('listener')}
             >
               {t('filterListeners')}
             </button>
             <button
               className={`btn btn-sm ${activeRoleFilter === 'counsellor' ? 'btn-primary' : 'btn-outline'}`}
+              style={{ padding: '10px 22px', borderRadius: '9999px' }}
               onClick={() => setActiveRoleFilter('counsellor')}
             >
               {t('filterCounsellors')}
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', alignItems: 'stretch' }}>
             {filteredExperts.map(exp => (
-              <div key={exp.id} className="expert-card">
+              <div key={exp.id} className="expert-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '100%' }}>
                 <div>
                   <div className="expert-header">
                     <div className="expert-avatar-wrap">
@@ -412,20 +495,20 @@ export const HomeView: React.FC = () => {
                     ))}
                   </div>
 
-                  <div style={{ fontSize: '0.8rem', color: 'var(--color-ink-muted)', margin: '8px 0' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--color-ink-muted)', margin: '10px 0' }}>
                     ★ <strong>{exp.rating}</strong> ({exp.reviewsCount} reviews) · <strong>{exp.experienceYears}+</strong> yrs exp · 🕒 {isTa && exp.nextSlotTa ? exp.nextSlotTa : exp.nextSlot}
                   </div>
                 </div>
 
-                <div className="expert-footer">
+                <div className="expert-footer" style={{ marginTop: '16px' }}>
                   <div>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--color-primary-dark)' }}>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-primary-dark)' }}>
                       {formatINR(exp.priceDisplay)}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--color-ink-muted)' }}>/ 60 mins</div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '6px' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
                     <button
                       className="btn btn-sm btn-outline"
                       onClick={() => setProfileModalExpert(exp)}
@@ -446,7 +529,7 @@ export const HomeView: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. HOW IT WORKS */}
+      {/* 6. HOW IT WORKS - Minimalist Apple Line Icons (Zero Cartoon Emojis) */}
       <section className="section">
         <div className="container">
           <div className="section-header">
@@ -455,87 +538,147 @@ export const HomeView: React.FC = () => {
             <p>{t('howSubtitle')}</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '20px' }}>
-            <div className="card" style={{ padding: '24px' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '10px' }}>🎁</div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{t('step1Title')}</h3>
-              <p style={{ fontSize: '0.9rem', color: 'var(--color-ink-muted)', lineHeight: 1.6 }}>{t('step1Desc')}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', alignItems: 'stretch' }}>
+            {/* Step 1 */}
+            <div className="card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', borderRadius: '20px' }}>
+              <div>
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '14px',
+                    background: 'var(--color-primary-soft)',
+                    color: 'var(--color-primary-dark)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '16px'
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="22" height="22">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{t('step1Title')}</h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--color-ink-muted)', lineHeight: 1.6, margin: 0 }}>{t('step1Desc')}</p>
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--color-ink-faint)', marginTop: '16px', fontWeight: 600 }}>Step 01</div>
             </div>
 
-            <div className="card" style={{ padding: '24px' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '10px' }}>👥</div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{t('step2Title')}</h3>
-              <p style={{ fontSize: '0.9rem', color: 'var(--color-ink-muted)', lineHeight: 1.6 }}>{t('step2Desc')}</p>
+            {/* Step 2 */}
+            <div className="card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', borderRadius: '20px' }}>
+              <div>
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '14px',
+                    background: 'var(--color-accent-pink-soft)',
+                    color: '#9D174D',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '16px'
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="22" height="22">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                  </svg>
+                </div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{t('step2Title')}</h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--color-ink-muted)', lineHeight: 1.6, margin: 0 }}>{t('step2Desc')}</p>
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--color-ink-faint)', marginTop: '16px', fontWeight: 600 }}>Step 02</div>
             </div>
 
-            <div className="card" style={{ padding: '24px' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '10px' }}>🔒</div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{t('step3Title')}</h3>
-              <p style={{ fontSize: '0.9rem', color: 'var(--color-ink-muted)', lineHeight: 1.6 }}>{t('step3Desc')}</p>
+            {/* Step 3 */}
+            <div className="card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', borderRadius: '20px' }}>
+              <div>
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '14px',
+                    background: 'var(--color-accent-blue-soft)',
+                    color: '#1E40AF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '16px'
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="22" height="22">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{t('step3Title')}</h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--color-ink-muted)', lineHeight: 1.6, margin: 0 }}>{t('step3Desc')}</p>
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--color-ink-faint)', marginTop: '16px', fontWeight: 600 }}>Step 03</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 7. PRICING SECTION */}
+      {/* 7. PRICING TEASER CARD (De-duplicated Single Teaser Card) */}
       <section className="section" style={{ background: 'var(--color-bg-lavender)' }}>
-        <div className="container">
-          <div className="section-header" style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 36px' }}>
-            <div className="eyebrow">TRANSPARENT INR PRICING</div>
-            <h2 style={{ fontSize: '2.1rem', letterSpacing: '-0.025em', margin: '8px 0 12px' }}>{t('pricingTitle')}</h2>
-            <p style={{ fontSize: '1.02rem', color: 'var(--color-ink-muted)', lineHeight: 1.6 }}>{t('pricingSubtitle')}</p>
-          </div>
+        <div className="container" style={{ maxWidth: '820px' }}>
+          <div
+            className="card"
+            style={{
+              padding: '44px 36px',
+              borderRadius: '24px',
+              background: 'linear-gradient(135deg, #FFFFFF 0%, #FAF7FE 100%)',
+              border: '0.5px solid rgba(124, 92, 191, 0.28)',
+              boxShadow: '0 12px 32px -4px rgba(62, 29, 101, 0.08)',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '18px'
+            }}
+          >
+            <span className="badge badge-lavender" style={{ fontWeight: 700, letterSpacing: '0.04em' }}>
+              HERSPACE MEMBERSHIP
+            </span>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: '24px', maxWidth: '860px', margin: '0 auto' }}>
-            {/* Free Trial Card */}
-            <div className="card" style={{ padding: '32px', border: '1.5px solid var(--color-primary-soft)', borderRadius: '20px', background: '#FFF' }}>
-              <span className="badge badge-lavender" style={{ marginBottom: '14px', fontWeight: 700 }}>
-                FOR EVERY NEW MEMBER
-              </span>
-              <h3 style={{ fontSize: '1.65rem', marginBottom: '6px', color: 'var(--color-text-dark)' }}>{t('pricingTrialHeading')}</h3>
-              <div style={{ fontSize: '2.6rem', fontWeight: 800, color: 'var(--color-primary)', margin: '12px 0 6px', letterSpacing: '-0.03em' }}>
-                ₹0 <span style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--color-ink-muted)' }}>/ 7 days free trial</span>
-              </div>
-              <p style={{ fontSize: '0.9rem', color: 'var(--color-ink-muted)', marginBottom: '18px', lineHeight: 1.5 }}>
-                7 days free trial @ ₹0, followed by ₹149 for the first 60 days validity, followed by monthly auto-renewal at ₹149.
-              </p>
+            <h2
+              style={{
+                fontSize: 'clamp(1.7rem, 3.2vw, 2.3rem)',
+                margin: 0,
+                color: 'var(--color-primary-dark)',
+                letterSpacing: '-0.025em',
+                lineHeight: 1.25
+              }}
+            >
+              Experience HerSpace free for 7 days. Plans start at ₹149/mo
+            </h2>
 
-              <ul style={{ listStyle: 'none', padding: 0, margin: '18px 0', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.9rem', color: 'var(--color-text-body)' }}>
-                <li>✓ {t('pricingTrialFeature1')}</li>
-                <li>✓ <strong style={{ color: 'var(--color-primary-dark)' }}>{t('pricingTrialFeature2')}</strong></li>
-                <li>✓ {t('pricingTrialFeature3')}</li>
-                <li>✓ {t('pricingTrialFeature4')}</li>
-                <li>✓ {t('pricingTrialFeature5')}</li>
-              </ul>
+            <p
+              style={{
+                fontSize: '1rem',
+                color: 'var(--color-ink-muted)',
+                maxWidth: '600px',
+                margin: 0,
+                lineHeight: 1.65
+              }}
+            >
+              Begin your journey with 7 days completely free at ₹0, including 1 complimentary 30-minute Trained Listener session. Then continue with ₹149 for your first 60 days validity, followed by auto-renewal at ₹149/month with 1-tap cancellation.
+            </p>
 
-              <button className="btn btn-primary btn-block" style={{ marginTop: '20px' }} onClick={() => navigate(user ? 'space' : 'onb-register')}>
-                {user ? t('spaceTitle') : 'Create Account (₹0 Today)'}
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '10px' }}>
+              <button className="btn btn-primary btn-lg" onClick={() => navigate('pricing')}>
+                <span>View Full Pricing & Plans</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="18" height="18">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
               </button>
-            </div>
-
-            {/* Continuation / Validity Card */}
-            <div className="card" style={{ padding: '32px', border: '0.5px solid var(--color-border)', borderRadius: '20px', background: '#FFF' }}>
-              <span className="badge badge-verified" style={{ marginBottom: '14px', fontWeight: 700 }}>
-                EXTENDED VALIDITY PLAN
-              </span>
-              <h3 style={{ fontSize: '1.65rem', marginBottom: '6px', color: 'var(--color-text-dark)' }}>First 60 Days Validity</h3>
-              <div style={{ fontSize: '2.6rem', fontWeight: 800, color: 'var(--color-text-dark)', margin: '12px 0 6px', letterSpacing: '-0.03em' }}>
-                ₹149 <span style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--color-ink-muted)' }}>for first 60 days</span>
-              </div>
-              <p style={{ fontSize: '0.9rem', color: 'var(--color-ink-muted)', marginBottom: '18px', lineHeight: 1.5 }}>
-                Auto-renews monthly at ₹149 after the first 60 days. Cancel anytime with one tap in your settings.
-              </p>
-
-              <ul style={{ listStyle: 'none', padding: 0, margin: '18px 0', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.9rem', color: 'var(--color-text-body)' }}>
-                <li>✓ Continuous access to all 11 health categories</li>
-                <li>✓ Retains private My Cycle logging on your device</li>
-                <li>✓ Ongoing access to Calm Audio Sanctuary</li>
-                <li>✓ Subsidized session bookings (₹399 / ₹999 / ₹99)</li>
-                <li>✓ Zero hidden costs, cancel anytime</li>
-              </ul>
-
-              <button className="btn btn-outline btn-block" style={{ marginTop: '20px' }} onClick={() => openPolicyModal('cancellation')}>
-                Review Policies & Terms →
+              <button className="btn btn-secondary btn-lg" onClick={() => navigate(user ? 'space' : 'onb-register')}>
+                <span>{user ? t('spaceTitle') : 'Start 7-Day Free Trial (₹0)'}</span>
               </button>
             </div>
           </div>

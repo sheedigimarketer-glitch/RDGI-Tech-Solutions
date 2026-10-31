@@ -510,7 +510,13 @@ window.HerSpaceTelephonyEngine = {
    */
   parkCall: function(authorizedRole) {
     if (!this.activeSession) return null;
-    const parkCode = 'PARK-' + (Math.floor(100 + Math.random() * 899));
+    let parkNum = '88';
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      const b = new Uint8Array(2);
+      window.crypto.getRandomValues(b);
+      parkNum = String(10 + (b[0] % 90));
+    }
+    const parkCode = 'PARK-' + parkNum;
     this.activeSession.state = 'parked';
     this.activeSession.parkCode = parkCode;
     this.activeSession.parkedByRole = authorizedRole || this.activeSession.partnerRole || 'listener';

@@ -25,8 +25,25 @@ export const MaskedCallModal: React.FC = () => {
   if (sess.state === 'transferred') statusLabel = 'Transferring to Counsellor...';
 
   return (
-    <div className="modal-overlay open" role="dialog" aria-modal="true">
-      <div className="modal-dialog" style={{ maxWidth: '520px' }}>
+    <div
+      className="modal-overlay open"
+      role="dialog"
+      aria-modal="true"
+      style={{
+        background: 'rgba(0, 0, 0, 0.5)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)'
+      }}
+    >
+      <div
+        className="modal-dialog"
+        style={{
+          maxWidth: '520px',
+          background: '#ffffff',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
+          border: '1px solid rgba(0, 0, 0, 0.08)'
+        }}
+      >
         <button
           className="modal-close-btn"
           onClick={endCall}

@@ -1,5 +1,7 @@
+import { ENV_CONFIG } from '../config';
+
 export const HERSPACE_CONFIG = {
-  appName: 'HerSpace',
+  appName: ENV_CONFIG.VITE_APP_TITLE,
   version: '4.1.0',
   tagline: 'SHARE · LISTEN · HEAL · GROW',
   wellbeingTagline: 'Every question deserves a safe answer.',
@@ -9,6 +11,18 @@ export const HERSPACE_CONFIG = {
   currencyCode: 'INR',
   currencySymbol: '₹',
 
+  env: ENV_CONFIG,
+  supabase: {
+    url: ENV_CONFIG.VITE_SUPABASE_URL,
+    publishableKey: ENV_CONFIG.VITE_SUPABASE_ANON_KEY
+  },
+  payments: {
+    razorpayKeyId: ENV_CONFIG.VITE_RAZORPAY_KEY_ID
+  },
+  telephony: {
+    bridgeUrl: ENV_CONFIG.VITE_TELEPHONY_BRIDGE
+  },
+
   support: {
     phone: '+91 44 4813 1000',
     displayPhone: '+91 44 4813 1000',
@@ -17,7 +31,8 @@ export const HERSPACE_CONFIG = {
   },
 
   images: {
-    heroSunrise: 'assets/images/01_HerSpace_Hero_Sunrise.png',
+    heroSunrise: 'assets/images/03_HerSpace_Reflection_Outdoor.png',
+    heroSunsetHill: 'assets/images/03_HerSpace_Reflection_Outdoor.png',
     calmCup: 'assets/images/02_HerSpace_Calm_Cup.png',
     reflectionOutdoor: 'assets/images/03_HerSpace_Reflection_Outdoor.png',
     hopePortrait: 'assets/images/04_HerSpace_Hope_Portrait.png',

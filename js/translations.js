@@ -220,7 +220,7 @@ window.HERSPACE_I18N = {
     eligibilityText: "HerSpace is exclusively designed for women and transgender women aged 18 and above.",
     safetyP1: "Zero Tolerance for Harassment: Safe, verified environment with two-way phone number masking.",
     safetyP2: "Strict Confidentiality: Sessions and intimate health logs are private and never recorded without explicit consent.",
-    safetyP3: "No Astrology: HerSpace does not provide horoscopes, birth charts, or astrology services. All support is rooted in human listening, evidence-based health education, and validated psychological counselling.",
+    safetyP3: "Vocal Therapy & Comfort: HerSpace offers guided vocal therapy and live comforting melodies. All support is rooted in human listening, evidence-based health education, and validated psychological counselling.",
 
     // Reschedule & Refund Policy
     policyTitle: "Appointment & Rescheduling Rules",
@@ -384,7 +384,7 @@ window.HERSPACE_I18N = {
     proExpLabel: "Years of Practical Experience",
     proBioLabel: "Professional Introduction & Philosophy",
     proConductTitle: "Professional Code of Conduct",
-    proConductAgree: "I agree to uphold client confidentiality, maintain strict boundaries, practice within my qualifications, never offer astrology services, and adhere to HerSpace safeguarding protocols."
+    proConductAgree: "I agree to uphold client confidentiality, maintain strict boundaries, practice within my qualifications, provide dedicated vocal comfort and emotional support, and adhere to HerSpace safeguarding protocols."
   },
 
   ta: {
@@ -581,7 +581,7 @@ window.HERSPACE_I18N = {
     eligibilityText: "HerSpace 18 வயது மற்றும் அதற்கு மேற்பட்ட பெண்கள் மற்றும் திருநங்கைகளுக்காக பிரத்யேகமாக வடிவமைக்கப்பட்டுள்ளது.",
     safetyP1: "பாதுகாப்பானது: இருவழி தொலைபேசி எண் மறைப்புடன் கூடிய பாதுகாப்பான சூழல்.",
     safetyP2: "முழு ரகசியம்: உங்கள் அமர்வுகள் மற்றும் தனிப்பட்ட நலக் குறிப்புகள் ஒப்புதல் இன்றி பகிரப்படாது.",
-    safetyP3: "ஜோதிடம் இல்லை: HerSpace ஜாதகம், ஜோதிட சேவைகளை வழங்குவதில்லை. அனைத்து ஆதரவும் மனித கவனிப்பு, அறிவியல் நலக்கல்வி மற்றும் உளவியல் ஆலோசனையை அடிப்படையாகக் கொண்டது.",
+    safetyP3: "குரல் சிகிச்சை & ஆறுதல்: HerSpace வழிகாட்டப்பட்ட குரல் சிகிச்சை மற்றும் ஆறுதல் மெல்லிசைகளை வழங்குகிறது. அனைத்து ஆதரவும் மனித கவனிப்பு, அறிவியல் நலக்கல்வி மற்றும் உளவியல் ஆலோசனையை அடிப்படையாகக் கொண்டது.",
 
     // Reschedule & Refund Policy
     policyTitle: "முன்பதிவு & மறுதிட்டமிடல் கொள்கைகள்",
@@ -745,7 +745,7 @@ window.HERSPACE_I18N = {
     proExpLabel: "அனுபவ ஆண்டுகள்",
     proBioLabel: "தொழில்முறை அறிமுகம் & அணுகுமுறை",
     proConductTitle: "தொழில்முறை நடத்தை விதிமுறைகள்",
-    proConductAgree: "ரகசியத்தன்மையை பாதுகாக்கவும், தொழில்முறை எல்லைகளை மதிக்கவும், ஜோதிட சேவைகளை வழங்காமல் இருக்கவும், பாதுகாப்பு நெறிமுறைகளைப் பின்பற்றவும் ஒப்புக்கொள்கிறேன்."
+    proConductAgree: "ரகசியத்தன்மையை பாதுகாக்கவும், தொழில்முறை எல்லைகளை மதிக்கவும், குரல் ஆறுதல் மற்றும் உணர்ச்சிபூர்வ ஆதரவை வழங்கவும், பாதுகாப்பு நெறிமுறைகளைப் பின்பற்றவும் ஒப்புக்கொள்கிறேன்."
   }
 };
 

@@ -9,8 +9,26 @@
   const db = window.herSpaceSupabase;
   const config = window.HERSPACE_CONFIG;
 
+  function getCryptoRandomOtp() {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      const bytes = new Uint8Array(6);
+      window.crypto.getRandomValues(bytes);
+      return Array.from(bytes, b => (b % 10).toString()).join('');
+    }
+    return Math.floor(100000 + (Date.now() % 900000)).toString();
+  }
+
+  function getCryptoRandomId(prefix = 'usr') {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      const bytes = new Uint8Array(8);
+      window.crypto.getRandomValues(bytes);
+      return prefix + '-' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    }
+    return prefix + '-' + Date.now().toString(36);
+  }
+
   window.herSpaceAuth = {
-    // Simulated OTP Generation & Verification
+    // Cryptographic OTP Generation & Verification
     generatedOtp: '849201',
 
     sendPhoneOtp(phone) {
@@ -18,9 +36,8 @@
       if (cleanPhone.length < 10) {
         throw new Error('Please enter a valid 10-digit mobile number.');
       }
-      // Generate a fresh 6-digit OTP
-      this.generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log(`[HerSpace Security] OTP sent to +91 ${cleanPhone.slice(-10)}: ${this.generatedOtp}`);
+      // Generate a fresh cryptographically secure 6-digit OTP
+      this.generatedOtp = getCryptoRandomOtp();
       return {
         success: true,
         formattedPhone: '+91 ' + cleanPhone.slice(-10),
@@ -35,15 +52,15 @@
       if (!agreeTerms) {
         throw new Error('You must accept the Terms of Service and Privacy Policy to proceed.');
       }
-      if (otp !== this.generatedOtp && otp !== '123456') {
-        throw new Error('Invalid OTP. Please check the code sent to your mobile or enter 123456.');
+      if (otp !== this.generatedOtp) {
+        throw new Error('Invalid OTP. Please check the cryptographic code sent to your mobile.');
       }
 
       // Check if duplicate user in local registry
       const registeredKey = 'herspace_reg_' + phone.replace(/\D/g, '').slice(-10);
       const isExisting = localStorage.getItem(registeredKey);
 
-      const userId = 'usr-' + Math.random().toString(36).substring(2, 9);
+      const userId = getCryptoRandomId('usr');
       const cleanPhone = '+91 ' + phone.replace(/\D/g, '').slice(-10);
 
       let entitlementData;
@@ -109,7 +126,7 @@
       if (this.phoneOtpIsLive()) {
         throw new Error('An SMS provider is configured but its integration is not part of this build.');
       }
-      this.generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      this.generatedOtp = getCryptoRandomOtp();
       return { live: false, testCode: this.generatedOtp, formattedPhone: '+91 ' + cleanPhone.slice(-10) };
     },
 
@@ -161,7 +178,7 @@
       const entitlement = claim.data;
 
       const user = {
-        id: authUserId || ('usr-' + Math.random().toString(36).substring(2, 9)),
+        id: authUserId || getCryptoRandomId('usr'),
         fullName: p.fullName.trim(),
         phone: cleanPhone,
         email: email,

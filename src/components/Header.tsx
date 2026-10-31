@@ -116,6 +116,15 @@ export const Header: React.FC = () => {
                   <span>{t('navPricing')}</span>
                 </button>
                 <button
+                  className={`nav-dropdown-item ${activeRoute === 'contact' ? 'active' : ''}`}
+                  onClick={() => {
+                    navigate('contact');
+                    setIsMoreOpen(false);
+                  }}
+                >
+                  <span>Support & Contact</span>
+                </button>
+                <button
                   className={`nav-dropdown-item ${activeRoute === 'how' ? 'active' : ''}`}
                   onClick={() => {
                     navigate('how');
@@ -139,19 +148,19 @@ export const Header: React.FC = () => {
               className={`nav-item ${activeRoute === 'support' ? 'active' : ''}`}
               onClick={() => navigate('support')}
             >
-              {t('navExplore')}
+              {t('navSupport')}
+            </button>
+            <button
+              className={`nav-item ${activeRoute === 'singers' ? 'active' : ''}`}
+              onClick={() => navigate('singers')}
+            >
+              {t('navSingers')}
             </button>
             <button
               className={`nav-item ${activeRoute === 'wellbeing' ? 'active' : ''}`}
               onClick={() => navigate('wellbeing')}
             >
               {t('navWellbeing')}
-            </button>
-            <button
-              className={`nav-item ${activeRoute === 'calm' ? 'active' : ''}`}
-              onClick={() => navigate('calm')}
-            >
-              {t('navCalm')}
             </button>
             <button
               className={`nav-item ${activeRoute === 'pricing' ? 'active' : ''}`}
@@ -173,6 +182,15 @@ export const Header: React.FC = () => {
               </button>
               <div className="nav-dropdown-menu" role="menu">
                 <button
+                  className={`nav-dropdown-item ${activeRoute === 'calm' ? 'active' : ''}`}
+                  onClick={() => {
+                    navigate('calm');
+                    setIsMoreOpen(false);
+                  }}
+                >
+                  <span>{t('navCalm')}</span>
+                </button>
+                <button
                   className={`nav-dropdown-item ${activeRoute === 'cycle' ? 'active' : ''}`}
                   onClick={() => {
                     navigate('cycle');
@@ -182,13 +200,13 @@ export const Header: React.FC = () => {
                   <span>{t('navMyCycle')}</span>
                 </button>
                 <button
-                  className={`nav-dropdown-item ${activeRoute === 'singers' ? 'active' : ''}`}
+                  className={`nav-dropdown-item ${activeRoute === 'contact' ? 'active' : ''}`}
                   onClick={() => {
-                    navigate('singers');
+                    navigate('contact');
                     setIsMoreOpen(false);
                   }}
                 >
-                  <span>{t('navSingers')}</span>
+                  <span>Support & Contact</span>
                 </button>
                 <button
                   className={`nav-dropdown-item ${activeRoute === 'how' ? 'active' : ''}`}

@@ -11,7 +11,7 @@
    - Tamil Content ([lang="ta"]): Noto Sans Tamil
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;1,6..96,500&family=Manrope:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -26,11 +26,11 @@ html {
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
   font-weight: 400;
   color: var(--color-text-dark);
   background-color: var(--color-bg-light);
-  line-height: 1.65;
+  line-height: 1.6;
   margin: 0;
   padding: 0;
   max-width: 100%;
@@ -44,33 +44,36 @@ html[lang="ta"] body,
 body[lang="ta"],
 [lang="ta"],
 .lang-ta {
-  font-family: var(--font-tamil), var(--font-sans);
+  font-family: var(--font-tamil), -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   line-height: 1.72;
   letter-spacing: 0;
   overflow-wrap: break-word;
   word-break: normal;
 }
 
-/* Editorial Hero Headline — ONLY place using Bodoni Moda */
+/* Modern Hero Headline — Clean Apple Sans-Serif Stack (Eliminating top clipping) */
 .hero-title,
 .font-editorial-hero {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  font-size: clamp(2rem, 4.2vw + 0.5rem, 3.625rem); /* 32px mobile -> 58px desktop */
-  line-height: 1.14;
-  letter-spacing: -0.015em;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.1rem, 4.4vw + 0.5rem, 3.6rem); /* 34px mobile -> 58px desktop */
+  line-height: 1.25;
+  letter-spacing: -0.025em;
   color: var(--color-primary-dark);
   margin: 0 0 var(--space-3) 0;
+  padding-top: 28px; /* eliminates top overflow clipping */
+  overflow: visible;
   overflow-wrap: break-word;
 }
 
 html[lang="ta"] .hero-title,
 [lang="ta"] .hero-title {
-  font-family: var(--font-tamil), var(--font-serif);
+  font-family: var(--font-tamil), -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   font-weight: 700;
-  font-size: clamp(1.75rem, 3.4vw + 0.5rem, 2.85rem);
-  line-height: 1.28;
+  font-size: clamp(1.85rem, 3.6vw + 0.5rem, 3rem);
+  line-height: 1.35;
   letter-spacing: 0;
+  padding-top: 28px;
 }
 
 /* Section & Card Headings — Strictly Manrope (Never Bodoni Moda) */

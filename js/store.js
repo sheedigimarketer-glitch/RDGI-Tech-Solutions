@@ -121,8 +121,8 @@
       type: 'entitlement',
       titleEn: 'Complimentary 30-Min Listener Session (₹0)',
       titleTa: 'இலவச 30-நிமிட கவனிப்பாளர் அமர்வு (₹0)',
-      bodyEn: 'First-time members enjoy a 3-Month Free Trial (₹0) plus 1 complimentary 30-minute Trained Listener session valid for 7 days.',
-      bodyTa: 'புதிய உறுப்பினர்களுக்கு 3 மாத இலவச சோதனை (₹0) மற்றும் 7 நாட்களுக்குச் செல்லுபடியாகும் 1 இலவச 30-நிமிட கவனிப்பாளர் அமர்வு வழங்கப்படுகிறது.',
+      bodyEn: 'First-time members enjoy a 7-Day Free Trial (₹0) followed by ₹149 for the first 60 days validity, plus 1 complimentary 30-minute Trained Listener session valid for 7 days.',
+      bodyTa: 'புதிய உறுப்பினர்களுக்கு 7 நாள் இலவச சோதனை (₹0) மற்றும் 7 நாட்களுக்குச் செல்லுபடியாகும் 1 இலவச 30-நிமிட கவனிப்பாளர் அமர்வு வழங்கப்படுகிறது.',
       time: 'Today',
       read: false
     }
@@ -361,7 +361,12 @@
     }
 
     toast(message, type = 'success') {
-      const id = Date.now() + Math.random();
+      let id = 'toast_' + Date.now().toString(36);
+      if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+        const bytes = new Uint8Array(4);
+        window.crypto.getRandomValues(bytes);
+        id += '_' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+      }
       const toastItem = { id, message, type };
       this.state.toasts.push(toastItem);
       // Toasts must not re-render the whole app (that would wipe forms the member is typing in).

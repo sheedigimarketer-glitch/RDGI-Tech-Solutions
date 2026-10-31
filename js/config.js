@@ -3,9 +3,18 @@
  * RDGI Tech Solutions
  */
 
+const envMeta = (typeof import !== 'undefined' && typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : {};
+const envGlobal = (typeof window !== 'undefined' && window.__ENV__) ? window.__ENV__ : {};
+
+const APP_TITLE = envMeta.VITE_APP_TITLE || envGlobal.VITE_APP_TITLE || 'HerSpace';
+const RAZORPAY_KEY_ID = envMeta.VITE_RAZORPAY_KEY_ID || envGlobal.VITE_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag';
+const TELEPHONY_BRIDGE = envMeta.VITE_TELEPHONY_BRIDGE || envGlobal.VITE_TELEPHONY_BRIDGE || 'https://api.herspace.local/telephony';
+const SUPABASE_URL = envMeta.VITE_SUPABASE_URL || envGlobal.VITE_SUPABASE_URL || (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.url) || 'https://placeholder-herspace.supabase.co';
+const SUPABASE_ANON_KEY = envMeta.VITE_SUPABASE_ANON_KEY || envGlobal.VITE_SUPABASE_ANON_KEY || (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.publishableKey) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy-anon-key-herspace';
+
 window.HERSPACE_CONFIG = {
   // Brand & Market
-  appName: 'HerSpace',
+  appName: APP_TITLE,
   version: '4.0.0',
   tagline: 'SHARE · LISTEN · HEAL · GROW',
   wellbeingTagline: 'Every question deserves a safe answer.',
@@ -24,10 +33,17 @@ window.HERSPACE_CONFIG = {
     logo: 'assets/images/herspace-client-logo.webp'
   },
 
-  // Supabase Configuration
+  // Safe Fallback Environment Properties
+  env: {
+    appTitle: APP_TITLE,
+    razorpayKeyId: RAZORPAY_KEY_ID,
+    telephonyBridge: TELEPHONY_BRIDGE
+  },
+
+  // Supabase Configuration with Safe Fallback Defaults
   supabase: {
-    url: (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.url) || 'https://tzbkjvvkhxxobqsbtsdq.supabase.co',
-    publishableKey: (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.publishableKey) || 'sb_publishable__xiHD48MLs4E3qokCYlBRQ_BVxegOCk'
+    url: SUPABASE_URL,
+    publishableKey: SUPABASE_ANON_KEY
   },
 
   // Verification providers. A provider of null means NOT CONNECTED: the UI must say so

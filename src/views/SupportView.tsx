@@ -37,32 +37,32 @@ export const SupportView: React.FC = () => {
       <div
         style={{
           display: 'flex',
-          gap: '8px',
+          gap: '16px',
           justifyContent: 'center',
-          marginBottom: '36px',
+          margin: '24px 0 32px 0',
           flexWrap: 'wrap'
         }}
       >
         <button
           className={`btn btn-sm ${activeRoleFilter === 'all' ? 'btn-primary' : 'btn-outline'}`}
-          style={{ minWidth: '120px', borderRadius: '9999px' }}
+          style={{ padding: '10px 22px', borderRadius: '9999px' }}
           onClick={() => setActiveRoleFilter('all')}
         >
           {t('filterAll')} ({experts.length})
         </button>
         <button
           className={`btn btn-sm ${activeRoleFilter === 'listener' ? 'btn-primary' : 'btn-outline'}`}
-          style={{ minWidth: '150px', borderRadius: '9999px' }}
+          style={{ padding: '10px 22px', borderRadius: '9999px' }}
           onClick={() => setActiveRoleFilter('listener')}
         >
-          {t('filterListeners')} (₹399)
+          {t('filterListeners')}
         </button>
         <button
           className={`btn btn-sm ${activeRoleFilter === 'counsellor' ? 'btn-primary' : 'btn-outline'}`}
-          style={{ minWidth: '160px', borderRadius: '9999px' }}
+          style={{ padding: '10px 22px', borderRadius: '9999px' }}
           onClick={() => setActiveRoleFilter('counsellor')}
         >
-          {t('filterCounsellors')} (₹999)
+          {t('filterCounsellors')}
         </button>
       </div>
 
@@ -81,8 +81,15 @@ export const SupportView: React.FC = () => {
           gap: '12px'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ fontSize: '1.8rem' }}>🎤</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary-dark)' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="20" height="20">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </div>
           <div>
             <strong style={{ fontSize: '0.98rem', color: 'var(--color-primary-dark)' }}>
               Looking for Live Singers & Vocal Comfort?
@@ -236,7 +243,30 @@ export const SupportView: React.FC = () => {
                     marginTop: '2px'
                   }}
                 >
-                  📞 {HERSPACE_CONFIG.support.phone}
+                  {HERSPACE_CONFIG.support.phone}
+                </a>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#15803D', fontWeight: 600 }}>
+                  WhatsApp Desk
+                </div>
+                <a
+                  href={`https://wa.me/${HERSPACE_CONFIG.support.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hello HerSpace Support, I would like assistance.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: '1.15rem',
+                    fontWeight: 700,
+                    color: '#15803D',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    marginTop: '4px'
+                  }}
+                >
+                  Chat on WhatsApp
                 </a>
               </div>
 
@@ -245,7 +275,7 @@ export const SupportView: React.FC = () => {
                   Working Hours
                 </div>
                 <div style={{ fontSize: '0.98rem', fontWeight: 600, color: 'var(--color-text-dark)', marginTop: '4px' }}>
-                  🕒 {t('supportEnquiryHours')}
+                  {t('supportEnquiryHours')}
                 </div>
               </div>
 
@@ -254,7 +284,7 @@ export const SupportView: React.FC = () => {
                   Official Email
                 </div>
                 <div style={{ fontSize: '0.98rem', fontWeight: 600, color: 'var(--color-primary)', marginTop: '4px' }}>
-                  ✉️ {HERSPACE_CONFIG.support.email}
+                  {HERSPACE_CONFIG.support.email}
                 </div>
               </div>
             </div>
@@ -266,13 +296,22 @@ export const SupportView: React.FC = () => {
               className="btn btn-primary btn-lg"
               style={{ textDecoration: 'none', textAlign: 'center' }}
             >
-              📞 Call Support Now
+              Call Support Now
+            </a>
+            <a
+              href={`https://wa.me/${HERSPACE_CONFIG.support.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hello HerSpace Support, I need assistance with my session.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary btn-lg"
+              style={{ textDecoration: 'none', textAlign: 'center', borderColor: '#BBF7D0', color: '#15803D' }}
+            >
+              WhatsApp Support
             </a>
             <button
               className="btn btn-outline"
               onClick={() => startMaskedCall('exp-anita', 'Customer Support Desk', 'counsellor')}
             >
-              🔒 Test Masked Bridge Call
+              Test Masked Bridge Call
             </button>
           </div>
         </div>

@@ -327,14 +327,17 @@ export const WellbeingView: React.FC = () => {
               return (
                 <div
                   key={art.id}
-                  className="card"
+                  className="card wellbeing-card"
                   style={{
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
+                    minHeight: '100%',
+                    background: '#ffffff',
                     padding: '24px',
                     borderRadius: '18px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 12px 24px -4px rgba(0, 0, 0, 0.08)',
                     transition: 'transform 0.15s ease, box-shadow 0.15s ease'
                   }}
                   onClick={() => setActiveArticle(art)}

@@ -69,8 +69,25 @@ export const PolicyModal: React.FC = () => {
   }
 
   return (
-    <div className="modal-overlay open" role="dialog" aria-modal="true">
-      <div className="modal-dialog" style={{ borderRadius: '20px', boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.12)', border: '0.5px solid rgba(0, 0, 0, 0.08)' }}>
+    <div
+      className="modal-overlay open"
+      role="dialog"
+      aria-modal="true"
+      style={{
+        background: 'rgba(0, 0, 0, 0.5)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)'
+      }}
+    >
+      <div
+        className="modal-dialog"
+        style={{
+          borderRadius: '20px',
+          background: '#ffffff',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
+          border: '0.5px solid rgba(0, 0, 0, 0.08)'
+        }}
+      >
         <button
           className="modal-close-btn"
           onClick={closePolicyModal}

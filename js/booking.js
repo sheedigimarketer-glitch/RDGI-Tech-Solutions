@@ -150,7 +150,12 @@
         throw new Error('This time slot is already reserved. Please select another slot.');
       }
 
-      const appointmentId = 'apt-' + Math.random().toString(36).substring(2, 9);
+      let appointmentId = 'apt-' + Date.now().toString(36);
+      if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+        const bytes = new Uint8Array(8);
+        window.crypto.getRandomValues(bytes);
+        appointmentId = 'apt-' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+      }
       const appointmentDate = new Date(`${dateStr} ${timeSlot.split(' - ')[0]}`);
       const rescheduleThreshold = new Date(appointmentDate.getTime() - config.appointments.rescheduleCutoffHours * 3600000);
 

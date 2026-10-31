@@ -23,6 +23,8 @@
   --color-ivory: #FFFDF9;            /* Warm Ivory */
   --color-warm-white: #FAF8F5;       /* Warm Alabaster */
   --color-pure-white: #FFFFFF;       /* Crisp White */
+  --color-bg-light: #FDFBF7;         /* Solid Warm Sand Base */
+  --color-surface: #FFFFFF;          /* Pure Solid White Surface */
   --color-footer-bg: #F4EFFA;        /* Tasteful Ivory-Lavender Footer Surface */
 
   --color-ink: #1F172F;              /* Deep Violet-Black text */
@@ -49,10 +51,10 @@
   --color-danger-bg: #FFF1F2;
   --color-danger-border: #FECDD3;
 
-  /* Final Typography Hierarchy */
-  --font-serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-tamil: 'Noto Sans Tamil', 'Manrope', sans-serif;
+  /* Final Typography Hierarchy: Modern Apple HIG Sans-Serif Stack */
+  --font-serif: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+  --font-tamil: 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
 
   /* Elevation & Shadows */
   --shadow-sm: 0 2px 10px rgba(62, 29, 101, 0.05);

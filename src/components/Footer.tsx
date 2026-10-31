@@ -45,10 +45,10 @@ export const Footer: React.FC = () => {
           <div className="footer-links-col">
             <h4>Trust & Policies</h4>
             <ul>
+              <li><button className="footer-link-btn" onClick={() => navigate('contact')}>Support & Contact Desk</button></li>
               <li><button className="footer-link-btn" onClick={() => openPolicyModal('privacy')}>Privacy & Masked Calling</button></li>
               <li><button className="footer-link-btn" onClick={() => openPolicyModal('terms')}>Terms of Service (18+)</button></li>
               <li><button className="footer-link-btn" onClick={() => openPolicyModal('cancellation')}>Reschedule & Refund Policy</button></li>
-              <li><button className="footer-link-btn" onClick={() => navigate('admin')}>Staff Governance</button></li>
             </ul>
           </div>
         </div>

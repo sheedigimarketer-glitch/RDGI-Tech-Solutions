@@ -42,22 +42,78 @@ export const DashboardView: React.FC = () => {
         <p>{t('dashSubtitle')}</p>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
+      {/* Native Apple-Style Segmented Control */}
+      <div
+        style={{
+          background: 'rgba(0, 0, 0, 0.05)',
+          borderRadius: '10px',
+          padding: '4px',
+          display: 'flex',
+          gap: '4px',
+          marginBottom: '28px',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
         <button
-          className={`btn btn-sm ${activeTab === 'upcoming' ? 'btn-primary' : 'btn-outline'}`}
+          type="button"
+          style={{
+            flex: 1,
+            textAlign: 'center',
+            fontSize: '13px',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            border: 'none',
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+            transition: 'all 120ms cubic-bezier(0.2, 0, 0, 1)',
+            background: activeTab === 'upcoming' ? '#ffffff' : 'transparent',
+            color: activeTab === 'upcoming' ? '#5E2750' : '#554865',
+            boxShadow: activeTab === 'upcoming' ? '0 2px 6px rgba(0, 0, 0, 0.08)' : 'none',
+            fontWeight: activeTab === 'upcoming' ? 600 : 500
+          }}
           onClick={() => setActiveTab('upcoming')}
         >
           {t('dashTabUpcoming')} ({upcomingApts.length})
         </button>
         <button
-          className={`btn btn-sm ${activeTab === 'past' ? 'btn-primary' : 'btn-outline'}`}
+          type="button"
+          style={{
+            flex: 1,
+            textAlign: 'center',
+            fontSize: '13px',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            border: 'none',
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+            transition: 'all 120ms cubic-bezier(0.2, 0, 0, 1)',
+            background: activeTab === 'past' ? '#ffffff' : 'transparent',
+            color: activeTab === 'past' ? '#5E2750' : '#554865',
+            boxShadow: activeTab === 'past' ? '0 2px 6px rgba(0, 0, 0, 0.08)' : 'none',
+            fontWeight: activeTab === 'past' ? 600 : 500
+          }}
           onClick={() => setActiveTab('past')}
         >
           {t('dashTabPast')} ({pastApts.length})
         </button>
         <button
-          className={`btn btn-sm ${activeTab === 'notifications' ? 'btn-primary' : 'btn-outline'}`}
+          type="button"
+          style={{
+            flex: 1,
+            textAlign: 'center',
+            fontSize: '13px',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            border: 'none',
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+            transition: 'all 120ms cubic-bezier(0.2, 0, 0, 1)',
+            background: activeTab === 'notifications' ? '#ffffff' : 'transparent',
+            color: activeTab === 'notifications' ? '#5E2750' : '#554865',
+            boxShadow: activeTab === 'notifications' ? '0 2px 6px rgba(0, 0, 0, 0.08)' : 'none',
+            fontWeight: activeTab === 'notifications' ? 600 : 500
+          }}
           onClick={() => setActiveTab('notifications')}
         >
           {t('dashTabNotifs')} ({notifications.length})
@@ -124,8 +180,26 @@ export const DashboardView: React.FC = () => {
       {activeTab === 'upcoming' && (
         <div>
           {upcomingApts.length === 0 ? (
-            <div className="card" style={{ padding: '36px', textAlign: 'center' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>📅</div>
+            <div className="card" style={{ padding: '36px 20px', textAlign: 'center', background: '#ffffff', borderRadius: '18px', border: '1px solid var(--color-border)' }}>
+              <div
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '16px',
+                  background: 'rgba(94, 39, 80, 0.08)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '14px'
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="#5E2750" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="28" height="28">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </div>
               <h3 style={{ fontSize: '1.25rem', marginBottom: '6px' }}>
                 {isTa ? 'வரவிருக்கும் முன்பதிவுகள் எதுவும் இல்லை' : 'No upcoming appointments scheduled.'}
               </h3>
@@ -141,7 +215,7 @@ export const DashboardView: React.FC = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {upcomingApts.map(apt => (
-                <div key={apt.id} className="card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                <div key={apt.id} className="card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px', background: '#ffffff', borderRadius: '18px' }}>
                   <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
                     <img
                       src={apt.expertAvatar}
@@ -155,8 +229,14 @@ export const DashboardView: React.FC = () => {
                         {(apt.rescheduleCount || 0) >= 1 && <span className="badge badge-lavender">Rescheduled (1x)</span>}
                       </div>
                       <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{apt.expertName}</h3>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--color-ink-muted)', marginTop: '2px' }}>
-                        📅 <strong>{apt.date}</strong> at <strong>{apt.time}</strong> · {apt.mode}
+                      <div style={{ fontSize: '0.85rem', color: 'var(--color-ink-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span><strong>{apt.date}</strong> at <strong>{apt.time}</strong> · {apt.mode}</span>
                       </div>
                     </div>
                   </div>
@@ -182,8 +262,12 @@ export const DashboardView: React.FC = () => {
                     <button
                       className="btn btn-sm btn-primary"
                       onClick={() => startMaskedCall(apt.expertId, apt.expertName, apt.expertRole)}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
-                      📞 {t('dashBtnJoinCall')}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                      </svg>
+                      <span>{t('dashBtnJoinCall')}</span>
                     </button>
                   </div>
                 </div>

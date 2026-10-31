@@ -42,8 +42,14 @@
     },
 
     submitApplication({ name, email, phone, role, qualification, rciNumber, experienceYears, specialties, bio }) {
+      let appId = 'app-' + Date.now().toString(36);
+      if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+        const bytes = new Uint8Array(6);
+        window.crypto.getRandomValues(bytes);
+        appId = 'app-' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+      }
       const newApp = {
-        id: 'app-' + Math.random().toString(36).substring(2, 7),
+        id: appId,
         name,
         email,
         phone,

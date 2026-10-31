@@ -105,6 +105,9 @@ export const MobileDrawer: React.FC = () => {
           <button className={`drawer-link ${activeRoute === 'pricing' ? 'active' : ''}`} onClick={() => handleNav('pricing')}>
             <span>{t('navPricing')} (₹)</span>
           </button>
+          <button className={`drawer-link ${activeRoute === 'contact' ? 'active' : ''}`} onClick={() => handleNav('contact')}>
+            <span>Support & Contact</span>
+          </button>
           <button className={`drawer-link ${activeRoute === 'how' ? 'active' : ''}`} onClick={() => handleNav('how')}>
             <span>{t('navFAQs')}</span>
           </button>

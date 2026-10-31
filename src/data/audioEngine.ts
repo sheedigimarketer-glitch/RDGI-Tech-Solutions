@@ -62,8 +62,10 @@ class AudioEngine {
           const oscGain = this.audioCtx.createGain();
 
           osc.type = type;
-          // Very slight chorus detune for lush acoustic warmth
-          const detuneCents = (Math.random() - 0.5) * 4;
+          // Very slight chorus detune for lush acoustic warmth using uniform entropy
+          const detuneBuf = new Uint8Array(1);
+          window.crypto.getRandomValues(detuneBuf);
+          const detuneCents = ((detuneBuf[0] / 255) - 0.5) * 4;
           osc.frequency.setValueAtTime(freq, now);
           osc.detune.setValueAtTime(detuneCents, now);
 

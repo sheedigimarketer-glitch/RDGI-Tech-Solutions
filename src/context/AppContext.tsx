@@ -17,6 +17,18 @@ import { DEFAULT_EXPERTS } from '../data/experts';
 import { LIVE_SINGERS } from '../data/singers';
 import { TRANSLATIONS } from '../data/translations';
 import { calmAudioEngine } from '../data/audioEngine';
+import {
+  generateSecureId,
+  generateSecureBookingId,
+  generateSecureQueueId,
+  generateSecureParkCode,
+  issueSecureOtp,
+  verifySecureOtp,
+  encryptHealthPayload,
+  decryptHealthPayload,
+  sanitizeInput,
+  formatMaskedDisplay
+} from '../utils/security';
 
 interface AppContextType {
   lang: Language;
@@ -124,6 +136,14 @@ interface AppContextType {
   closePolicyModal: () => void;
   isDrawerOpen: boolean;
   setIsDrawerOpen: (open: boolean) => void;
+  isMaintenanceMode: boolean;
+  setIsMaintenanceMode: (val: boolean) => void;
+  billingStats: {
+    activeTrials: number;
+    activePromo60: number;
+    monthlyAutoRenewals: number;
+  };
+  simulateSubscription: (type: 'trial' | 'promo60' | 'monthly' | 'cancel') => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -179,6 +199,20 @@ const INITIAL_PRO_APPLICATIONS: ProApplication[] = [
     submittedAt: '2026-10-27T09:15:00Z',
     email: 'kavitha.listener@care.in',
     phone: '+91 98412 67890'
+  },
+  {
+    id: 'app-03',
+    name: 'Subhashini Natarajan',
+    role: 'singer',
+    qualification: 'M.A. Carnatic Classical Vocals · Madras Music Academy',
+    rciNumber: 'MMA-VOC-8841',
+    experienceYears: 7,
+    specialties: ['Calm Ragas', 'Insomnia Relief', 'Lullabies'],
+    bio: 'Vocal therapist and classical singer providing soothing evening ragas and gentle bedtime lullabies.',
+    status: 'pending',
+    submittedAt: '2026-10-28T16:45:00Z',
+    email: 'subhashini.vocals@herspace.in',
+    phone: '+91 98405 55678'
   }
 ];
 
@@ -266,8 +300,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return 'home';
   });
 
-  const [experts] = useState<Expert[]>(DEFAULT_EXPERTS);
-  const [singers] = useState<LiveSinger[]>(LIVE_SINGERS);
+  const [experts, setExperts] = useState<Expert[]>(DEFAULT_EXPERTS);
+  const [singers, setSingers] = useState<LiveSinger[]>(LIVE_SINGERS);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('all');
   const [activeRoleFilter, setActiveRoleFilter] = useState<string>('all');
 
@@ -284,16 +318,36 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     optInConsent: boolean;
     logs: CycleLog[];
     remindersEnabled: boolean;
-  }>(() => {
-    try {
-      const saved = localStorage.getItem('herspace_cycle');
-      return saved
-        ? JSON.parse(saved)
-        : { optInConsent: false, logs: [], remindersEnabled: false };
-    } catch {
-      return { optInConsent: false, logs: [], remindersEnabled: false };
-    }
-  });
+  }>({ optInConsent: false, logs: [], remindersEnabled: false });
+
+  // Zero-Knowledge Decryption of Sensitive Health Logs at Rest
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const storedEnc = localStorage.getItem('herspace_cycle_enc');
+        const legacyPlain = localStorage.getItem('herspace_cycle');
+        if (storedEnc) {
+          const decrypted = await decryptHealthPayload<{
+            optInConsent: boolean;
+            logs: CycleLog[];
+            remindersEnabled: boolean;
+          }>(storedEnc);
+          if (decrypted && isMounted) setCycle(decrypted);
+        } else if (legacyPlain) {
+          const parsed = JSON.parse(legacyPlain);
+          if (isMounted) setCycle(parsed);
+          // Auto-migrate legacy plaintext to zero-knowledge AES-GCM ciphertext
+          const enc = await encryptHealthPayload(parsed);
+          localStorage.setItem('herspace_cycle_enc', enc);
+          localStorage.removeItem('herspace_cycle');
+        }
+      } catch (err) {
+        console.error('Zero-knowledge payload initialization error:', err);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, []);
 
   const [savedArticleIds, setSavedArticleIds] = useState<string[]>(() => {
     try {
@@ -321,8 +375,41 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [profileModalExpert, setProfileModalExpert] = useState<Expert | null>(null);
   const [isCrisisModalOpen, setIsCrisisModalOpen] = useState(false);
   const [isProModalOpen, setIsProModalOpen] = useState(false);
-  const [policyModalType, setPolicyModalType] = useState<'privacy' | 'terms' | 'cancellation' | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [policyModalType, setPolicyModalType] = useState<'privacy' | 'terms' | 'cancellation' | null>(null);
+
+  // System Maintenance Mode
+  const [isMaintenanceMode, setIsMaintenanceModeState] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('herspace_maintenance_mode') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const setIsMaintenanceMode = (val: boolean) => {
+    setIsMaintenanceModeState(val);
+    try {
+      localStorage.setItem('herspace_maintenance_mode', String(val));
+    } catch {}
+    addToast(
+      val ? 'Emergency Maintenance Mode switched ON.' : 'Emergency Maintenance Mode switched OFF.',
+      val ? 'warning' : 'success'
+    );
+  };
+
+  // Operational Billing Stats
+  const [billingStats, setBillingStats] = useState(() => {
+    try {
+      const saved = localStorage.getItem('herspace_billing_stats');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      activeTrials: 482,
+      activePromo60: 194,
+      monthlyAutoRenewals: 326
+    };
+  });
 
   // Calm Web Audio state
   const [calmState, setCalmState] = useState({
@@ -362,10 +449,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch {}
   }, [appointments]);
 
+  // Zero-Knowledge Encrypted Health Data Persistence
   useEffect(() => {
-    try {
-      localStorage.setItem('herspace_cycle', JSON.stringify(cycle));
-    } catch {}
+    (async () => {
+      try {
+        if (cycle.optInConsent || cycle.logs.length > 0) {
+          const enc = await encryptHealthPayload(cycle);
+          localStorage.setItem('herspace_cycle_enc', enc);
+          localStorage.removeItem('herspace_cycle');
+        } else {
+          localStorage.removeItem('herspace_cycle_enc');
+          localStorage.removeItem('herspace_cycle');
+        }
+      } catch {}
+    })();
   }, [cycle]);
 
   useEffect(() => {
@@ -382,7 +479,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Toast Helpers
   const addToast = (message: string, type: Toast['type'] = 'success') => {
-    const id = 'toast_' + Math.random().toString(36).substring(2, 9);
+    const id = generateSecureId('toast', 6);
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
@@ -416,13 +513,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (clean.length < 10) {
       throw new Error(isTa ? 'தயவுசெய்து சரியான 10-இலக்க மொபைல் எண்ணை உள்ளிடவும்.' : 'Please enter a valid 10-digit mobile number.');
     }
-    const freshOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    setLatestGeneratedOtp(freshOtp);
-    addToast(isTa ? `டெமோ OTP குறியீடு: ${freshOtp}` : `Demo OTP generated: ${freshOtp}`, 'info');
+    const { demoOtp } = issueSecureOtp(clean);
+    setLatestGeneratedOtp(demoOtp);
+    addToast(
+      isTa
+        ? `பாதுகாப்பான OTP குறியீடு: ${demoOtp} (10 நிமிடங்கள் செல்லுபடியாகும், ஒற்றைப் பயன்பாடு)`
+        : `Cryptographic OTP generated: ${demoOtp} (Single-use, 10-minute expiry)`,
+      'info'
+    );
     return {
       success: true,
       formattedPhone: '+91 ' + clean.slice(-10),
-      demoOtp: freshOtp
+      demoOtp
     };
   };
 
@@ -442,9 +544,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (!data.agreeTerms) {
       throw new Error(isTa ? 'விதிமுறைகளை ஏற்க வேண்டும்.' : 'You must accept the Terms and Privacy Policy to proceed.');
     }
-    if (data.otp !== latestGeneratedOtp && data.otp !== '123456') {
-      throw new Error(isTa ? 'தவறான OTP குறியீடு. 123456 அல்லது அனுப்பப்பட்ட குறியீட்டை உள்ளிடவும்.' : 'Invalid OTP. Please enter the generated code or 123456.');
-    }
+
+    // Enforce cryptographic verification with single-use consumption and brute-force lockout
+    await verifySecureOtp(data.phone, data.otp);
 
     const cleanDigits = data.phone.replace(/\D/g, '').slice(-10);
     const cleanPhone = '+91 ' + cleanDigits;
@@ -481,11 +583,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       addToast(isTa ? '7 நாள் இலவச சோதனை மற்றும் 1 இலவச அமர்வு துவங்கியது!' : '🎉 7-day free trial & 1 complimentary 30-min session active!', 'success');
     }
 
+    const cleanFullName = sanitizeInput(data.fullName, 80);
+    const cleanEmail = sanitizeInput(data.email || '', 100);
+
     const newUser: User = {
-      id: 'usr-' + Math.random().toString(36).substring(2, 9),
-      fullName: data.fullName || 'HerSpace Member',
+      id: generateSecureId('usr', 8),
+      fullName: cleanFullName || 'HerSpace Member',
       phone: cleanPhone,
-      email: data.email || '',
+      email: cleanEmail,
       age: data.age,
       identity: data.identity,
       role: 'member',
@@ -503,15 +608,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const verifyOtpAndSignIn = async (phone: string, otp: string) => {
-    if (otp !== latestGeneratedOtp && otp !== '123456') {
-      throw new Error(isTa ? 'தவறான OTP குறியீடு. 123456 என உள்ளிடவும்.' : 'Invalid OTP. Please enter 123456 or the generated code.');
-    }
+    // Enforce cryptographic verification with single-use consumption and brute-force lockout
+    await verifySecureOtp(phone, otp);
+
     const cleanDigits = phone.replace(/\D/g, '').slice(-10);
     const cleanPhone = '+91 ' + cleanDigits;
     const now = new Date();
 
     const signedUser: User = user || {
-      id: 'usr-' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('usr', 8),
       fullName: 'HerSpace Member',
       phone: cleanPhone,
       email: '',
@@ -593,7 +698,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       : 0;
 
     const newApt: Appointment = {
-      id: 'apt-' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('apt', 8),
       expertId: target.id,
       expertName: isTa && 'nameTa' in target ? target.nameTa : target.name,
       expertRole: target.role,
@@ -604,7 +709,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       priceDisplay: computedPrice,
       isComplimentary,
       status: 'scheduled',
-      bookingId: 'HS-' + Math.floor(100000 + Math.random() * 900000),
+      bookingId: generateSecureBookingId(),
       createdAt: new Date().toISOString(),
       rescheduleCount: 0,
       selectedTierTitle: tierTitle
@@ -697,8 +802,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const addCycleLog = (log: Omit<CycleLog, 'id' | 'createdAt'>) => {
     const newLog: CycleLog = {
-      id: 'cyc-' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('cyc', 8),
       ...log,
+      notes: sanitizeInput(log.notes || '', 500),
       createdAt: new Date().toISOString()
     };
     setCycle(prev => ({
@@ -748,7 +854,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     });
   };
 
-  const submitPrivateQuestion = (_categoryId: string, _question: string) => {
+  const submitPrivateQuestion = (_categoryId: string, question: string) => {
+    const clean = sanitizeInput(question || '', 800);
+    if (!clean) return;
     addToast(
       isTa
         ? 'உங்கள் கேள்வி ரகசியமாகப் பெறப்பட்டது. விரைவில் பதிலளிக்கப்படும்.'
@@ -803,13 +911,31 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const singer = singers.find(s => s.id === partnerId);
     const target = exp || singer || experts[0];
 
+    const userPhone = user?.phone || '+919840199999';
+    const bookingId = generateSecureBookingId();
+
+    // Secure server-side call bridge dispatch without exposing partner phone to client
+    try {
+      fetch('/api/telephony/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId,
+          userPhone,
+          listenerId: target.id
+        })
+      }).catch(err => {
+        console.warn('Telephony background bridge notification:', err);
+      });
+    } catch {}
+
     const newSession: TelephonySession = {
-      queueId: 'HS-Q' + Math.floor(100 + Math.random() * 900),
+      queueId: generateSecureQueueId(),
       partnerId: target.id,
       partnerName: partnerName || (isTa && 'nameTa' in target ? target.nameTa : target.name),
       partnerRole: partnerRole || target.role,
       state: 'connected',
-      memberMaskedDisplay: '+91 98*** **210 (Masked)',
+      memberMaskedDisplay: formatMaskedDisplay(userPhone),
       partnerMaskedDisplay: '+91 44 4813 1001 (Exotel Bridge)',
       startedAt: Date.now()
     };
@@ -832,7 +958,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const parkCall = () => {
     if (telephonySession) {
-      const code = 'P' + Math.floor(10 + Math.random() * 90);
+      const code = generateSecureParkCode();
       setTelephonySession({ ...telephonySession, state: 'parked', parkCode: code });
       addToast(isTa ? `அழைப்பு பாதுகாப்பாக நிறுத்தப்பட்டது. ஸ்லாட்: ${code}` : `Call parked in secure slot ${code}.`, 'info');
     }
@@ -880,8 +1006,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Professional Applications
   const submitProApplication = (data: Omit<ProApplication, 'id' | 'status' | 'submittedAt'>) => {
     const newApp: ProApplication = {
-      id: 'app-' + Math.random().toString(36).substring(2, 7),
-      ...data,
+      id: generateSecureId('app', 8),
+      name: sanitizeInput(data.name, 100),
+      email: sanitizeInput(data.email, 100),
+      phone: sanitizeInput(data.phone, 20),
+      role: data.role,
+      qualification: sanitizeInput(data.qualification, 200),
+      rciNumber: data.rciNumber ? sanitizeInput(data.rciNumber, 50) : null,
+      experienceYears: Number(data.experienceYears) || 0,
+      specialties: (data.specialties || []).map(s => sanitizeInput(s, 50)),
+      bio: sanitizeInput(data.bio, 500),
       status: 'pending',
       submittedAt: new Date().toISOString()
     };
@@ -896,10 +1030,153 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateProApplicationStatus = (id: string, status: 'approved' | 'rejected') => {
-    setProApplications(prev =>
-      prev.map(app => (app.id === id ? { ...app, status } : app))
-    );
-    addToast(status === 'approved' ? 'Application approved & credentials verified.' : 'Application rejected.', 'info');
+    let targetApp: ProApplication | undefined;
+    setProApplications(prev => {
+      const updated = prev.map(app => {
+        if (app.id === id) {
+          targetApp = { ...app, status };
+          return targetApp;
+        }
+        return app;
+      });
+      try {
+        localStorage.setItem('herspace_pro_applications', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    if (status === 'approved' && targetApp) {
+      const appData = targetApp as ProApplication;
+      if (appData.role === 'singer') {
+        const newSinger: LiveSinger = {
+          id: 'singer-' + appData.id,
+          name: appData.name,
+          nameTa: appData.name,
+          role: 'singer',
+          roleLabelEn: 'Live Musician & Vocalist',
+          roleLabelTa: 'நேரலை பாடகர்',
+          stylesEn: ['Classical Carnatic', 'Soothing Melodies', 'Devotional & Healing'],
+          stylesTa: ['கர்நாடக சங்கீதம்', 'மெல்லிசை', 'பக்தி & அமைதி'],
+          languages: ['Tamil', 'Sanskrit', 'English'],
+          experienceYears: appData.experienceYears,
+          rating: 5.0,
+          sessionsCompleted: 1,
+          qualification: appData.qualification,
+          qualificationTa: appData.qualification,
+          priceStatus: 'from_199',
+          demoFeeINR: 199,
+          nextAvailable: 'Tonight at 8:00 PM',
+          nextAvailableTa: 'இன்று இரவு 8:00',
+          avatarColor: '#5E2750',
+          verified: true,
+          bioEn: appData.bio || 'Vocalist trained in acoustic therapeutic ragas for emotional equilibrium.',
+          bioTa: 'மன அமைதிக்கான சிகிச்சை ராகங்களில் பயிற்சி பெற்ற பாடகர்.'
+        };
+        setSingers(prev => [newSinger, ...prev]);
+      } else {
+        const isCounsellor = appData.role === 'counsellor';
+        const newExpert: Expert = {
+          id: 'exp-' + appData.id,
+          name: appData.name,
+          nameTa: appData.name,
+          role: isCounsellor ? 'counsellor' : 'listener',
+          qualification: appData.qualification + (appData.rciNumber ? ` (RCI: ${appData.rciNumber})` : ''),
+          qualificationTa: appData.qualification + (appData.rciNumber ? ` (RCI: ${appData.rciNumber})` : ''),
+          experienceYears: appData.experienceYears,
+          pricePaise: isCounsellor ? 99900 : 39900,
+          priceDisplay: isCounsellor ? 999 : 399,
+          durationMinutes: isCounsellor ? 45 : 30,
+          avatar: isCounsellor
+            ? 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80'
+            : 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80',
+          specialties: appData.specialties && appData.specialties.length > 0 ? appData.specialties : ['Emotional Wellbeing', 'Life Transitions'],
+          specialtiesTa: ['மன அமைதி', 'வாழ்க்கை மாற்றம்'],
+          languages: ['Tamil', 'English'],
+          modes: ['call'],
+          rating: 5.0,
+          reviewsCount: 1,
+          nextSlot: 'Today at 6:00 PM',
+          nextSlotTa: 'இன்று மாலை 6:00',
+          bio: appData.bio || 'Verified professional practitioner on HerSpace panel.',
+          bioTa: 'சரிபார்க்கப்பட்ட சிறப்பு நிபுணர்.',
+          verified: true
+        };
+        setExperts(prev => [newExpert, ...prev]);
+      }
+      addToast(
+        `Staff Approved: ${appData.name} is now active in the public directory!`,
+        'success'
+      );
+    } else {
+      addToast('Application rejected.', 'info');
+    }
+  };
+
+  const simulateSubscription = (type: 'trial' | 'promo60' | 'monthly' | 'cancel') => {
+    const now = new Date();
+    if (type === 'trial') {
+      const trialEnd = new Date(now.getTime() + 7 * 86400000).toISOString();
+      setEntitlement({
+        trialStartedAt: now.toISOString(),
+        trialEndsAt: trialEnd,
+        welcomeCallExpiresAt: trialEnd,
+        welcomeCallStatus: 'available',
+        paidThrough: null,
+        autoRenew: true,
+        isReturning: false
+      });
+      setBillingStats(prev => {
+        const updated = { ...prev, activeTrials: prev.activeTrials + 1 };
+        try { localStorage.setItem('herspace_billing_stats', JSON.stringify(updated)); } catch {}
+        return updated;
+      });
+      addToast('Simulated Webhook: Activated 7-Day Free Trial (@ ₹0) with 1 complimentary call.', 'success');
+    } else if (type === 'promo60') {
+      const promoEnd = new Date(now.getTime() + 60 * 86400000).toISOString();
+      setEntitlement({
+        trialStartedAt: now.toISOString(),
+        trialEndsAt: now.toISOString(),
+        welcomeCallExpiresAt: promoEnd,
+        welcomeCallStatus: 'available',
+        paidThrough: promoEnd,
+        autoRenew: true,
+        isReturning: false
+      });
+      setBillingStats(prev => {
+        const updated = { ...prev, activePromo60: prev.activePromo60 + 1 };
+        try { localStorage.setItem('herspace_billing_stats', JSON.stringify(updated)); } catch {}
+        return updated;
+      });
+      addToast('Simulated Webhook: Paid ₹149 for 60 Days validity successfully applied.', 'success');
+    } else if (type === 'monthly') {
+      const renewEnd = new Date(now.getTime() + 30 * 86400000).toISOString();
+      setEntitlement({
+        trialStartedAt: now.toISOString(),
+        trialEndsAt: now.toISOString(),
+        welcomeCallExpiresAt: renewEnd,
+        welcomeCallStatus: 'used',
+        paidThrough: renewEnd,
+        autoRenew: true,
+        isReturning: true
+      });
+      setBillingStats(prev => {
+        const updated = { ...prev, monthlyAutoRenewals: prev.monthlyAutoRenewals + 1 };
+        try { localStorage.setItem('herspace_billing_stats', JSON.stringify(updated)); } catch {}
+        return updated;
+      });
+      addToast('Simulated Webhook: Monthly auto-renewal processed (@ ₹149/mo).', 'success');
+    } else if (type === 'cancel') {
+      setEntitlement({
+        trialStartedAt: now.toISOString(),
+        trialEndsAt: now.toISOString(),
+        welcomeCallExpiresAt: now.toISOString(),
+        welcomeCallStatus: 'expired',
+        paidThrough: null,
+        autoRenew: false,
+        isReturning: false
+      });
+      addToast('Simulated Webhook: Membership canceled. Access reverted to non-member tier.', 'warning');
+    }
   };
 
   // Policies Modal
@@ -992,7 +1269,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         openPolicyModal,
         closePolicyModal,
         isDrawerOpen,
-        setIsDrawerOpen
+        setIsDrawerOpen,
+        isMaintenanceMode,
+        setIsMaintenanceMode,
+        billingStats,
+        simulateSubscription
       }}
     >
       {children}
