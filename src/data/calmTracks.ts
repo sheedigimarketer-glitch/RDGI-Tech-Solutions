@@ -10,7 +10,7 @@ export const CALM_TRACKS: CalmTrack[] = [
     baseFreq: 432,
     soundProfile: 'warm_pad',
     licence: 'HerSpace Original Studio Master (Royalty-Free)',
-    artwork: 'assets/images/02_HerSpace_Calm_Cup.png',
+    artwork: '/assets/images/02_HerSpace_Calm_Cup.png',
     title: {
       en: 'Amaithi Moochu — Gentle Tamil Breathing Reset',
       ta: 'அமைதி மூச்சு — வழிகாட்டப்பட்ட தமிழ் தியானம்'
@@ -33,7 +33,7 @@ export const CALM_TRACKS: CalmTrack[] = [
     baseFreq: 528,
     soundProfile: 'singing_bowl',
     licence: 'HerSpace Original Studio Master (Royalty-Free)',
-    artwork: 'assets/images/02_HerSpace_Calm_Cup.png',
+    artwork: '/assets/images/02_HerSpace_Calm_Cup.png',
     title: {
       en: 'Safe Harbour — Evening Emotional Grounding',
       ta: 'பாதுகாப்பான மனம் — மாலை நேர உணர்வு சமநிலை (English)'
@@ -56,7 +56,7 @@ export const CALM_TRACKS: CalmTrack[] = [
     baseFreq: 396,
     soundProfile: 'harmonic_veena',
     licence: 'Licensed Carnatic Ambient Instrumental',
-    artwork: 'assets/images/02_HerSpace_Calm_Cup.png',
+    artwork: '/assets/images/02_HerSpace_Calm_Cup.png',
     title: {
       en: 'Thanjavur Veena & Bansuri Serenity (Raga Neelambari)',
       ta: 'தஞ்சாவூர் வீணை & புல்லாங்குழல் மெல்லிசை (நீலாம்பரி ராகம்)'
@@ -79,7 +79,7 @@ export const CALM_TRACKS: CalmTrack[] = [
     baseFreq: 285,
     soundProfile: 'rain_breeze',
     licence: 'HerSpace Field Recording (Public Domain / Original)',
-    artwork: 'assets/images/03_HerSpace_Reflection_Outdoor.png',
+    artwork: '/assets/images/03_HerSpace_Reflection_Outdoor.png',
     title: {
       en: 'Nilgiris Monsoon Rain & Eucalyptus Breeze',
       ta: 'நீலகிரி மழைச் சாரல் & இயற்கை ஒலி'
@@ -102,7 +102,7 @@ export const CALM_TRACKS: CalmTrack[] = [
     baseFreq: 432,
     soundProfile: 'sleep_drone',
     licence: 'HerSpace Original Studio Master (Royalty-Free)',
-    artwork: 'assets/images/02_HerSpace_Calm_Cup.png',
+    artwork: '/assets/images/02_HerSpace_Calm_Cup.png',
     title: {
       en: 'Thaalattu — Deep Sleep Preparation & Night Comfort',
       ta: 'தாலாட்டு — ஆழ்ந்த உறக்கத்திற்கான இரவு இசை'

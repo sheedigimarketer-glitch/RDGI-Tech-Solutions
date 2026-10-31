@@ -31,7 +31,7 @@ export const Header: React.FC = () => {
             navigate('home');
           }}
         >
-          <img src="assets/herspace-client-logo.webp" alt="HerSpace Logo" />
+          <img src="/assets/herspace-client-logo.webp" alt="HerSpace Logo" />
         </a>
 
         {isMember ? (

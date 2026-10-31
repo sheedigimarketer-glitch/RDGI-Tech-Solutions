@@ -31,12 +31,12 @@ export const HERSPACE_CONFIG = {
   },
 
   images: {
-    heroSunrise: 'assets/images/03_HerSpace_Reflection_Outdoor.png',
-    heroSunsetHill: 'assets/images/03_HerSpace_Reflection_Outdoor.png',
-    calmCup: 'assets/images/02_HerSpace_Calm_Cup.png',
-    reflectionOutdoor: 'assets/images/03_HerSpace_Reflection_Outdoor.png',
-    hopePortrait: 'assets/images/04_HerSpace_Hope_Portrait.png',
-    logo: 'assets/herspace-client-logo.webp'
+    heroSunrise: '/assets/images/03_HerSpace_Reflection_Outdoor.png',
+    heroSunsetHill: '/assets/images/03_HerSpace_Reflection_Outdoor.png',
+    calmCup: '/assets/images/02_HerSpace_Calm_Cup.png',
+    reflectionOutdoor: '/assets/images/03_HerSpace_Reflection_Outdoor.png',
+    hopePortrait: '/assets/images/04_HerSpace_Hope_Portrait.png',
+    logo: '/assets/herspace-client-logo.webp'
   },
 
   pricing: {
