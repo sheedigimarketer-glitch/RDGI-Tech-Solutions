@@ -22,17 +22,27 @@ export const Header: React.FC = () => {
   const isMember = Boolean(user && (onboarding.completed || user.isAuthenticated));
 
   return (
-    <header className="app-header">
-      <div className="container header-inner">
+    <header className="app-header h-16 md:h-18 px-4 flex items-center justify-between">
+      <div className="container header-inner flex items-center justify-between">
         <a
-          className="brand-logo"
+          className="brand-logo flex items-center shrink-0"
           href="#home"
           onClick={e => {
             e.preventDefault();
             navigate('home');
           }}
         >
-          <img src="/logo.png" alt="HerSpace Logo" />
+          <img
+            src="/logo.png"
+            alt="HerSpace Logo"
+            className="h-11 md:h-13 w-auto object-contain"
+            style={{
+              height: '48px',
+              maxHeight: '52px',
+              width: 'auto',
+              objectFit: 'contain'
+            }}
+          />
         </a>
 
         {isMember ? (
