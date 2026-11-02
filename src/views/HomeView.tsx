@@ -9,21 +9,22 @@ export const HomeView: React.FC = () => {
   return (
     <div className="home-portal-view relative w-full h-[calc(100dvh-64px)] md:h-[calc(100dvh-72px)] overflow-hidden flex flex-col bg-[#FAF7F5]">
       <section className="hero-portal-section relative w-full flex-1 h-full flex items-center overflow-hidden bg-[#FAF7F5]">
-        {/* Scenic Meditation Photograph: Woman Positioned Prominently on the Right */}
+        {/* Scenic Meditation Photograph: High-DPI Crisp Rendering with Woman Prominently on the Right */}
         <img
           src={HERSPACE_CONFIG.images.heroSunrise}
+          srcSet="/hero-1x.jpg 1x, /hero.jpg 2x"
+          sizes="100vw"
           alt={t('heroBannerAlt')}
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
           referrerPolicy="no-referrer"
           className="hero-portal-bg absolute inset-0 w-full h-full object-cover object-[82%_center] z-[1] pointer-events-none select-none"
         />
 
-        {/* Subtle Atmospheric Sky Scrim on Left for Frosted Card Legibility */}
+        {/* Localized Left Sky Scrim — Preserves 100% Photographic Clarity on the Subject */}
         <div
           className="hero-portal-vignette absolute inset-0 z-[2] pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(90deg, rgba(250, 247, 245, 0.45) 0%, rgba(250, 247, 245, 0.16) 44%, rgba(250, 247, 245, 0) 75%)'
-          }}
         />
 
         {/* Sky Section Registration/Login (Left / Upper-Middle Area) */}

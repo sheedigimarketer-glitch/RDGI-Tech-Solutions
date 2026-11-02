@@ -730,15 +730,21 @@ html[lang="ta"] .bottom-nav-item {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: right center;
+  object-position: 82% center;
   z-index: 1;
   pointer-events: none;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .hero-portal-vignette {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(250, 247, 245, 0.52) 0%, rgba(250, 247, 245, 0.18) 48%, rgba(250, 247, 245, 0) 80%);
+  background: linear-gradient(90deg, rgba(250, 247, 245, 0.22) 0%, rgba(250, 247, 245, 0.06) 36%, rgba(250, 247, 245, 0) 58%);
   z-index: 2;
   pointer-events: none;
 }
@@ -768,10 +774,12 @@ html[lang="ta"] .bottom-nav-item {
     height: 100% !important;
     object-fit: cover !important;
     object-position: 78% center !important;
+    image-rendering: -webkit-optimize-contrast !important;
+    transform: translateZ(0) !important;
   }
   .hero-portal-vignette {
     display: block !important;
-    background: linear-gradient(180deg, rgba(253, 251, 247, 0.35) 0%, rgba(253, 251, 247, 0.12) 60%, rgba(253, 251, 247, 0.25) 100%) !important;
+    background: linear-gradient(180deg, rgba(250, 247, 245, 0.12) 0%, rgba(250, 247, 245, 0) 45%, rgba(250, 247, 245, 0.08) 100%) !important;
   }
   .hero-portal-section .container {
     min-height: auto !important;
