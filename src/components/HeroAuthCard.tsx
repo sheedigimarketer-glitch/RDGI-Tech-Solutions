@@ -46,170 +46,68 @@ export const HeroAuthCard: React.FC = () => {
 
   if (user) {
     return (
-      <div
-        className="hero-auth-card backdrop-blur-md rounded-2xl border border-white/40"
-        style={{
-          background: 'rgba(255, 255, 255, 0.86)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderRadius: '20px',
-          padding: '22px 20px',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.6)',
-          width: '100%',
-          maxWidth: '370px',
-          boxSizing: 'border-box'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-            <span
-              style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: '#10B981',
-                display: 'inline-block',
-                boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.2)'
-              }}
-            />
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#047857', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              Safe Space Active
-            </span>
-          </div>
+      <div className="hero-auth-card w-full max-w-[380px] rounded-2xl backdrop-blur-xl bg-white/80 border border-white/40 p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-medium text-[#5E2750]">
+            Confidential Sanctuary Active
+          </span>
           <button
             type="button"
             onClick={signOut}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#666',
-              fontSize: '11px',
-              textDecoration: 'underline',
-              cursor: 'pointer'
-            }}
+            className="text-xs font-medium text-slate-500 hover:text-slate-800 underline cursor-pointer min-h-[32px] px-1"
           >
             Sign Out
           </button>
         </div>
 
-        <h2 style={{ fontWeight: 700, color: '#3b1d36', fontSize: '21px', margin: '0 0 2px 0', lineHeight: 1.2 }}>
+        <h2 className="text-xl font-bold tracking-tight text-slate-900 mb-1">
           Welcome, @{user.username || (user.fullName ? user.fullName.split(' ')[0] : 'Member')}
         </h2>
 
-        <p style={{ color: '#555', fontSize: '12.5px', lineHeight: 1.45, margin: '4px 0 14px 0' }}>
-          Your confidential HerSpace sanctuary is active.
+        <p className="text-xs text-slate-500 leading-relaxed mb-4">
+          Your private HerSpace sanctuary is ready whenever you need support.
         </p>
 
         <button
           type="button"
           onClick={() => navigate('space')}
-          style={{
-            background: '#5E2750',
-            color: 'white',
-            padding: '11px 14px',
-            borderRadius: '12px',
-            fontWeight: 600,
-            fontSize: '13.5px',
-            width: '100%',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'opacity 0.2s, transform 0.12s cubic-bezier(0.2, 0, 0, 1)',
-            boxShadow: '0 4px 14px rgba(94, 39, 80, 0.25)'
-          }}
-          onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.98)')}
-          onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+          className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-[#5E2750] hover:bg-[#4c1f40] active:scale-[0.98] text-white text-sm font-semibold transition-all cursor-pointer flex items-center justify-center"
         >
           Enter Safe Space →
         </button>
 
-        <div
-          style={{
-            fontSize: '11px',
-            color: '#666',
-            textAlign: 'center',
-            marginTop: '10px',
-            letterSpacing: '-0.01em'
-          }}
-        >
-          100% Anonymous & Confidential • 18+
+        <div className="text-xs text-slate-500 text-center mt-3">
+          100% Anonymous & Confidential · 18+
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      className="hero-auth-card backdrop-blur-md rounded-2xl border border-white/40"
-      style={{
-        background: 'rgba(255, 255, 255, 0.86)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderRadius: '20px',
-        padding: '22px 20px',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-        border: '1px solid rgba(255, 255, 255, 0.6)',
-        width: '100%',
-        maxWidth: '370px',
-        boxSizing: 'border-box'
-      }}
-    >
+    <div className="hero-auth-card w-full max-w-[380px] rounded-2xl backdrop-blur-xl bg-white/80 border border-white/40 p-6 shadow-sm">
       {/* Header Inside Card */}
-      <div style={{ textAlign: 'left', marginBottom: '12px' }}>
-        <h2
-          style={{
-            fontWeight: 700,
-            color: '#3b1d36',
-            fontSize: '22px',
-            margin: '0 0 3px 0',
-            lineHeight: 1.15,
-            letterSpacing: '-0.02em'
-          }}
-        >
+      <div className="text-left mb-4">
+        <h2 className="text-xl font-bold tracking-tight text-slate-900 mb-1">
           HerSpace
         </h2>
-        <p
-          style={{
-            color: '#5C535A',
-            fontSize: '12.5px',
-            margin: 0,
-            lineHeight: 1.35,
-            fontWeight: 500
-          }}
-        >
+        <p className="text-xs text-slate-500 leading-relaxed">
           A Safe, Confidential Space For Every Woman
         </p>
       </div>
 
-      {/* Clean Tab Toggle: [ Register ] | [ Sign In ] */}
-      <div
-        style={{
-          display: 'flex',
-          background: 'rgba(94, 39, 80, 0.08)',
-          borderRadius: '9999px',
-          padding: '3px',
-          marginBottom: '12px'
-        }}
-      >
+      {/* Apple HIG Segmented Control: [ Register ] | [ Sign In ] */}
+      <div className="flex items-center gap-1 p-1 bg-slate-900/5 rounded-xl mb-4">
         <button
           type="button"
           onClick={() => {
             setMode('register');
             setError(null);
           }}
-          style={{
-            flex: 1,
-            padding: '7px 12px',
-            border: 'none',
-            borderRadius: '9999px',
-            background: mode === 'register' ? '#FFFFFF' : 'transparent',
-            color: mode === 'register' ? '#3b1d36' : '#6E626B',
-            fontWeight: mode === 'register' ? 700 : 500,
-            fontSize: '12.5px',
-            cursor: 'pointer',
-            boxShadow: mode === 'register' ? '0 2px 6px rgba(0, 0, 0, 0.08)' : 'none',
-            transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}
+          className={`flex-1 min-h-[40px] px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+            mode === 'register'
+              ? 'bg-white text-slate-900 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           Register
         </button>
@@ -219,19 +117,11 @@ export const HeroAuthCard: React.FC = () => {
             setMode('signin');
             setError(null);
           }}
-          style={{
-            flex: 1,
-            padding: '7px 12px',
-            border: 'none',
-            borderRadius: '9999px',
-            background: mode === 'signin' ? '#FFFFFF' : 'transparent',
-            color: mode === 'signin' ? '#3b1d36' : '#6E626B',
-            fontWeight: mode === 'signin' ? 700 : 500,
-            fontSize: '12.5px',
-            cursor: 'pointer',
-            boxShadow: mode === 'signin' ? '0 2px 6px rgba(0, 0, 0, 0.08)' : 'none',
-            transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}
+          className={`flex-1 min-h-[40px] px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+            mode === 'signin'
+              ? 'bg-white text-slate-900 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           Sign In
         </button>
@@ -239,37 +129,32 @@ export const HeroAuthCard: React.FC = () => {
 
       {error && (
         <div
-          style={{
-            background: '#FEF2F2',
-            border: '1px solid #FECACA',
-            color: '#B91C1C',
-            borderRadius: '10px',
-            padding: '7px 10px',
-            fontSize: '11.5px',
-            fontWeight: 600,
-            marginBottom: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
+          role="alert"
+          className="bg-red-50/90 border border-red-200 text-red-700 rounded-xl px-3 py-2 text-xs font-medium mb-3 flex items-center gap-2"
         >
-          <span>⚠️</span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="shrink-0"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} noValidate>
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
         {/* Username / Anonymous Handle Input */}
-        <div style={{ marginBottom: '10px' }}>
+        <div>
           <label
             htmlFor="heroUsername"
-            style={{
-              display: 'block',
-              fontSize: '11.5px',
-              fontWeight: 600,
-              color: '#4B364A',
-              marginBottom: '4px'
-            }}
+            className="block text-xs font-medium text-slate-700 mb-1"
           >
             Username / Anonymous Handle
           </label>
@@ -283,44 +168,19 @@ export const HeroAuthCard: React.FC = () => {
               if (error) setError(null);
             }}
             placeholder="Choose an anonymous handle, e.g., Maya_92"
-            style={{
-              width: '100%',
-              padding: '9px 12px',
-              fontSize: '13px',
-              borderRadius: '10px',
-              border: '1px solid rgba(0, 0, 0, 0.14)',
-              background: '#FFFFFF',
-              color: '#1F2937',
-              outline: 'none',
-              boxSizing: 'border-box',
-              transition: 'border-color 0.15s, box-shadow 0.15s'
-            }}
-            onFocus={e => {
-              e.currentTarget.style.borderColor = '#5E2750';
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(94, 39, 80, 0.12)';
-            }}
-            onBlur={e => {
-              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.14)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
+            className="w-full min-h-[44px] px-3.5 py-2 text-sm rounded-xl border border-slate-300/80 bg-white/95 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#5E2750] focus:ring-2 focus:ring-[#5E2750]/15 transition-colors"
           />
         </div>
 
-        {/* Password Input with Eye Visibility Toggle */}
-        <div style={{ marginBottom: '14px' }}>
+        {/* Password Input with 44x44pt Eye Visibility Toggle */}
+        <div>
           <label
             htmlFor="heroPassword"
-            style={{
-              display: 'block',
-              fontSize: '11.5px',
-              fontWeight: 600,
-              color: '#4B364A',
-              marginBottom: '4px'
-            }}
+            className="block text-xs font-medium text-slate-700 mb-1"
           >
             Password
           </label>
-          <div style={{ position: 'relative' }}>
+          <div className="relative flex items-center">
             <input
               id="heroPassword"
               type={showPassword ? 'text' : 'password'}
@@ -329,54 +189,22 @@ export const HeroAuthCard: React.FC = () => {
                 setPassword(e.target.value);
                 if (error) setError(null);
               }}
-              placeholder="••••••••"
-              style={{
-                width: '100%',
-                padding: '9px 36px 9px 12px',
-                fontSize: '13px',
-                borderRadius: '10px',
-                border: '1px solid rgba(0, 0, 0, 0.14)',
-                background: '#FFFFFF',
-                color: '#1F2937',
-                outline: 'none',
-                boxSizing: 'border-box',
-                transition: 'border-color 0.15s, box-shadow 0.15s'
-              }}
-              onFocus={e => {
-                e.currentTarget.style.borderColor = '#5E2750';
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(94, 39, 80, 0.12)';
-              }}
-              onBlur={e => {
-                e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.14)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
+              placeholder="Enter password"
+              className="w-full min-h-[44px] pl-3.5 pr-11 py-2 text-sm rounded-xl border border-slate-300/80 bg-white/95 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#5E2750] focus:ring-2 focus:ring-[#5E2750]/15 transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
-              style={{
-                position: 'absolute',
-                right: '8px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#6B7280',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
+              className="absolute right-0 w-11 h-11 flex items-center justify-center text-slate-500 hover:text-slate-800 cursor-pointer rounded-r-xl"
             >
               {showPassword ? (
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
                   <line x1="1" y1="1" x2="23" y2="23"></line>
                 </svg>
               ) : (
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
@@ -385,43 +213,19 @@ export const HeroAuthCard: React.FC = () => {
           </div>
         </div>
 
-        {/* Prominent Action Button */}
+        {/* Primary Action Button (#5E2750) */}
         <button
           type="submit"
           disabled={isSubmitting}
-          style={{
-            background: '#5E2750',
-            color: 'white',
-            padding: '11px 14px',
-            borderRadius: '12px',
-            fontWeight: 600,
-            fontSize: '13.5px',
-            width: '100%',
-            border: 'none',
-            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-            opacity: isSubmitting ? 0.8 : 1,
-            transition: 'opacity 0.2s, transform 0.12s cubic-bezier(0.2, 0, 0, 1)',
-            boxShadow: '0 4px 14px rgba(94, 39, 80, 0.28)'
-          }}
-          onMouseDown={e => { if (!isSubmitting) e.currentTarget.style.transform = 'scale(0.98)'; }}
-          onMouseUp={e => { if (!isSubmitting) e.currentTarget.style.transform = 'scale(1)'; }}
+          className="w-full min-h-[44px] mt-1 px-4 py-2.5 rounded-xl bg-[#5E2750] hover:bg-[#4c1f40] active:scale-[0.98] disabled:opacity-70 text-white text-sm font-semibold transition-all cursor-pointer flex items-center justify-center whitespace-nowrap"
         >
           {isSubmitting ? 'Securing Session...' : 'Enter Safe Space →'}
         </button>
       </form>
 
-      {/* Small Privacy Label */}
-      <div
-        style={{
-          fontSize: '11px',
-          color: '#666',
-          textAlign: 'center',
-          marginTop: '10px',
-          letterSpacing: '-0.01em',
-          lineHeight: 1.35
-        }}
-      >
-        100% Anonymous & Confidential • 18+
+      {/* Reassuring Privacy Label */}
+      <div className="text-xs text-slate-500 text-center mt-3">
+        100% Anonymous & Confidential · 18+
       </div>
     </div>
   );

@@ -7,84 +7,28 @@ export const HomeView: React.FC = () => {
   const { t } = useApp();
 
   return (
-    <div
-      className="home-portal-view"
-      style={{
-        width: '100%',
-        minHeight: 'calc(100vh - 64px)',
-        overflow: 'hidden',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-    >
-      {/* SINGLE-SCREEN FULL VIEWPORT HERO GATEWAY */}
-      <section
-        className="hero-portal-section"
-        style={{
-          position: 'relative',
-          width: '100%',
-          flex: 1,
-          minHeight: 'calc(100vh - 64px)',
-          display: 'flex',
-          alignItems: 'center',
-          overflow: 'hidden',
-          background: '#FDFBF7'
-        }}
-      >
-        {/* Scenic Meditation Photograph: Woman Positioned Prominently & Clearly Visible on the Right */}
+    <div className="home-portal-view relative w-full h-[calc(100dvh-64px)] md:h-[calc(100dvh-72px)] overflow-hidden flex flex-col bg-[#FAF7F5]">
+      <section className="hero-portal-section relative w-full flex-1 h-full flex items-center overflow-hidden bg-[#FAF7F5]">
+        {/* Scenic Meditation Photograph: Woman Positioned Prominently on the Right */}
         <img
           src={HERSPACE_CONFIG.images.heroSunrise}
           alt={t('heroBannerAlt')}
-          className="hero-portal-bg"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: '82% center',
-            zIndex: 1,
-            pointerEvents: 'none'
-          }}
+          referrerPolicy="no-referrer"
+          className="hero-portal-bg absolute inset-0 w-full h-full object-cover object-[82%_center] z-[1] pointer-events-none select-none"
         />
 
-        {/* Subtle Atmospheric Sky Gradient on Left for Frosted Card Legibility */}
+        {/* Subtle Atmospheric Sky Scrim on Left for Frosted Card Legibility */}
         <div
-          className="hero-portal-vignette"
+          className="hero-portal-vignette absolute inset-0 z-[2] pointer-events-none"
           style={{
-            position: 'absolute',
-            inset: 0,
             background:
-              'linear-gradient(90deg, rgba(253, 251, 247, 0.42) 0%, rgba(253, 251, 247, 0.16) 44%, rgba(253, 251, 247, 0) 75%)',
-            zIndex: 2,
-            pointerEvents: 'none'
+              'linear-gradient(90deg, rgba(250, 247, 245, 0.45) 0%, rgba(250, 247, 245, 0.16) 44%, rgba(250, 247, 245, 0) 75%)'
           }}
         />
 
         {/* Sky Section Registration/Login (Left / Upper-Middle Area) */}
-        <div
-          className="container"
-          style={{
-            position: 'relative',
-            zIndex: 3,
-            paddingTop: '20px',
-            paddingBottom: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            width: '100%'
-          }}
-        >
-          <div
-            className="hero-sky-panel"
-            style={{
-              width: '100%',
-              maxWidth: '370px',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
+        <div className="container relative z-[3] w-full px-4 pb-16 md:pb-6 flex flex-col justify-center">
+          <div className="hero-sky-panel w-full max-w-[380px] flex flex-col">
             <HeroAuthCard />
           </div>
         </div>

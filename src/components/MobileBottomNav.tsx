@@ -40,50 +40,72 @@ export const MobileBottomNav: React.FC = () => {
   );
 
   return (
-    <nav className="mobile-bottom-nav" aria-label="Primary Mobile Navigation">
+    <nav
+      className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-[1000] backdrop-blur-xl bg-white/85 border-t border-slate-200/80 px-2 py-1.5 flex items-center justify-around"
+      aria-label="Primary Bottom Navigation"
+    >
       {/* 1. Home Tab */}
       <button
-        className={`bottom-nav-item ${activeRoute === 'home' ? 'active' : ''}`}
+        type="button"
+        className={`bottom-nav-item min-h-[48px] min-w-[48px] rounded-xl flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer ${
+          activeRoute === 'home' ? 'active text-[#5E2750] font-bold' : 'text-slate-500 hover:text-slate-900'
+        }`}
         onClick={() => navigate('home')}
       >
         <span className="nav-svg-icon">{homeIcon}</span>
-        <span>Home</span>
+        <span className="text-[11px] leading-tight">Home</span>
       </button>
 
-      {/* 2. Support Tab (Care Directory) */}
+      {/* 2. Support Tab */}
       <button
-        className={`bottom-nav-item ${activeRoute === 'support' ? 'active' : ''}`}
+        type="button"
+        className={`bottom-nav-item min-h-[48px] min-w-[48px] rounded-xl flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer ${
+          activeRoute === 'support' ? 'active text-[#5E2750] font-bold' : 'text-slate-500 hover:text-slate-900'
+        }`}
         onClick={() => navigate('support')}
       >
         <span className="nav-svg-icon">{supportIcon}</span>
-        <span>Support</span>
+        <span className="text-[11px] leading-tight">Support</span>
       </button>
 
       {/* 3. Melodies Tab */}
       <button
-        className={`bottom-nav-item ${activeRoute === 'singers' || activeRoute === 'calm' ? 'active' : ''}`}
+        type="button"
+        className={`bottom-nav-item min-h-[48px] min-w-[48px] rounded-xl flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer ${
+          activeRoute === 'singers' || activeRoute === 'calm' ? 'active text-[#5E2750] font-bold' : 'text-slate-500 hover:text-slate-900'
+        }`}
         onClick={() => navigate('singers')}
       >
         <span className="nav-svg-icon">{melodiesIcon}</span>
-        <span>Melodies</span>
+        <span className="text-[11px] leading-tight">Melodies</span>
       </button>
 
       {/* 4. Plans Tab */}
       <button
-        className={`bottom-nav-item ${activeRoute === 'pricing' ? 'active' : ''}`}
+        type="button"
+        className={`bottom-nav-item min-h-[48px] min-w-[48px] rounded-xl flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer ${
+          activeRoute === 'pricing' || activeRoute === 'plans' || activeRoute === 'how'
+            ? 'active text-[#5E2750] font-bold'
+            : 'text-slate-500 hover:text-slate-900'
+        }`}
         onClick={() => navigate('pricing')}
       >
         <span className="nav-svg-icon">{plansIcon}</span>
-        <span>Plans</span>
+        <span className="text-[11px] leading-tight">Plans</span>
       </button>
 
       {/* 5. My Space Tab */}
       <button
-        className={`bottom-nav-item ${activeRoute === 'space' || activeRoute === 'dashboard' || activeRoute === 'cycle' ? 'active' : ''}`}
+        type="button"
+        className={`bottom-nav-item min-h-[48px] min-w-[48px] rounded-xl flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer ${
+          activeRoute === 'space' || activeRoute === 'dashboard' || activeRoute === 'cycle'
+            ? 'active text-[#5E2750] font-bold'
+            : 'text-slate-500 hover:text-slate-900'
+        }`}
         onClick={() => navigate(user ? 'space' : 'onb-register')}
       >
         <span className="nav-svg-icon">{spaceIcon}</span>
-        <span>My Space</span>
+        <span className="text-[11px] leading-tight">My Space</span>
       </button>
     </nav>
   );

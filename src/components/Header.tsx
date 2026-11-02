@@ -242,10 +242,10 @@ export const Header: React.FC = () => {
           </nav>
         )}
 
-        <div className="nav-actions">
+        <div className="nav-actions flex items-center gap-2 shrink-0">
           {/* Notification Bell */}
           <button
-            className="header-icon-btn"
+            className="header-icon-btn w-11 h-11 rounded-xl flex items-center justify-center"
             onClick={() => navigate('dashboard')}
             aria-label={t('navNotifications')}
             title={t('navNotifications')}
@@ -263,28 +263,17 @@ export const Header: React.FC = () => {
             onClick={() => setIsCrisisModalOpen(true)}
             aria-label="24/7 Crisis Helpline"
             title="24/7 Crisis Helpline"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              background: 'rgba(220, 38, 38, 0.08)',
-              border: '1px solid rgba(220, 38, 38, 0.25)',
-              color: '#B91C1C',
-              borderRadius: '9999px',
-              padding: '6px 11px',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap'
-            }}
+            className="min-h-[44px] px-3 py-2 rounded-xl border border-red-200 bg-red-50/90 hover:bg-red-100/80 text-red-700 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-colors"
           >
-            <span>🆘</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
             <span>{lang === 'en' ? 'Helpline' : 'உதவி எண்'}</span>
           </button>
 
           {/* Language Switcher */}
           <button
-            className="lang-toggle-btn"
+            className="lang-toggle-btn min-h-[44px] px-3 py-2 rounded-xl"
             id="headerLangSwitchBtn"
             onClick={toggleLanguage}
             aria-label="Switch Language"
@@ -300,37 +289,25 @@ export const Header: React.FC = () => {
           {user ? (
             <>
               <button
-                className="btn btn-sm btn-secondary btn-desktop-only"
+                className="btn btn-sm btn-secondary btn-desktop-only min-h-[44px] px-3.5 rounded-xl text-xs font-semibold text-[#5E2750]"
                 onClick={() => navigate('space')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '7px',
-                  background: 'rgba(94, 39, 80, 0.08)',
-                  borderColor: 'rgba(94, 39, 80, 0.22)',
-                  color: '#5E2750',
-                  fontWeight: 700,
-                  borderRadius: '9999px',
-                  padding: '6px 14px'
-                }}
               >
-                <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }}></span>
                 <span>@{user.username || (user.fullName ? user.fullName.split(' ')[0] : 'Member')}</span>
               </button>
-              <button className="btn btn-sm btn-outline btn-desktop-only" onClick={signOut}>
+              <button className="btn btn-sm btn-outline btn-desktop-only min-h-[44px] rounded-xl" onClick={signOut}>
                 {t('navSignOut')}
               </button>
             </>
           ) : (
             <>
               <button
-                className="btn btn-sm btn-ghost btn-desktop-only"
+                className="btn btn-sm btn-ghost btn-desktop-only min-h-[44px] rounded-xl"
                 onClick={() => navigate('signin')}
               >
                 <span>{t('btnSignInShort')}</span>
               </button>
               <button
-                className="btn btn-sm btn-primary btn-desktop-only"
+                className="btn btn-sm btn-primary btn-desktop-only min-h-[44px] rounded-xl bg-[#5E2750] text-white px-4 font-semibold"
                 onClick={() => navigate('onb-register')}
               >
                 <span>Create Account</span>
@@ -340,11 +317,11 @@ export const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="mobile-menu-btn"
+            className="mobile-menu-btn w-11 h-11 rounded-xl"
             aria-label="Open navigation menu"
             onClick={() => setIsDrawerOpen(true)}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="24" height="24">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="22" height="22">
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>
