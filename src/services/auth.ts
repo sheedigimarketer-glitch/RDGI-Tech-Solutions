@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-const url = import.meta.env.VITE_SUPABASE_URL;
-const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
-export const supabase = url && key && !url.includes('placeholder') && !key.includes('dummy')
-  ? createClient(url, key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }) : null;
+// Public client configuration is pinned to the verified HerSpace project.
+// Existing hosting environment values may be malformed; never let them crash app startup.
+const url = 'https://tzbkjvvkhxxobqsbtsdq.supabase.co';
+const key = 'sb_publishable__xiHD48MLs4E3qokCYlBRQ_BVxegOCk';
+export const supabase = createClient(url, key, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
 export function requireClient() {
   if (!supabase) throw new Error('Account service is not configured. Please contact HerSpace support.');
   return supabase;
