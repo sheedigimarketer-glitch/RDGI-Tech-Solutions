@@ -18,3 +18,13 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 Thumbs.db
+
+# Build output and local secrets
+dist/
+.env
+.env.local
+.env.*.local
+
+# Local development symlink and Supabase CLI cache
+/node_modules
+supabase/.temp/

@@ -499,6 +499,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Route Navigation Guard
   const navigate = (requestedRoute: string) => {
     let target = requestedRoute;
+    if (requestedRoute === 'admin') { window.location.assign('/admin/login'); return; }
     if (requestedRoute === 'onb-register') {
       if (user) target = onboarding.completed ? 'space' : 'onb-tour';
     } else if (requestedRoute === 'signin') {
