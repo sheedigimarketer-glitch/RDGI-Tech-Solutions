@@ -242,7 +242,7 @@ export const Header: React.FC = () => {
           </nav>
         )}
 
-        <div className="nav-actions flex items-center gap-2 shrink-0">
+        <div className="nav-actions flex items-center gap-2.5 shrink-0">
           {/* Notification Bell */}
           <button
             className="header-icon-btn w-11 h-11 rounded-xl flex items-center justify-center"
@@ -263,7 +263,7 @@ export const Header: React.FC = () => {
             onClick={() => setIsCrisisModalOpen(true)}
             aria-label="24/7 Crisis Helpline"
             title="24/7 Crisis Helpline"
-            className="min-h-[44px] px-3 py-2 rounded-xl border border-red-200 bg-red-50/90 hover:bg-red-100/80 text-red-700 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-colors"
+            className="min-h-[40px] px-3 py-1.5 rounded-full border border-red-200 bg-red-50/90 hover:bg-red-100/80 text-red-700 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-colors"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
@@ -271,49 +271,35 @@ export const Header: React.FC = () => {
             <span>{lang === 'en' ? 'Helpline' : 'உதவி எண்'}</span>
           </button>
 
-          {/* Language Switcher */}
+          {/* Dongle / Theme / Language Mode Toggle Button (Always Visible) */}
           <button
-            className="lang-toggle-btn min-h-[44px] px-3 py-2 rounded-xl"
-            id="headerLangSwitchBtn"
+            id="dongle-toggle"
+            type="button"
             onClick={toggleLanguage}
-            aria-label="Switch Language"
+            aria-label="Toggle Mode"
+            className="px-4 py-2 text-xs sm:text-sm font-medium bg-[#5E2750] text-white rounded-full shadow-sm hover:bg-[#4c1f40] transition-all active:scale-95 cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="2" y1="12" x2="22" y2="12"></line>
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
             </svg>
-            <span>{lang === 'en' ? 'தமிழ்' : 'EN'}</span>
+            <span>{lang === 'en' ? 'தமிழ் / Mode' : 'EN / Mode'}</span>
           </button>
 
           {user ? (
             <>
               <button
-                className="btn btn-sm btn-secondary btn-desktop-only min-h-[44px] px-3.5 rounded-xl text-xs font-semibold text-[#5E2750]"
+                className="btn btn-sm btn-secondary btn-desktop-only min-h-[40px] px-3.5 rounded-full text-xs font-semibold text-[#5E2750]"
                 onClick={() => navigate('space')}
               >
                 <span>@{user.username || (user.fullName ? user.fullName.split(' ')[0] : 'Member')}</span>
               </button>
-              <button className="btn btn-sm btn-outline btn-desktop-only min-h-[44px] rounded-xl" onClick={signOut}>
+              <button className="btn btn-sm btn-outline btn-desktop-only min-h-[40px] rounded-full" onClick={signOut}>
                 {t('navSignOut')}
               </button>
             </>
-          ) : (
-            <>
-              <button
-                className="btn btn-sm btn-ghost btn-desktop-only min-h-[44px] rounded-xl"
-                onClick={() => navigate('signin')}
-              >
-                <span>{t('btnSignInShort')}</span>
-              </button>
-              <button
-                className="btn btn-sm btn-primary btn-desktop-only min-h-[44px] rounded-xl bg-[#5E2750] text-white px-4 font-semibold"
-                onClick={() => navigate('onb-register')}
-              >
-                <span>Create Account</span>
-              </button>
-            </>
-          )}
+          ) : null}
 
           {/* Mobile Menu Button */}
           <button

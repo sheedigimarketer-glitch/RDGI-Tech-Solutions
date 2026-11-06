@@ -149,14 +149,14 @@ export const HeroAuthCard: React.FC = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
-        {/* Username / Anonymous Handle Input */}
-        <div>
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        {/* Username / Email / Anonymous Handle Input */}
+        <div className="space-y-1">
           <label
             htmlFor="heroUsername"
-            className="block text-xs font-medium text-slate-700 mb-1"
+            className="block text-xs font-semibold text-slate-700"
           >
-            Username / Anonymous Handle
+            Username / Email or Anonymous Handle
           </label>
           <input
             id="heroUsername"
@@ -167,16 +167,16 @@ export const HeroAuthCard: React.FC = () => {
               setUsername(e.target.value);
               if (error) setError(null);
             }}
-            placeholder="Choose an anonymous handle, e.g., Maya_92"
-            className="w-full min-h-[44px] px-3.5 py-2 text-sm rounded-xl border border-slate-300/80 bg-white/95 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#5E2750] focus:ring-2 focus:ring-[#5E2750]/15 transition-colors"
+            placeholder="Maya_92 or name@example.com"
+            className="w-full min-h-[44px] px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5E2750] transition-colors"
           />
         </div>
 
         {/* Password Input with 44x44pt Eye Visibility Toggle */}
-        <div>
+        <div className="space-y-1">
           <label
             htmlFor="heroPassword"
-            className="block text-xs font-medium text-slate-700 mb-1"
+            className="block text-xs font-semibold text-slate-700"
           >
             Password
           </label>
@@ -189,14 +189,14 @@ export const HeroAuthCard: React.FC = () => {
                 setPassword(e.target.value);
                 if (error) setError(null);
               }}
-              placeholder="Enter password"
-              className="w-full min-h-[44px] pl-3.5 pr-11 py-2 text-sm rounded-xl border border-slate-300/80 bg-white/95 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#5E2750] focus:ring-2 focus:ring-[#5E2750]/15 transition-colors"
+              placeholder="••••••••"
+              className="w-full min-h-[44px] pl-3 pr-11 py-2 text-sm rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5E2750] transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
-              className="absolute right-0 w-11 h-11 flex items-center justify-center text-slate-500 hover:text-slate-800 cursor-pointer rounded-r-xl"
+              className="absolute right-0 w-11 h-11 flex items-center justify-center text-slate-500 hover:text-slate-800 cursor-pointer rounded-r-lg"
             >
               {showPassword ? (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -217,15 +217,19 @@ export const HeroAuthCard: React.FC = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full min-h-[44px] mt-1 px-4 py-2.5 rounded-xl bg-[#5E2750] hover:bg-[#4c1f40] active:scale-[0.98] disabled:opacity-70 text-white text-sm font-semibold transition-all cursor-pointer flex items-center justify-center whitespace-nowrap"
+          className="w-full min-h-[44px] py-2.5 bg-[#5E2750] hover:bg-[#4c1f40] active:scale-[0.98] disabled:opacity-70 text-white font-medium text-sm rounded-lg transition-colors shadow-md cursor-pointer flex items-center justify-center whitespace-nowrap"
         >
-          {isSubmitting ? 'Securing Session...' : 'Enter Safe Space →'}
+          {isSubmitting
+            ? 'Securing Session...'
+            : mode === 'signin'
+            ? 'Sign In →'
+            : 'Enter Safe Space →'}
         </button>
       </form>
 
       {/* Reassuring Privacy Label */}
-      <div className="text-xs text-slate-500 text-center mt-3">
-        100% Anonymous & Confidential · 18+
+      <div className="text-xs text-slate-500 text-center pt-1">
+        100% Anonymous & Confidential · 18+ Only
       </div>
     </div>
   );
