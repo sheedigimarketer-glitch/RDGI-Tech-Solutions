@@ -66,7 +66,7 @@ export const AdminPortal: React.FC = () => {
     try {await work();} catch(err:any) {setError(err.message || 'Please try again.');} finally {setBusy(false);}
   };
   const logout=()=>action(async()=>{await signOutAdmin();setOverview(null);setStage('signin');});
-  const logo=<a href="/" className="admin-brand" aria-label="HerSpace home"><span className="admin-petal" aria-hidden="true">✦</span>HerSpace</a>;
+  const logo=<a href="/" className="admin-brand" aria-label="HerSpace home"><img src="/logo.png" alt="HerSpace Logo" /></a>;
   if(stage === 'dashboard' && overview) return <div className="admin-shell">
     <aside className="admin-sidebar">{logo}<p className="admin-eyebrow">ADMIN WORKSPACE</p><nav aria-label="Admin navigation"><button aria-current={tab==='overview'?'page':undefined} onClick={()=>setTab('overview')}>Overview</button><button aria-current={tab==='members'?'page':undefined} onClick={()=>setTab('members')}>Members</button></nav><div className="admin-sidebar-foot">Private staff workspace<button onClick={logout} disabled={busy}>Sign out</button></div></aside>
     <main className="admin-dashboard"><header className="admin-dashboard-head"><div><p className="admin-eyebrow">HERSPACE ADMIN</p><h1>{tab==='overview'?'Your care workspace':'Members'}</h1><p>Manage your platform with care and confidence.</p></div><button className="admin-secondary" onClick={()=>action(refresh)} disabled={busy}>Refresh</button></header>
