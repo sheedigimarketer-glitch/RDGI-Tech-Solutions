@@ -26,7 +26,7 @@ it('ignores an account load that completes after sign-out',async()=>{
   await act(async()=>{mocks.callback('SIGNED_IN',{user:{id:'alice'}});});
   await waitFor(()=>expect(mocks.loadAccount).toHaveBeenCalled());
   await act(async()=>{mocks.callback('SIGNED_OUT',null);});
-  await act(async()=>{finish({user:{id:'alice'},entitlement:{trialEndsAt:'2027-02-06'}});});
+  await act(async()=>{finish({user:{id:'alice'},entitlement:{trialEndsAt:'2026-11-13'}});});
   expect(screen.getByTestId('identity').textContent).toBe('signed-out');
   expect(screen.getByTestId('trial').textContent).toBe('none');
 });

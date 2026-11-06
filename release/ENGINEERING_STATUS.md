@@ -6,6 +6,7 @@ Status: IMPLEMENTED AND LOCALLY TESTED; NOT DEPLOYED; NOT READY FOR PUBLIC RELEA
 
 - Member login uses a username and password.
 - Registration requires a private recovery email.
+- Membership free trial is 7 days, confirmed by the product owner on 7 November 2026 (IST). This supersedes the earlier 3-month trial.
 - The email is not returned by the public username-login endpoint or put in a public directory.
 - Email confirmation must remain enabled in Supabase; verify the actual project setting before release.
 - Source audit used the uploaded RDGI-Tech-Solutions-main.zip. Connected backend: HerSpace-RDGI, ref tzbkjvvkhxxobqsbtsdq.
@@ -24,7 +25,7 @@ The active entry point is index.html → src/main.tsx → React AppProvider. The
 | Session trust | Auth events + getUser verification; no authentication from legacy localStorage objects | LOCALLY TESTED | Live token expiry/recovery/device tests |
 | Profiles | Own profile read from member_profiles | IMPLEMENTED / LOCALLY TESTED (database access boundary) | Profile editing; server-persisted onboarding progress |
 | Membership | Read-only server entitlements; browser payment simulation disabled | PARTIAL | Reconcile pricing text; real payment webhook/mandate handling; abuse and repeat-trial policy |
-| Trial | Trigger prepares 3 calendar months and a separate 7-day welcome-call expiry | LOCALLY TESTED | Confirm current pricing before release: source UI advertises 7 days and an initial 60-day paid offer, unlike earlier approved rules |
+| Trial | Product owner confirmed 7 days; trigger creates a 7-day membership trial and a separate 7-day welcome-call expiry | IMPLEMENTED / LOCALLY TESTED | Hosted verification pending; the initial 60-day paid offer still requires confirmation |
 | Bookings | Still browser state + static professionals/slots | NOT INTEGRATED | Real availability, atomic reservations, complimentary-use consumption, rescheduling/no-show rules and RLS |
 | Professionals | Static directory and local applications | NOT INTEGRATED | Documents, protected uploads, verification and server-owned roles |
 | Admin | Browser PIN route disabled | BLOCKED FOR PUBLIC USE | Staff authentication, server-owned RBAC and audited administration |
@@ -54,7 +55,7 @@ Use npm ci, npm run test:auth, npm run build. Test report: 27 tests across servi
 
 ## Release-blocking caveats
 
-No real email was sent in testing, and no production account was created. Confirm the client-approved pricing rules, SMTP setup, redirect URL allowlist and exact frontend origin before a live auth test. Configure platform-level signup and IP abuse protection; the prepared endpoint currently has an atomic per-handle throttle only, which can lock a targeted username and does not replace perimeter protections. Existing Auth users without username mappings are not migrated automatically. Check whether any such accounts need onboarding. Recovery emails must remain private, but this does not make accounts anonymous to the service operator. No public launch until remaining critical workflows and recovery/security tests pass.
+No real email was sent in testing, and no production account was created. Confirm the paid pricing rules, SMTP setup, redirect URL allowlist and exact frontend origin before a live auth test. Configure platform-level signup and IP abuse protection; the prepared endpoint currently has an atomic per-handle throttle only, which can lock a targeted username and does not replace perimeter protections. Existing Auth users without username mappings are not migrated automatically. Check whether any such accounts need onboarding. Recovery emails must remain private, but this does not make accounts anonymous to the service operator. No public launch until remaining critical workflows and recovery/security tests pass.
 
 ## Next input needed
 

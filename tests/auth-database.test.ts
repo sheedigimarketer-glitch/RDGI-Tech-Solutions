@@ -16,8 +16,8 @@ beforeAll(async () => {
   for (const [id,name] of [[alice,'alice'],[bob,'bob']]) await db.query(`insert into auth.users(id,email,raw_user_meta_data,created_at) values ($1,$2,$3,'2026-11-06T10:00:00Z')`,[id,name+'@example.com',JSON.stringify({username:name,age:24,identity:'woman',terms_accepted:true})]);
 }, 30000);
 afterAll(() => db.close());
-it('creates an atomic username, member profile and exactly three calendar months of trial',async()=>{
-  const {rows}=await db.query(`select p.username,e.trial_ends_at='2027-02-06T10:00:00Z'::timestamptz as correct_trial,e.welcome_call_expires_at='2026-11-13T10:00:00Z'::timestamptz as correct_voucher from member_profiles p join member_entitlements e using(user_id) where user_id=$1`,[alice]);
+it('creates an atomic username, member profile and exactly seven days of trial',async()=>{
+  const {rows}=await db.query(`select p.username,e.trial_ends_at='2026-11-13T10:00:00Z'::timestamptz as correct_trial,e.welcome_call_expires_at='2026-11-13T10:00:00Z'::timestamptz as correct_voucher from member_profiles p join member_entitlements e using(user_id) where user_id=$1`,[alice]);
   expect(rows).toEqual([{username:'alice',correct_trial:true,correct_voucher:true}]);
 });
 it('rejects duplicate usernames transactionally',async()=>{

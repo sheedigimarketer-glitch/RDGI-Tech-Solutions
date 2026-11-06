@@ -58,7 +58,7 @@ begin
   insert into public.member_profiles(user_id,full_name,username,eligibility_category)
     values(new.id,handle,handle,case when category='trans_woman' then 'transgender_woman' else 'woman' end);
   insert into public.member_entitlements(user_id,trial_started_at,trial_ends_at,welcome_call_expires_at)
-    values(new.id,new.created_at,new.created_at + interval '3 months',new.created_at + interval '7 days');
+    values(new.id,new.created_at,new.created_at + interval '7 days',new.created_at + interval '7 days');
   return new;
 end;
 $$;
