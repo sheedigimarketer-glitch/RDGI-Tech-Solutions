@@ -29,10 +29,12 @@ import {
   BookStepView,
   SigninView
 } from './views/OnboardingViews';
-import { AdminView } from './views/AdminView';
+import { AdminPortal } from './views/AdminPortal';
 
 export const App: React.FC = () => {
   const { activeRoute, navigate, lang, toggleLanguage, isMaintenanceMode, setIsMaintenanceMode } = useApp();
+
+  if (/^\/admin(?:\/|$)/.test(window.location.pathname)) return <AdminPortal />;
 
   const isOnboardingRoute = [
     'onb-register',
@@ -85,7 +87,7 @@ export const App: React.FC = () => {
       case 'dashboard':
         return <DashboardView />;
       case 'admin':
-        return <AdminView />;
+        return <AdminPortal />;
       case 'policies':
       case 'home':
       default:
