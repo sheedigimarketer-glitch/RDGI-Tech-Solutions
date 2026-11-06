@@ -243,19 +243,49 @@ export const Header: React.FC = () => {
         )}
 
         <div className="nav-actions flex items-center gap-2.5 shrink-0">
-          {/* Notification Bell */}
+          {/* Dongle / Theme / Mode Switcher */}
           <button
-            className="header-icon-btn w-11 h-11 rounded-xl flex items-center justify-center"
-            onClick={() => navigate('dashboard')}
-            aria-label={t('navNotifications')}
-            title={t('navNotifications')}
+            id="dongle-toggle"
+            type="button"
+            onClick={toggleLanguage}
+            aria-label="Toggle Mode"
+            className="px-3 py-1.5 min-h-[38px] text-xs font-medium border border-slate-300 bg-white text-slate-800 rounded-full hover:bg-slate-100 transition-colors cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
             </svg>
-            {notifCount > 0 && <span className="notif-badge">{notifCount}</span>}
+            <span>{lang === 'en' ? 'Toggle · தமிழ்' : 'Toggle · EN'}</span>
           </button>
+
+          {/* Top Line Sign Up Button (Always Visible when signed out) */}
+          {user ? (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate('space')}
+                className="px-4 py-2 min-h-[38px] text-xs sm:text-sm font-semibold bg-[#5E2750] text-white rounded-full shadow-sm hover:bg-[#4c1f40] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+              >
+                @{user.username || (user.fullName ? user.fullName.split(' ')[0] : 'Member')}
+              </button>
+              <button
+                type="button"
+                onClick={signOut}
+                className="btn btn-sm btn-outline btn-desktop-only min-h-[38px] rounded-full text-xs"
+              >
+                {t('navSignOut')}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => navigate('onb-register')}
+              className="px-4 py-2 min-h-[38px] text-xs sm:text-sm font-semibold bg-[#5E2750] text-white rounded-full shadow-sm hover:bg-[#4c1f40] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+            >
+              {lang === 'en' ? 'Sign Up' : 'பதிவு செய்க'}
+            </button>
+          )}
 
           {/* Crisis Helpline Shortcut */}
           <button
@@ -263,47 +293,17 @@ export const Header: React.FC = () => {
             onClick={() => setIsCrisisModalOpen(true)}
             aria-label="24/7 Crisis Helpline"
             title="24/7 Crisis Helpline"
-            className="min-h-[40px] px-3 py-1.5 rounded-full border border-red-200 bg-red-50/90 hover:bg-red-100/80 text-red-700 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-colors"
+            className="hidden sm:inline-flex min-h-[38px] px-3 py-1.5 rounded-full border border-red-200 bg-red-50/90 hover:bg-red-100/80 text-red-700 text-xs font-semibold items-center gap-1.5 cursor-pointer whitespace-nowrap transition-colors"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
             </svg>
             <span>{lang === 'en' ? 'Helpline' : 'உதவி எண்'}</span>
           </button>
 
-          {/* Dongle / Theme / Language Mode Toggle Button (Always Visible) */}
-          <button
-            id="dongle-toggle"
-            type="button"
-            onClick={toggleLanguage}
-            aria-label="Toggle Mode"
-            className="px-4 py-2 text-xs sm:text-sm font-medium bg-[#5E2750] text-white rounded-full shadow-sm hover:bg-[#4c1f40] transition-all active:scale-95 cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="2" y1="12" x2="22" y2="12"></line>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-            </svg>
-            <span>{lang === 'en' ? 'தமிழ் / Mode' : 'EN / Mode'}</span>
-          </button>
-
-          {user ? (
-            <>
-              <button
-                className="btn btn-sm btn-secondary btn-desktop-only min-h-[40px] px-3.5 rounded-full text-xs font-semibold text-[#5E2750]"
-                onClick={() => navigate('space')}
-              >
-                <span>@{user.username || (user.fullName ? user.fullName.split(' ')[0] : 'Member')}</span>
-              </button>
-              <button className="btn btn-sm btn-outline btn-desktop-only min-h-[40px] rounded-full" onClick={signOut}>
-                {t('navSignOut')}
-              </button>
-            </>
-          ) : null}
-
           {/* Mobile Menu Button */}
           <button
-            className="mobile-menu-btn w-11 h-11 rounded-xl"
+            className="mobile-menu-btn w-10 h-10 rounded-xl"
             aria-label="Open navigation menu"
             onClick={() => setIsDrawerOpen(true)}
           >
