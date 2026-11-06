@@ -47,7 +47,7 @@ export const PolicyModal: React.FC = () => {
     title = isTa ? 'தனியுரிமை & இருவழி எண் மறைப்பு பாதுகாப்பு' : 'Privacy & 2-Way Number Masking Notice';
     content = (
       <div>
-        <p style={{ lineHeight: 1.6 }}>{t('safetyP1')}</p>
+        <p style={{ lineHeight: 1.6 }}>{t('safetyP1')}</p><p>Your recovery email is stored privately in Supabase Auth for account verification and password recovery. It is not displayed in member or professional directories.</p>
         <ul style={{ paddingLeft: '20px', lineHeight: 1.8, margin: '14px 0', fontSize: '0.9rem' }}>
           <li><strong>2-Way Masked Telephone Bridge:</strong> Neither members nor professionals can view each other's real mobile numbers.</li>
           <li><strong>Zero Health Disclosure:</strong> Period logs (My Cycle) and private wellbeing questions are strictly isolated to your device.</li>

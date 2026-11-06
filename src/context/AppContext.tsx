@@ -1,3 +1,4 @@
+import { supabase, requireClient, loginAccount, registerAccount, loadAccount } from '../services/auth';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
   Language,
@@ -58,7 +59,10 @@ interface AppContextType {
   anonymousAuth: (data: {
     username: string;
     password?: string;
-    phone?: string;
+    email?: string;
+    age?: number;
+    identity?: 'woman' | 'trans_woman';
+    agreeTerms?: boolean;
     mode: 'register' | 'signin';
   }) => Promise<void>;
   signOut: () => void;
@@ -258,24 +262,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // User State
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const saved = localStorage.getItem('herspace_user');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [entitlement, setEntitlement] = useState<Entitlement | null>(() => {
-    try {
-      const saved = localStorage.getItem('herspace_entitlement');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
-
+  const [user, setUser] = useState<User | null>(null);
+  const [entitlement, setEntitlement] = useState<Entitlement | null>(null);
   const [onboarding, setOnboarding] = useState<OnboardingState>(() => {
     try {
       const saved = localStorage.getItem('herspace_onboarding');
@@ -311,14 +299,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('all');
   const [activeRoleFilter, setActiveRoleFilter] = useState<string>('all');
 
-  const [appointments, setAppointments] = useState<Appointment[]>(() => {
-    try {
-      const saved = localStorage.getItem('herspace_appointments');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   const [cycle, setCycle] = useState<{
     optInConsent: boolean;
@@ -428,32 +409,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Telephony state
   const [telephonySession, setTelephonySession] = useState<TelephonySession | null>(null);
 
-  // Persistence helpers
-  useEffect(() => {
-    try {
-      if (user) localStorage.setItem('herspace_user', JSON.stringify(user));
-      else localStorage.removeItem('herspace_user');
-    } catch {}
-  }, [user]);
-
-  useEffect(() => {
-    try {
-      if (entitlement) localStorage.setItem('herspace_entitlement', JSON.stringify(entitlement));
-      else localStorage.removeItem('herspace_entitlement');
-    } catch {}
-  }, [entitlement]);
-
+  // On-device preferences only; authentication comes from Supabase.
   useEffect(() => {
     try {
       localStorage.setItem('herspace_onboarding', JSON.stringify(onboarding));
     } catch {}
   }, [onboarding]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('herspace_appointments', JSON.stringify(appointments));
-    } catch {}
-  }, [appointments]);
+
 
   // Zero-Knowledge Encrypted Health Data Persistence
   useEffect(() => {
@@ -499,6 +462,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Route Navigation Guard
   const navigate = (requestedRoute: string) => {
     let target = requestedRoute;
+    if (requestedRoute === 'admin') { addToast('Staff access is not enabled in this release.', 'info'); return; }
     if (requestedRoute === 'onb-register') {
       if (user) target = onboarding.completed ? 'space' : 'onb-tour';
     } else if (requestedRoute === 'signin') {
@@ -511,231 +475,76 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Auth Operations
-  const [latestGeneratedOtp, setLatestGeneratedOtp] = useState<string>('849201');
-
-  const sendPhoneOtp = (phone: string) => {
-    const clean = phone.replace(/\D/g, '');
-    if (clean.length < 10) {
-      throw new Error(isTa ? 'தயவுசெய்து சரியான 10-இலக்க மொபைல் எண்ணை உள்ளிடவும்.' : 'Please enter a valid 10-digit mobile number.');
-    }
-    const { demoOtp } = issueSecureOtp(clean);
-    setLatestGeneratedOtp(demoOtp);
-    addToast(
-      isTa
-        ? `பாதுகாப்பான OTP குறியீடு: ${demoOtp} (10 நிமிடங்கள் செல்லுபடியாகும், ஒற்றைப் பயன்பாடு)`
-        : `Cryptographic OTP generated: ${demoOtp} (Single-use, 10-minute expiry)`,
-      'info'
-    );
-    return {
-      success: true,
-      formattedPhone: '+91 ' + clean.slice(-10),
-      demoOtp
-    };
-  };
-
-  const verifyOtpAndRegister = async (data: {
-    phone: string;
-    otp: string;
-    fullName: string;
-    email?: string;
-    age: number;
-    identity: 'woman' | 'trans_woman';
-    agreeTerms: boolean;
-    autoRenew?: boolean;
-  }) => {
-    if (data.age < 18) {
-      throw new Error(isTa ? '18 வயதுக்கு மேற்பட்ட பெண்களுக்கு மட்டுமே உரியது.' : 'HerSpace is strictly for women and transgender women aged 18+.');
-    }
-    if (!data.agreeTerms) {
-      throw new Error(isTa ? 'விதிமுறைகளை ஏற்க வேண்டும்.' : 'You must accept the Terms and Privacy Policy to proceed.');
-    }
-
-    // Enforce cryptographic verification with single-use consumption and brute-force lockout
-    await verifySecureOtp(data.phone, data.otp);
-
-    const cleanDigits = data.phone.replace(/\D/g, '').slice(-10);
-    const cleanPhone = '+91 ' + cleanDigits;
-    const regKey = 'herspace_reg_' + cleanDigits;
-    const isExisting = localStorage.getItem(regKey);
-
-    const now = new Date();
-    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days free trial
-    const welcomeCallEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
-
-    let ent: Entitlement;
-    if (isExisting) {
-      ent = {
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: trialEnd.toISOString(),
-        welcomeCallExpiresAt: welcomeCallEnd.toISOString(),
-        welcomeCallStatus: 'expired',
-        paidThrough: null,
-        autoRenew: false,
-        isReturning: true
-      };
-      addToast(isTa ? 'மீண்டும் வருக! ஏற்கனவே பதிவு செய்யப்பட்ட கணக்கு.' : 'Welcome back! Restored existing account.', 'info');
-    } else {
-      ent = {
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: trialEnd.toISOString(),
-        welcomeCallExpiresAt: welcomeCallEnd.toISOString(),
-        welcomeCallStatus: 'available',
-        paidThrough: null,
-        autoRenew: data.autoRenew ?? false,
-        isReturning: false
-      };
-      localStorage.setItem(regKey, JSON.stringify(ent));
-      addToast(isTa ? '7 நாள் இலவச சோதனை மற்றும் 1 இலவச அமர்வு துவங்கியது!' : '🎉 7-day free trial & 1 complimentary 30-min session active!', 'success');
-    }
-
-    const cleanFullName = sanitizeInput(data.fullName, 80);
-    const cleanEmail = sanitizeInput(data.email || '', 100);
-
-    const newUser: User = {
-      id: generateSecureId('usr', 8),
-      fullName: cleanFullName || 'HerSpace Member',
-      phone: cleanPhone,
-      email: cleanEmail,
-      age: data.age,
-      identity: data.identity,
-      role: 'member',
-      createdAt: now.toISOString()
-    };
-
-    setUser(newUser);
-    setEntitlement(ent);
-    setOnboarding(prev => ({
-      ...prev,
-      step: 'tour',
-      completed: false
-    }));
-    navigate('onb-tour');
-  };
-
-  const verifyOtpAndSignIn = async (phone: string, otp: string) => {
-    // Enforce cryptographic verification with single-use consumption and brute-force lockout
-    await verifySecureOtp(phone, otp);
-
-    const cleanDigits = phone.replace(/\D/g, '').slice(-10);
-    const cleanPhone = '+91 ' + cleanDigits;
-    const now = new Date();
-
-    const signedUser: User = user || {
-      id: generateSecureId('usr', 8),
-      fullName: 'HerSpace Member',
-      phone: cleanPhone,
-      email: '',
-      age: 24,
-      identity: 'woman',
-      role: 'member',
-      createdAt: now.toISOString()
-    };
-
-    setUser(signedUser);
-    if (!entitlement) {
-      setEntitlement({
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        welcomeCallExpiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        welcomeCallStatus: 'available',
-        paidThrough: null,
-        autoRenew: false,
-        isReturning: false
-      });
-    }
-
-    addToast(isTa ? 'வெற்றிகரமாக உள்நுழைந்துள்ளீர்கள்!' : 'Signed in successfully!', 'success');
-    navigate('space');
-  };
-
-  const anonymousAuth = async (data: {
-    username: string;
-    password?: string;
-    phone?: string;
-    mode: 'register' | 'signin';
-  }) => {
-    const cleanUsername = sanitizeInput(data.username, 32);
-    if (!cleanUsername || cleanUsername.length < 3) {
-      throw new Error(isTa ? 'தயவுசெய்து குறைந்தது 3 எழுத்துக்களைக் கொண்ட புனைப்பெயரை உள்ளிடவும்.' : 'Please choose an anonymous handle with at least 3 characters (e.g. Maya_92).');
-    }
-
-    const now = new Date();
-    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const welcomeCallEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-    const cleanDigits = (data.phone || '9840199999').replace(/\D/g, '').slice(-10);
-    const cleanPhone = '+91 ' + (cleanDigits.length === 10 ? cleanDigits : '9840199999');
-
-    const authUser: User = {
-      id: generateSecureId('usr', 8),
-      username: cleanUsername,
-      fullName: cleanUsername,
-      phone: cleanPhone,
-      email: `${cleanUsername.toLowerCase().replace(/[^a-z0-9]/g, '')}@safe.herspace.local`,
-      age: 24,
-      identity: 'woman',
-      role: 'member',
-      isAuthenticated: true,
-      createdAt: now.toISOString()
-    };
-
-    const ent: Entitlement = entitlement || {
-      trialStartedAt: now.toISOString(),
-      trialEndsAt: trialEnd.toISOString(),
-      welcomeCallExpiresAt: welcomeCallEnd.toISOString(),
-      welcomeCallStatus: 'available',
-      paidThrough: null,
-      autoRenew: false,
-      isReturning: data.mode === 'signin'
-    };
-
-    setUser(authUser);
-    setEntitlement(ent);
-    setOnboarding({
-      step: 'book',
-      tourSeen: true,
-      tourSkipped: true,
-      completed: true,
-      completedAt: now.toISOString(),
-      tourReplay: false
-    });
-
+  // Auth is verified by Supabase; legacy browser objects never establish identity.
+  useEffect(() => {
     try {
-      localStorage.setItem('herspace_user', JSON.stringify(authUser));
-      localStorage.setItem('herspace_entitlement', JSON.stringify(ent));
-      localStorage.setItem('herspace_onboarding', JSON.stringify({
-        step: 'book',
-        tourSeen: true,
-        tourSkipped: true,
-        completed: true,
-        completedAt: now.toISOString(),
-        tourReplay: false
-      }));
+      localStorage.removeItem('herspace_user');
+      localStorage.removeItem('herspace_entitlement');
+      const legacyAppointments = localStorage.getItem('herspace_appointments');
+      if (legacyAppointments && legacyAppointments !== '[]') localStorage.setItem('herspace_legacy_appointments_unverified', legacyAppointments);
+      localStorage.removeItem('herspace_appointments');
     } catch {}
-
-    addToast(
-      data.mode === 'register'
-        ? (isTa ? `வரவேற்கிறோம் @${cleanUsername}! உங்கள் பாதுகாப்பான தளம் திறக்கப்பட்டது.` : `Welcome to HerSpace, @${cleanUsername}! Your safe space is unlocked.`)
-        : (isTa ? `மீண்டும் வருக @${cleanUsername}!` : `Welcome back, @${cleanUsername}! Access granted.`),
-      'success'
-    );
-    navigate('space');
-  };
-
-  const signOut = () => {
-    setUser(null);
-    setEntitlement(null);
-    setOnboarding({
-      step: 'register',
-      tourSeen: false,
-      tourSkipped: false,
-      completed: false,
-      completedAt: null,
-      tourReplay: false
+    if (!supabase) return;
+    let disposed = false;
+    let revision = 0;
+    const synchronize = async (session: any) => {
+      const current = ++revision;
+      setUser(null);
+      setEntitlement(null);
+      setAppointments([]);
+      if (!session) return;
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (error || !data.user || data.user.id !== session.user.id) throw new Error('Session expired. Please sign in again.');
+        const account = await loadAccount(data.user);
+        if (disposed || current !== revision) return;
+        setUser(account.user);
+        setEntitlement(account.entitlement);
+      } catch (error: any) {
+        if (!disposed && current === revision) addToast(error.message, 'error');
+      }
+    };
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') setActiveRoute('reset-password');
+      // Do not call Supabase methods while its auth callback holds the lock.
+      queueMicrotask(() => { if (!disposed) void synchronize(session); });
     });
-    addToast(isTa ? 'கணக்கிலிருந்து வெளியேறிவிட்டீர்கள்.' : 'Signed out safely.', 'info');
-    navigate('home');
+    return () => { disposed = true; revision++; listener.subscription.unsubscribe(); };
+  }, []);
+
+  const sendPhoneOtp = (_phone: string): { success: boolean; formattedPhone: string; demoOtp: string } => {
+    throw new Error('Please use username and password registration. Mobile OTP sign-in is no longer available.');
+  };
+  const verifyOtpAndRegister = async (_data: any) => { throw new Error('Use username and password registration.'); };
+  const verifyOtpAndSignIn = async (_phone: string, _otp: string) => { throw new Error('Use username and password sign-in.'); };
+  const anonymousAuth = async (data: {
+    username: string; password?: string; email?: string; age?: number;
+    identity?: 'woman' | 'trans_woman'; agreeTerms?: boolean; mode: 'register' | 'signin';
+  }) => {
+    if (data.mode === 'register') {
+      await registerAccount({ username: data.username, password: data.password || '', email: data.email || '', age: data.age || 0, identity: data.identity || '', agreeTerms: data.agreeTerms === true });
+      addToast('Check your private email to verify your account before signing in.', 'info');
+    } else {
+      await loginAccount(data.username, data.password || '');
+      const { data: result, error } = await requireClient().auth.getUser();
+      if (error || !result.user) throw new Error('Unable to verify your session.');
+      const account = await loadAccount(result.user);
+      setUser(account.user);
+      setEntitlement(account.entitlement);
+      setActiveRoute('space');
+    }
+  };
+  const signOut = () => {
+    void (async () => {
+      try {
+        const { error } = await requireClient().auth.signOut();
+        if (error) throw error;
+        setUser(null); setEntitlement(null); setAppointments([]);
+        setOnboarding({ step: 'register', tourSeen: false, tourSkipped: false, completed: false, completedAt: null, tourReplay: false });
+        setActiveRoute('home');
+        addToast('Signed out safely.', 'info');
+      } catch { addToast('Sign-out could not be completed. Please try again.', 'error'); }
+    })();
   };
 
   const updateOnboardingStep = (step: 'register' | 'tour' | 'membership' | 'book', markComplete: boolean = false) => {
@@ -1192,72 +1001,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
-  const simulateSubscription = (type: 'trial' | 'promo60' | 'monthly' | 'cancel') => {
-    const now = new Date();
-    if (type === 'trial') {
-      const trialEnd = new Date(now.getTime() + 7 * 86400000).toISOString();
-      setEntitlement({
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: trialEnd,
-        welcomeCallExpiresAt: trialEnd,
-        welcomeCallStatus: 'available',
-        paidThrough: null,
-        autoRenew: true,
-        isReturning: false
-      });
-      setBillingStats(prev => {
-        const updated = { ...prev, activeTrials: prev.activeTrials + 1 };
-        try { localStorage.setItem('herspace_billing_stats', JSON.stringify(updated)); } catch {}
-        return updated;
-      });
-      addToast('Simulated Webhook: Activated 7-Day Free Trial (@ ₹0) with 1 complimentary call.', 'success');
-    } else if (type === 'promo60') {
-      const promoEnd = new Date(now.getTime() + 60 * 86400000).toISOString();
-      setEntitlement({
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: now.toISOString(),
-        welcomeCallExpiresAt: promoEnd,
-        welcomeCallStatus: 'available',
-        paidThrough: promoEnd,
-        autoRenew: true,
-        isReturning: false
-      });
-      setBillingStats(prev => {
-        const updated = { ...prev, activePromo60: prev.activePromo60 + 1 };
-        try { localStorage.setItem('herspace_billing_stats', JSON.stringify(updated)); } catch {}
-        return updated;
-      });
-      addToast('Simulated Webhook: Paid ₹149 for 60 Days validity successfully applied.', 'success');
-    } else if (type === 'monthly') {
-      const renewEnd = new Date(now.getTime() + 30 * 86400000).toISOString();
-      setEntitlement({
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: now.toISOString(),
-        welcomeCallExpiresAt: renewEnd,
-        welcomeCallStatus: 'used',
-        paidThrough: renewEnd,
-        autoRenew: true,
-        isReturning: true
-      });
-      setBillingStats(prev => {
-        const updated = { ...prev, monthlyAutoRenewals: prev.monthlyAutoRenewals + 1 };
-        try { localStorage.setItem('herspace_billing_stats', JSON.stringify(updated)); } catch {}
-        return updated;
-      });
-      addToast('Simulated Webhook: Monthly auto-renewal processed (@ ₹149/mo).', 'success');
-    } else if (type === 'cancel') {
-      setEntitlement({
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: now.toISOString(),
-        welcomeCallExpiresAt: now.toISOString(),
-        welcomeCallStatus: 'expired',
-        paidThrough: null,
-        autoRenew: false,
-        isReturning: false
-      });
-      addToast('Simulated Webhook: Membership canceled. Access reverted to non-member tier.', 'warning');
-    }
+  const simulateSubscription = (_type: 'trial' | 'promo60' | 'monthly' | 'cancel') => {
+    addToast('Payments are not yet enabled. No charge or membership change was made.', 'info');
   };
+
 
   // Policies Modal
   const openPolicyModal = (type: 'privacy' | 'terms' | 'cancellation') => {

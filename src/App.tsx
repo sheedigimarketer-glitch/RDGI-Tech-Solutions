@@ -1,3 +1,5 @@
+import { HeroAuthCard } from './components/HeroAuthCard';
+import { PasswordRecovery } from './components/PasswordRecovery';
 import React from 'react';
 import { useApp } from './context/AppContext';
 import { CrisisBanner } from './components/CrisisBanner';
@@ -29,7 +31,7 @@ import {
   BookStepView,
   SigninView
 } from './views/OnboardingViews';
-import { AdminView } from './views/AdminView';
+
 
 export const App: React.FC = () => {
   const { activeRoute, navigate, lang, toggleLanguage, isMaintenanceMode, setIsMaintenanceMode } = useApp();
@@ -55,7 +57,7 @@ export const App: React.FC = () => {
   const renderMainView = () => {
     switch (activeRoute) {
       case 'onb-register':
-        return <RegisterView />;
+        return <div className="flex justify-center py-10"><HeroAuthCard /></div>;
       case 'onb-tour':
         return <TourView />;
       case 'onb-membership':
@@ -63,7 +65,9 @@ export const App: React.FC = () => {
       case 'onb-book':
         return <BookStepView />;
       case 'signin':
-        return <SigninView />;
+        return <div className="flex justify-center py-10"><HeroAuthCard initialMode="signin" /></div>;
+      case 'reset-password':
+        return <PasswordRecovery />;
       case 'space':
         return <PersonalSpaceView />;
       case 'support':
@@ -85,7 +89,7 @@ export const App: React.FC = () => {
       case 'dashboard':
         return <DashboardView />;
       case 'admin':
-        return <AdminView />;
+        return <p className="p-6">Staff access is not enabled in this release.</p>;
       case 'policies':
       case 'home':
       default:
