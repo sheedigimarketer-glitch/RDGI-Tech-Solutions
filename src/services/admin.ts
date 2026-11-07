@@ -32,7 +32,9 @@ export async function verifiedFactor(): Promise<string | null> {
 export async function enrollAdminFactor() {
   const { data, error } = await requireClient().auth.mfa.enroll({ factorType: 'totp', friendlyName: 'HerSpace Admin ' + Date.now() });
   if (error) throw new Error('Unable to set up your authenticator. Contact support if you have a pending setup.');
-  return { id: data.id, qr: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(data.totp.qr_code) };
+  // The SDK already adds a data URL prefix. Encode only the SVG payload.
+  const svg = data.totp.qr_code.replace(/^data:image\/svg\+xml;utf-8,/, '');
+  return { id: data.id, qr: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) };
 }
 export async function verifyAdminFactor(factorId: string, code: string) {
   if (!/^\d{6}$/.test(code)) throw new Error('Enter the six-digit code from your authenticator app.');
