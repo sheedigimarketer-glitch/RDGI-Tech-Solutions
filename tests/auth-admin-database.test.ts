@@ -17,6 +17,7 @@ beforeAll(async()=>{
   insert into member_profiles(user_id,full_name) values('${member}','Member Alias');
   insert into member_entitlements values('${member}',now()+interval '7 days',null);`);
   await db.exec(readFileSync('supabase/migrations/20261106190523_admin_portal.sql','utf8'));
+  await db.exec(readFileSync('supabase/migrations/20261107065524_communications_pilot.sql','utf8'));
   await db.query('insert into admin_accounts(user_id) values($1)',[staff]);
 },30000);
 afterAll(()=>db.close());
@@ -54,6 +55,21 @@ it('denies anonymous function execution',async()=>{
  await db.exec('set role anon');
  try{await expect(db.query('select herspace_staff_status()')).rejects.toThrow('permission denied');await expect(db.query('select herspace_admin_overview()')).rejects.toThrow('permission denied');}
  finally{await db.exec('reset role');}
+});
+it('allows a single pilot attempt per channel only for staff with MFA', async () => {
+  const call = "select herspace_reserve_communications_test('call') as allowed";
+  await asUser(member, 'aal2', async () => {
+    await expect(db.query(call)).rejects.toThrow('Admin access required');
+  });
+  await asUser(staff, 'aal1', async () => {
+    await expect(db.query(call)).rejects.toThrow('Admin access required');
+  });
+  await asUser(staff, 'aal2', async () => {
+    expect((await db.query(call)).rows).toEqual([{ allowed: true }]);
+    expect((await db.query(call)).rows).toEqual([{ allowed: false }]);
+    expect((await db.query("select herspace_reserve_communications_test('whatsapp') as allowed")).rows)
+      .toEqual([{ allowed: true }]);
+  });
 });
 it('revokes access immediately when the staff assignment is disabled',async()=>{
  await db.query('update admin_accounts set enabled=false where user_id=$1',[staff]);
