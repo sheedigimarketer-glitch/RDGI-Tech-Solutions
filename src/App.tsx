@@ -9,13 +9,11 @@ import { ToastContainer } from './components/ToastContainer';
 import { BookingModal } from './components/BookingModal';
 import { ExpertProfileModal } from './components/ExpertProfileModal';
 import { MaskedCallModal } from './components/MaskedCallModal';
-import { ProApplyModal } from './components/ProApplyModal';
 import { PolicyModal } from './components/PolicyModal';
 
 import { HomeView } from './views/HomeView';
 import { SupportView } from './views/SupportView';
 import { WellbeingView } from './views/WellbeingView';
-import { CycleView } from './views/CycleView';
 import { CalmView } from './views/CalmView';
 import { SingersView } from './views/SingersView';
 import { DashboardView } from './views/DashboardView';
@@ -73,7 +71,7 @@ export const App: React.FC = () => {
       case 'wellbeing':
         return <WellbeingView />;
       case 'cycle':
-        return <CycleView />;
+        return <RegisterView />;
       case 'calm':
         return <CalmView />;
       case 'singers':
@@ -233,7 +231,6 @@ export const App: React.FC = () => {
       <BookingModal />
       <ExpertProfileModal />
       <MaskedCallModal />
-      <ProApplyModal />
       <PolicyModal />
       <MobileDrawer />
       <ToastContainer />

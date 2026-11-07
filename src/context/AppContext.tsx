@@ -20,14 +20,8 @@ import { calmAudioEngine } from '../data/audioEngine';
 import {
   generateSecureId,
   generateSecureBookingId,
-  generateSecureQueueId,
   generateSecureParkCode,
-  issueSecureOtp,
-  verifySecureOtp,
-  encryptHealthPayload,
-  decryptHealthPayload,
-  sanitizeInput,
-  formatMaskedDisplay
+  sanitizeInput
 } from '../utils/security';
 
 interface AppContextType {
@@ -43,24 +37,6 @@ interface AppContextType {
   activeRoute: string;
   navigate: (route: string) => void;
 
-  sendPhoneOtp: (phone: string) => { success: boolean; formattedPhone: string; demoOtp: string };
-  verifyOtpAndRegister: (data: {
-    phone: string;
-    otp: string;
-    fullName: string;
-    email?: string;
-    age: number;
-    identity: 'woman' | 'trans_woman';
-    agreeTerms: boolean;
-    autoRenew?: boolean;
-  }) => Promise<void>;
-  verifyOtpAndSignIn: (phone: string, otp: string) => Promise<void>;
-  anonymousAuth: (data: {
-    username: string;
-    password?: string;
-    phone?: string;
-    mode: 'register' | 'signin';
-  }) => Promise<void>;
   signOut: () => void;
   updateOnboardingStep: (step: 'register' | 'tour' | 'membership' | 'book', markComplete?: boolean) => void;
 
@@ -258,102 +234,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // User State
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const saved = localStorage.getItem('herspace_user');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
+  const [user, setUser] = useState<User | null>(null);
+  const [entitlement, setEntitlement] = useState<Entitlement | null>(null);
+  const [onboarding, setOnboarding] = useState<OnboardingState>({
+    step: 'register', tourSeen: false, tourSkipped: false,
+    completed: false, completedAt: null, tourReplay: false
   });
-
-  const [entitlement, setEntitlement] = useState<Entitlement | null>(() => {
-    try {
-      const saved = localStorage.getItem('herspace_entitlement');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [onboarding, setOnboarding] = useState<OnboardingState>(() => {
-    try {
-      const saved = localStorage.getItem('herspace_onboarding');
-      return saved
-        ? JSON.parse(saved)
-        : {
-            step: 'register',
-            tourSeen: false,
-            tourSkipped: false,
-            completed: false,
-            completedAt: null,
-            tourReplay: false
-          };
-    } catch {
-      return {
-        step: 'register',
-        tourSeen: false,
-        tourSkipped: false,
-        completed: false,
-        completedAt: null,
-        tourReplay: false
-      };
-    }
-  });
-
-  const [activeRoute, setActiveRoute] = useState<string>(() => {
-    if (user && onboarding.completed) return 'space';
-    return 'home';
-  });
+  const [activeRoute, setActiveRoute] = useState('home');
 
   const [experts, setExperts] = useState<Expert[]>(DEFAULT_EXPERTS);
   const [singers, setSingers] = useState<LiveSinger[]>(LIVE_SINGERS);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('all');
   const [activeRoleFilter, setActiveRoleFilter] = useState<string>('all');
 
-  const [appointments, setAppointments] = useState<Appointment[]>(() => {
-    try {
-      const saved = localStorage.getItem('herspace_appointments');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   const [cycle, setCycle] = useState<{
     optInConsent: boolean;
     logs: CycleLog[];
     remindersEnabled: boolean;
   }>({ optInConsent: false, logs: [], remindersEnabled: false });
-
-  // Zero-Knowledge Decryption of Sensitive Health Logs at Rest
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        const storedEnc = localStorage.getItem('herspace_cycle_enc');
-        const legacyPlain = localStorage.getItem('herspace_cycle');
-        if (storedEnc) {
-          const decrypted = await decryptHealthPayload<{
-            optInConsent: boolean;
-            logs: CycleLog[];
-            remindersEnabled: boolean;
-          }>(storedEnc);
-          if (decrypted && isMounted) setCycle(decrypted);
-        } else if (legacyPlain) {
-          const parsed = JSON.parse(legacyPlain);
-          if (isMounted) setCycle(parsed);
-          // Auto-migrate legacy plaintext to zero-knowledge AES-GCM ciphertext
-          const enc = await encryptHealthPayload(parsed);
-          localStorage.setItem('herspace_cycle_enc', enc);
-          localStorage.removeItem('herspace_cycle');
-        }
-      } catch (err) {
-        console.error('Zero-knowledge payload initialization error:', err);
-      }
-    })();
-    return () => { isMounted = false; };
-  }, []);
 
   const [savedArticleIds, setSavedArticleIds] = useState<string[]>(() => {
     try {
@@ -365,22 +265,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
 
   const [notifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
-  const [proApplications, setProApplications] = useState<ProApplication[]>(() => {
-    try {
-      const saved = localStorage.getItem('herspace_pro_applications');
-      return saved ? JSON.parse(saved) : INITIAL_PRO_APPLICATIONS;
-    } catch {
-      return INITIAL_PRO_APPLICATIONS;
-    }
-  });
+  const [proApplications, setProApplications] = useState<ProApplication[]>([]);
 
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   // Modals state
-  const [bookingModalExpert, setBookingModalExpert] = useState<Expert | LiveSinger | null>(null);
+  const [bookingModalExpert, setBookingModalExpertState] = useState<Expert | LiveSinger | null>(null);
   const [profileModalExpert, setProfileModalExpert] = useState<Expert | null>(null);
   const [isCrisisModalOpen, setIsCrisisModalOpen] = useState(false);
-  const [isProModalOpen, setIsProModalOpen] = useState(false);
+  const isProModalOpen = false;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [policyModalType, setPolicyModalType] = useState<'privacy' | 'terms' | 'cancellation' | null>(null);
 
@@ -428,60 +321,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Telephony state
   const [telephonySession, setTelephonySession] = useState<TelephonySession | null>(null);
 
-  // Persistence helpers
-  useEffect(() => {
-    try {
-      if (user) localStorage.setItem('herspace_user', JSON.stringify(user));
-      else localStorage.removeItem('herspace_user');
-    } catch {}
-  }, [user]);
-
-  useEffect(() => {
-    try {
-      if (entitlement) localStorage.setItem('herspace_entitlement', JSON.stringify(entitlement));
-      else localStorage.removeItem('herspace_entitlement');
-    } catch {}
-  }, [entitlement]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('herspace_onboarding', JSON.stringify(onboarding));
-    } catch {}
-  }, [onboarding]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('herspace_appointments', JSON.stringify(appointments));
-    } catch {}
-  }, [appointments]);
-
-  // Zero-Knowledge Encrypted Health Data Persistence
-  useEffect(() => {
-    (async () => {
-      try {
-        if (cycle.optInConsent || cycle.logs.length > 0) {
-          const enc = await encryptHealthPayload(cycle);
-          localStorage.setItem('herspace_cycle_enc', enc);
-          localStorage.removeItem('herspace_cycle');
-        } else {
-          localStorage.removeItem('herspace_cycle_enc');
-          localStorage.removeItem('herspace_cycle');
-        }
-      } catch {}
-    })();
-  }, [cycle]);
-
   useEffect(() => {
     try {
       localStorage.setItem('herspace_wellbeing_saved', JSON.stringify(savedArticleIds));
     } catch {}
   }, [savedArticleIds]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('herspace_pro_applications', JSON.stringify(proApplications));
-    } catch {}
-  }, [proApplications]);
 
   // Toast Helpers
   const addToast = (message: string, type: Toast['type'] = 'success') => {
@@ -492,6 +336,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, 4500);
   };
 
+  const setBookingModalExpert = (expert: Expert | LiveSinger | null) => {
+    if (expert && !user) {
+      addToast(isTa ? 'முன்பதிவு தற்போது கிடைக்கவில்லை.' : 'Session booking is currently unavailable.', 'info');
+      return;
+    }
+    setBookingModalExpertState(expert);
+  };
+
+  const setIsProModalOpen = (open: boolean) => {
+    if (open) {
+      addToast(isTa ? 'தொழில்முறை விண்ணப்பங்கள் தற்போது கிடைக்கவில்லை.' : 'Professional applications are currently unavailable.', 'info');
+    }
+  };
+
   const removeToast = (id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
@@ -499,6 +357,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Route Navigation Guard
   const navigate = (requestedRoute: string) => {
     let target = requestedRoute;
+    if (['cycle', 'onb-tour', 'onb-membership', 'onb-book'].includes(target) && !user) {
+      target = 'onb-register';
+    }
     if (requestedRoute === 'admin') { window.location.assign('/admin/login'); return; }
     if (requestedRoute === 'onb-register') {
       if (user) target = onboarding.completed ? 'space' : 'onb-tour';
@@ -510,218 +371,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setActiveRoute(target);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Auth Operations
-  const [latestGeneratedOtp, setLatestGeneratedOtp] = useState<string>('849201');
-
-  const sendPhoneOtp = (phone: string) => {
-    const clean = phone.replace(/\D/g, '');
-    if (clean.length < 10) {
-      throw new Error(isTa ? 'தயவுசெய்து சரியான 10-இலக்க மொபைல் எண்ணை உள்ளிடவும்.' : 'Please enter a valid 10-digit mobile number.');
-    }
-    const { demoOtp } = issueSecureOtp(clean);
-    setLatestGeneratedOtp(demoOtp);
-    addToast(
-      isTa
-        ? `பாதுகாப்பான OTP குறியீடு: ${demoOtp} (10 நிமிடங்கள் செல்லுபடியாகும், ஒற்றைப் பயன்பாடு)`
-        : `Cryptographic OTP generated: ${demoOtp} (Single-use, 10-minute expiry)`,
-      'info'
-    );
-    return {
-      success: true,
-      formattedPhone: '+91 ' + clean.slice(-10),
-      demoOtp
-    };
-  };
-
-  const verifyOtpAndRegister = async (data: {
-    phone: string;
-    otp: string;
-    fullName: string;
-    email?: string;
-    age: number;
-    identity: 'woman' | 'trans_woman';
-    agreeTerms: boolean;
-    autoRenew?: boolean;
-  }) => {
-    if (data.age < 18) {
-      throw new Error(isTa ? '18 வயதுக்கு மேற்பட்ட பெண்களுக்கு மட்டுமே உரியது.' : 'HerSpace is strictly for women and transgender women aged 18+.');
-    }
-    if (!data.agreeTerms) {
-      throw new Error(isTa ? 'விதிமுறைகளை ஏற்க வேண்டும்.' : 'You must accept the Terms and Privacy Policy to proceed.');
-    }
-
-    // Enforce cryptographic verification with single-use consumption and brute-force lockout
-    await verifySecureOtp(data.phone, data.otp);
-
-    const cleanDigits = data.phone.replace(/\D/g, '').slice(-10);
-    const cleanPhone = '+91 ' + cleanDigits;
-    const regKey = 'herspace_reg_' + cleanDigits;
-    const isExisting = localStorage.getItem(regKey);
-
-    const now = new Date();
-    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days free trial
-    const welcomeCallEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
-
-    let ent: Entitlement;
-    if (isExisting) {
-      ent = {
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: trialEnd.toISOString(),
-        welcomeCallExpiresAt: welcomeCallEnd.toISOString(),
-        welcomeCallStatus: 'expired',
-        paidThrough: null,
-        autoRenew: false,
-        isReturning: true
-      };
-      addToast(isTa ? 'மீண்டும் வருக! ஏற்கனவே பதிவு செய்யப்பட்ட கணக்கு.' : 'Welcome back! Restored existing account.', 'info');
-    } else {
-      ent = {
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: trialEnd.toISOString(),
-        welcomeCallExpiresAt: welcomeCallEnd.toISOString(),
-        welcomeCallStatus: 'available',
-        paidThrough: null,
-        autoRenew: data.autoRenew ?? false,
-        isReturning: false
-      };
-      localStorage.setItem(regKey, JSON.stringify(ent));
-      addToast(isTa ? '7 நாள் இலவச சோதனை மற்றும் 1 இலவச அமர்வு துவங்கியது!' : '🎉 7-day free trial & 1 complimentary 30-min session active!', 'success');
-    }
-
-    const cleanFullName = sanitizeInput(data.fullName, 80);
-    const cleanEmail = sanitizeInput(data.email || '', 100);
-
-    const newUser: User = {
-      id: generateSecureId('usr', 8),
-      fullName: cleanFullName || 'HerSpace Member',
-      phone: cleanPhone,
-      email: cleanEmail,
-      age: data.age,
-      identity: data.identity,
-      role: 'member',
-      createdAt: now.toISOString()
-    };
-
-    setUser(newUser);
-    setEntitlement(ent);
-    setOnboarding(prev => ({
-      ...prev,
-      step: 'tour',
-      completed: false
-    }));
-    navigate('onb-tour');
-  };
-
-  const verifyOtpAndSignIn = async (phone: string, otp: string) => {
-    // Enforce cryptographic verification with single-use consumption and brute-force lockout
-    await verifySecureOtp(phone, otp);
-
-    const cleanDigits = phone.replace(/\D/g, '').slice(-10);
-    const cleanPhone = '+91 ' + cleanDigits;
-    const now = new Date();
-
-    const signedUser: User = user || {
-      id: generateSecureId('usr', 8),
-      fullName: 'HerSpace Member',
-      phone: cleanPhone,
-      email: '',
-      age: 24,
-      identity: 'woman',
-      role: 'member',
-      createdAt: now.toISOString()
-    };
-
-    setUser(signedUser);
-    if (!entitlement) {
-      setEntitlement({
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        welcomeCallExpiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        welcomeCallStatus: 'available',
-        paidThrough: null,
-        autoRenew: false,
-        isReturning: false
-      });
-    }
-
-    addToast(isTa ? 'வெற்றிகரமாக உள்நுழைந்துள்ளீர்கள்!' : 'Signed in successfully!', 'success');
-    navigate('space');
-  };
-
-  const anonymousAuth = async (data: {
-    username: string;
-    password?: string;
-    phone?: string;
-    mode: 'register' | 'signin';
-  }) => {
-    const cleanUsername = sanitizeInput(data.username, 32);
-    if (!cleanUsername || cleanUsername.length < 3) {
-      throw new Error(isTa ? 'தயவுசெய்து குறைந்தது 3 எழுத்துக்களைக் கொண்ட புனைப்பெயரை உள்ளிடவும்.' : 'Please choose an anonymous handle with at least 3 characters (e.g. Maya_92).');
-    }
-
-    const now = new Date();
-    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const welcomeCallEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-    const cleanDigits = (data.phone || '9840199999').replace(/\D/g, '').slice(-10);
-    const cleanPhone = '+91 ' + (cleanDigits.length === 10 ? cleanDigits : '9840199999');
-
-    const authUser: User = {
-      id: generateSecureId('usr', 8),
-      username: cleanUsername,
-      fullName: cleanUsername,
-      phone: cleanPhone,
-      email: `${cleanUsername.toLowerCase().replace(/[^a-z0-9]/g, '')}@safe.herspace.local`,
-      age: 24,
-      identity: 'woman',
-      role: 'member',
-      isAuthenticated: true,
-      createdAt: now.toISOString()
-    };
-
-    const ent: Entitlement = entitlement || {
-      trialStartedAt: now.toISOString(),
-      trialEndsAt: trialEnd.toISOString(),
-      welcomeCallExpiresAt: welcomeCallEnd.toISOString(),
-      welcomeCallStatus: 'available',
-      paidThrough: null,
-      autoRenew: false,
-      isReturning: data.mode === 'signin'
-    };
-
-    setUser(authUser);
-    setEntitlement(ent);
-    setOnboarding({
-      step: 'book',
-      tourSeen: true,
-      tourSkipped: true,
-      completed: true,
-      completedAt: now.toISOString(),
-      tourReplay: false
-    });
-
-    try {
-      localStorage.setItem('herspace_user', JSON.stringify(authUser));
-      localStorage.setItem('herspace_entitlement', JSON.stringify(ent));
-      localStorage.setItem('herspace_onboarding', JSON.stringify({
-        step: 'book',
-        tourSeen: true,
-        tourSkipped: true,
-        completed: true,
-        completedAt: now.toISOString(),
-        tourReplay: false
-      }));
-    } catch {}
-
-    addToast(
-      data.mode === 'register'
-        ? (isTa ? `வரவேற்கிறோம் @${cleanUsername}! உங்கள் பாதுகாப்பான தளம் திறக்கப்பட்டது.` : `Welcome to HerSpace, @${cleanUsername}! Your safe space is unlocked.`)
-        : (isTa ? `மீண்டும் வருக @${cleanUsername}!` : `Welcome back, @${cleanUsername}! Access granted.`),
-      'success'
-    );
-    navigate('space');
   };
 
   const signOut = () => {
@@ -987,40 +636,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // Telephony Engine
-  const startMaskedCall = (partnerId: string, partnerName?: string, partnerRole?: string) => {
-    const exp = experts.find(e => e.id === partnerId);
-    const singer = singers.find(s => s.id === partnerId);
-    const target = exp || singer || experts[0];
-
-    const userPhone = user?.phone || '+919840199999';
-    const bookingId = generateSecureBookingId();
-
-    // Secure server-side call bridge dispatch without exposing partner phone to client
-    try {
-      fetch('/api/telephony/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bookingId,
-          userPhone,
-          listenerId: target.id
-        })
-      }).catch(err => {
-        console.warn('Telephony background bridge notification:', err);
-      });
-    } catch {}
-
-    const newSession: TelephonySession = {
-      queueId: generateSecureQueueId(),
-      partnerId: target.id,
-      partnerName: partnerName || (isTa && 'nameTa' in target ? target.nameTa : target.name),
-      partnerRole: partnerRole || target.role,
-      state: 'connected',
-      memberMaskedDisplay: formatMaskedDisplay(userPhone),
-      partnerMaskedDisplay: '+91 44 4813 1001 (Exotel Bridge)',
-      startedAt: Date.now()
-    };
-    setTelephonySession(newSession);
+  const startMaskedCall = () => {
+    addToast(isTa ? 'மறைக்கப்பட்ட அழைப்புகள் தற்போது கிடைக்கவில்லை.' : 'Masked calling is currently unavailable.', 'info');
   };
 
   const holdCall = () => {
@@ -1120,9 +737,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
         return app;
       });
-      try {
-        localStorage.setItem('herspace_pro_applications', JSON.stringify(updated));
-      } catch {}
       return updated;
     });
 
@@ -1284,10 +898,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         activeRoute,
         navigate,
 
-        sendPhoneOtp,
-        verifyOtpAndRegister,
-        verifyOtpAndSignIn,
-        anonymousAuth,
         signOut,
         updateOnboardingStep,
 
