@@ -20,14 +20,12 @@ import { calmAudioEngine } from '../data/audioEngine';
 import {
   generateSecureId,
   generateSecureBookingId,
-  generateSecureQueueId,
   generateSecureParkCode,
   issueSecureOtp,
   verifySecureOtp,
   encryptHealthPayload,
   decryptHealthPayload,
-  sanitizeInput,
-  formatMaskedDisplay
+  sanitizeInput
 } from '../utils/security';
 
 interface AppContextType {
@@ -987,40 +985,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // Telephony Engine
-  const startMaskedCall = (partnerId: string, partnerName?: string, partnerRole?: string) => {
-    const exp = experts.find(e => e.id === partnerId);
-    const singer = singers.find(s => s.id === partnerId);
-    const target = exp || singer || experts[0];
-
-    const userPhone = user?.phone || '+919840199999';
-    const bookingId = generateSecureBookingId();
-
-    // Secure server-side call bridge dispatch without exposing partner phone to client
-    try {
-      fetch('/api/telephony/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bookingId,
-          userPhone,
-          listenerId: target.id
-        })
-      }).catch(err => {
-        console.warn('Telephony background bridge notification:', err);
-      });
-    } catch {}
-
-    const newSession: TelephonySession = {
-      queueId: generateSecureQueueId(),
-      partnerId: target.id,
-      partnerName: partnerName || (isTa && 'nameTa' in target ? target.nameTa : target.name),
-      partnerRole: partnerRole || target.role,
-      state: 'connected',
-      memberMaskedDisplay: formatMaskedDisplay(userPhone),
-      partnerMaskedDisplay: '+91 44 4813 1001 (Exotel Bridge)',
-      startedAt: Date.now()
-    };
-    setTelephonySession(newSession);
+  const startMaskedCall = () => {
+    addToast(isTa ? 'அழைப்பு சேவை தற்போது கிடைக்கவில்லை.' : 'The call service is currently unavailable.', 'error');
   };
 
   const holdCall = () => {
