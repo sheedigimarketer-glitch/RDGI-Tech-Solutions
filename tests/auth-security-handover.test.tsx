@@ -13,7 +13,7 @@ afterEach(() => {
   localStorage.clear();
 });
 
-it('ignores legacy browser identity and private records, without asking for credentials', () => {
+it('ignores legacy browser identity and private records on the member entry card', () => {
   localStorage.setItem('herspace_user', JSON.stringify({ id: 'old-demo-user', isAuthenticated: true }));
   localStorage.setItem('herspace_appointments', JSON.stringify([{ id: 'old-appointment' }]));
   localStorage.setItem('herspace_cycle', JSON.stringify({ logs: [{ id: 'old-cycle' }] }));
@@ -25,7 +25,7 @@ it('ignores legacy browser identity and private records, without asking for cred
   }
 
   render(<AppProvider><HeroAuthCard /><PrivateState /></AppProvider>);
-  expect(screen.getByText('Member registration and sign-in are currently unavailable.')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Sign In' })).toBeTruthy();
   expect(screen.queryByRole('textbox')).toBeNull();
   expect(screen.getByText('[null,[],[],[]]')).toBeTruthy();
   expect(localStorage.getItem('herspace_appointments')).toContain('old-appointment');

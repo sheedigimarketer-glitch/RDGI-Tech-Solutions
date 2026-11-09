@@ -271,7 +271,7 @@ export const Header: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={signOut}
+                onClick={() => void signOut()}
                 className="btn btn-sm btn-outline btn-desktop-only min-h-[38px] rounded-full text-xs"
               >
                 {t('navSignOut')}

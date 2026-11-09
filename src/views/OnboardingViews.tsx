@@ -2,26 +2,6 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { HERSPACE_CONFIG } from '../data/config';
 
-// -----------------------------------------------------------------------------------------------
-// 1. REGISTRATION VIEW ('onb-register')
-// -----------------------------------------------------------------------------------------------
-export const RegisterView: React.FC = () => {
-  const { isTa, navigate } = useApp();
-  return (
-    <section className="onb-page">
-      <div className="container onb-narrow">
-        <h1 className="onb-title">{isTa ? 'உறுப்பினர் அணுகல்' : 'Member access'}</h1>
-        <p className="onb-sub" role="status">
-          {isTa ? 'உறுப்பினர் பதிவு மற்றும் உள்நுழைவு தற்போது கிடைக்கவில்லை.' : 'Member registration and sign-in are currently unavailable.'}
-        </p>
-        <button type="button" className="btn btn-primary" onClick={() => navigate('home')}>
-          {isTa ? 'முகப்புக்குச் செல்லவும்' : 'Return to home'}
-        </button>
-      </div>
-    </section>
-  );
-};
-
 export const TourView: React.FC = () => {
   const { t, isTa, updateOnboardingStep, navigate } = useApp();
   const [slide, setSlide] = useState(0);
@@ -101,14 +81,11 @@ export const TourView: React.FC = () => {
 // 3. MEMBERSHIP CONFIRMATION VIEW ('onb-membership')
 // -----------------------------------------------------------------------------------------------
 export const MembershipView: React.FC = () => {
-  const { t, updateOnboardingStep, navigate } = useApp();
-  const [autoRenew, setAutoRenew] = useState(false);
-
-  const trialEndFormatted = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
+  const { t, isTa, entitlement, updateOnboardingStep, navigate } = useApp();
+  const trialEnds = entitlement?.trialEndsAt ? new Date(entitlement.trialEndsAt) : null;
+  const activeTrial = trialEnds && trialEnds.getTime() > Date.now();
+  const voucherAvailable = entitlement?.welcomeCallStatus === 'available' &&
+    Date.parse(entitlement.welcomeCallExpiresAt) > Date.now();
 
   const handleContinue = () => {
     updateOnboardingStep('book');
@@ -118,38 +95,28 @@ export const MembershipView: React.FC = () => {
   return (
     <section className="onb-page">
       <div className="container onb-narrow">
-        <h1 className="onb-title">{t('memTitle')}</h1>
-        <p className="onb-sub">{t('memSub')}</p>
+        <h1 className="onb-title">{isTa ? 'உறுப்பினர் விவரங்கள்' : 'Membership'}</h1>
+        <p className="onb-sub">{isTa ? 'இலவசமாகத் தொடரலாம். கட்டண விவரங்கள் தேவையில்லை.' : 'Continue without entering payment details.'}</p>
 
         <div className="onb-card onb-mem">
           <div className="onb-mem-hero">
-            <span className="badge" style={{ background: 'rgba(255,255,255,0.25)', color: '#FFF', marginBottom: '8px' }}>
-              ENROLMENT BENEFIT
-            </span>
-            <h2 style={{ fontSize: '1.4rem', margin: '4px 0 6px', color: '#FFF' }}>{t('memCard1Title')}</h2>
-            <p style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.95)', marginBottom: '8px' }}>{t('memCard1Desc')}</p>
-            <div style={{ fontSize: '0.82rem', background: 'rgba(255,255,255,0.18)', padding: '6px 12px', borderRadius: '8px', display: 'inline-block' }}>
-              🗓️ Free trial valid through: <strong>{trialEndFormatted}</strong>
-            </div>
+            <h2 style={{ fontSize: '1.4rem', margin: '4px 0 6px', color: '#FFF' }}>
+              {activeTrial ? (isTa ? 'இலவச சோதனை செயலில் உள்ளது' : 'Free trial active') :
+                (isTa ? 'உங்கள் HerSpace கணக்கு தயாராக உள்ளது' : 'Your HerSpace account is ready')}
+            </h2>
+            <p style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.95)', marginBottom: '8px' }}>
+              {activeTrial ? (isTa ? 'இலவச சோதனை முடியும் நாள்' : 'Trial ends') + ' · ' +
+                trialEnds.toLocaleDateString(isTa ? 'ta-IN' : 'en-IN', { dateStyle: 'medium' }) :
+                (isTa ? 'சேவைகளைப் பார்வையிடத் தொடருங்கள்.' : 'Continue to explore available services.')}
+            </p>
           </div>
 
-          <div style={{ background: 'var(--color-bg-lavender)', border: '1px solid var(--color-lavender-soft)', padding: '16px', borderRadius: '12px' }}>
-            <span className="badge badge-pink" style={{ marginBottom: '6px' }}>VALID FOR 7 DAYS</span>
-            <h3 style={{ fontSize: '1.2rem', margin: '4px 0 4px', color: 'var(--color-primary-dark)' }}>{t('memCard2Title')}</h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--color-ink-muted)', margin: 0 }}>{t('memCard2Desc')}</p>
-          </div>
-
-          <div className="form-check" style={{ marginTop: '8px' }}>
-            <input
-              id="chkAutoRenew"
-              type="checkbox"
-              checked={autoRenew}
-              onChange={e => setAutoRenew(e.target.checked)}
-            />
-            <label htmlFor="chkAutoRenew" style={{ fontSize: '0.82rem' }}>
-              {t('memToggleAutoRenew')}
-            </label>
-          </div>
+          {voucherAvailable && <div style={{ background: 'var(--color-bg-lavender)', border: '1px solid var(--color-lavender-soft)', padding: '16px', borderRadius: '12px' }}>
+            <h3 style={{ fontSize: '1.2rem', margin: '4px 0', color: 'var(--color-primary-dark)' }}>{t('memCard2Title')}</h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--color-ink-muted)', margin: 0 }}>
+              {isTa ? 'காலாவதியாகும் நாள்' : 'Expires'} · {new Date(entitlement.welcomeCallExpiresAt).toLocaleDateString(isTa ? 'ta-IN' : 'en-IN', { dateStyle: 'medium' })}
+            </p>
+          </div>}
 
           <button className="btn btn-primary btn-lg btn-block" onClick={handleContinue}>
             {t('btnContinueToBook')}
@@ -164,8 +131,11 @@ export const MembershipView: React.FC = () => {
 // 4. CHOOSE SERVICE & BOOK STEP ('onb-book')
 // -----------------------------------------------------------------------------------------------
 export const BookStepView: React.FC = () => {
-  const { t, isTa, experts, singers, updateOnboardingStep, navigate, setBookingModalExpert } = useApp();
+  const { isTa, experts, singers, entitlement, updateOnboardingStep, navigate, setBookingModalExpert } = useApp();
   const [hubTab, setHubTab] = useState<'listener' | 'counsellor' | 'singer'>('listener');
+
+  const voucherAvailable = entitlement?.welcomeCallStatus === 'available' &&
+    Date.parse(entitlement.welcomeCallExpiresAt) > Date.now();
 
   const finishToSpace = () => {
     updateOnboardingStep('book', true);
@@ -178,7 +148,7 @@ export const BookStepView: React.FC = () => {
         <div style={{ maxWidth: '640px', margin: '0 auto 20px', textAlign: 'center' }}>
           <h1 className="onb-title">{isTa ? 'ஆதரவு முறையைத் தேர்வு செய்து முன்பதிவு செய்யுங்கள்' : 'Choose Your First Care Session'}</h1>
           <p className="onb-sub">
-            {isTa ? 'உங்கள் தேவைகளுக்கு ஏற்ற ஆதரவைத் தேர்வு செய்யவும்.' : 'Your free trial includes 1 complimentary 30-min Trained Listener call.'}
+            {isTa ? 'உங்கள் தேவைகளுக்கு ஏற்ற ஆதரவைத் தேர்வு செய்யவும்.' : 'Explore trained listeners, counsellors and live melodies.'}
           </p>
 
           <div className="service-tabs" style={{ maxWidth: '480px', margin: '0 auto 20px' }}>
@@ -186,19 +156,19 @@ export const BookStepView: React.FC = () => {
               className={`service-tab ${hubTab === 'listener' ? 'active' : ''}`}
               onClick={() => setHubTab('listener')}
             >
-              Trained Listeners (₹399)
+              {isTa ? 'பயிற்சி பெற்ற கவனிப்பாளர்கள் (₹399)' : 'Trained Listeners (₹399)'}
             </button>
             <button
               className={`service-tab ${hubTab === 'counsellor' ? 'active' : ''}`}
               onClick={() => setHubTab('counsellor')}
             >
-              Counsellors (₹999)
+              {isTa ? 'ஆலோசகர்கள் (₹999)' : 'Counsellors (₹999)'}
             </button>
             <button
               className={`service-tab ${hubTab === 'singer' ? 'active' : ''}`}
               onClick={() => setHubTab('singer')}
             >
-              Live Melodies
+              {isTa ? 'நேரடி மெல்லிசை' : 'Live Melodies'}
             </button>
           </div>
         </div>
@@ -214,7 +184,7 @@ export const BookStepView: React.FC = () => {
                     <p className="expert-bio">{isTa && s.bioTa ? s.bioTa : s.bioEn}</p>
                   </div>
                   <button className="btn btn-primary btn-block" onClick={() => { setBookingModalExpert(s); finishToSpace(); }}>
-                    Schedule Melody →
+                    {isTa ? 'மெல்லிசை அமர்வைப் பார்க்கவும்' : 'View melody session'} →
                   </button>
                 </div>
               ))
@@ -231,7 +201,7 @@ export const BookStepView: React.FC = () => {
                     <p className="expert-bio">{isTa && exp.bioTa ? exp.bioTa : exp.bio}</p>
                   </div>
                   <button className="btn btn-primary btn-block" onClick={() => { setBookingModalExpert(exp); finishToSpace(); }}>
-                    {exp.role === 'listener' ? 'Book with Free Voucher (₹0)' : 'Book Session →'}
+                    {exp.role === 'listener' && voucherAvailable ? (isTa ? 'இலவச அமர்வைப் பார்க்கவும்' : 'View complimentary session') : (isTa ? 'அமர்வைப் பார்க்கவும்' : 'View session')} →
                   </button>
                 </div>
               ))}
@@ -239,15 +209,10 @@ export const BookStepView: React.FC = () => {
 
         <div className="onb-later">
           <button className="btn btn-outline" onClick={finishToSpace}>
-            I’ll book later — Go to My Personal Space →
+            {isTa ? 'என் தனிப்பட்ட இடத்திற்குச் செல்லவும்' : 'Go to My Personal Space'} →
           </button>
         </div>
       </div>
     </section>
   );
 };
-
-// -----------------------------------------------------------------------------------------------
-// 5. SIGN IN VIEW ('signin')
-// -----------------------------------------------------------------------------------------------
-export const SigninView = RegisterView;
