@@ -2,13 +2,14 @@
 
 /* ---------- Onboarding shell (no tabs, no footer, no bottom bar) ---------- */
 .onb-header {
-  position: sticky; top: 0; z-index: 900;
-  background: rgba(252, 250, 255, 0.96);
-  backdrop-filter: blur(12px);
+  background: var(--color-lavender-tint);
   border-bottom: 1px solid var(--color-border);
   padding-top: env(safe-area-inset-top, 0px);
 }
-.onb-header-inner { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.onb-header-inner {
+  display: flex; align-items: center; gap: 12px; min-height: 56px;
+  max-width: var(--max-content-width); padding-inline: clamp(16px, 4vw, 32px);
+}
 .onb-logo { display: inline-flex; flex-shrink: 0; }
 .onb-logo img { height: 30px; width: auto; max-width: 130px; object-fit: contain; }
 .onb-progress { flex: 1 1 auto; min-width: 0; }
@@ -28,6 +29,39 @@
   background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-lg);
   padding: 20px; box-shadow: var(--shadow-md); min-width: 0;
 }
+/* ---------- Member registration, sign-in, recovery and profile ---------- */
+.member-access { padding-block: clamp(24px, 5vw, 48px); }
+.member-access .onb-narrow {
+  width: min(calc(100% - 32px), 560px);
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+.member-access .onb-title { color: var(--color-ink); line-height: 1.2; }
+.member-access :is(.onb-title, .onb-sub, .onb-notice) { margin: 0; }
+.member-access .onb-form {
+  display: grid;
+  gap: 16px;
+  padding: clamp(16px, 4vw, 24px);
+}
+.member-access :is(.form-group, .form-check, .onb-links) { margin: 0; }
+.member-access :is(.form-label, .form-check, .form-control) { color: var(--color-ink); }
+.member-access .form-control {
+  min-width: 0;
+  border: 1px solid var(--color-ink-faint);
+  background: var(--color-lavender-tint);
+  font-size: 1rem;
+}
+.member-access .form-control:focus { border-color: var(--color-primary); }
+.member-access .onb-links { justify-content: flex-start; column-gap: 16px; row-gap: 0; }
+.member-access .onb-actions { flex-flow: row wrap; }
+.member-access .onb-actions .btn { flex-basis: 136px; }
+.member-access .btn { border-radius: var(--radius-sm); }
+.member-access :is(.btn, .onb-link):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .onb-inline { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
 .onb-inline .form-control { flex: 1 1 160px; min-width: 0; }
 .onb-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }

@@ -107,7 +107,7 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
 
   const minimumBirthYear = new Date().getFullYear() - 18;
   return (
-    <section className="onb-page">
+    <section className="onb-page member-access">
       <div className="container onb-narrow">
         <h1 className="onb-title">{titles[mode]}</h1>
         {isRegister && <p className="onb-sub">{t('regSub')}</p>}
@@ -157,9 +157,9 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
               <input id="member-consent" name="consent" type="checkbox" required />
               <label htmlFor="member-consent">{t('regConsent')}</label>
             </div>
-            <div className="onb-actions">
-              <button type="button" className="btn btn-outline btn-sm" onClick={() => openPolicyModal('terms')}>{copy('Terms of Use', 'பயன்பாட்டு விதிமுறைகள்')}</button>
-              <button type="button" className="btn btn-outline btn-sm" onClick={() => openPolicyModal('privacy')}>{copy('Privacy Policy', 'தனியுரிமைக் கொள்கை')}</button>
+            <div className="onb-links">
+              <button type="button" className="onb-link" onClick={() => openPolicyModal('terms')}>{copy('Terms of Use', 'பயன்பாட்டு விதிமுறைகள்')}</button>
+              <button type="button" className="onb-link" onClick={() => openPolicyModal('privacy')}>{copy('Privacy Policy', 'தனியுரிமைக் கொள்கை')}</button>
             </div>
           </>}
           <button className="btn btn-primary btn-block" disabled={busy || (canReset && Boolean(notice))} type="submit">
@@ -168,8 +168,8 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
               canReset ? copy('Save new password', 'புதிய கடவுச்சொல்லைச் சேமிக்கவும்') : copy('Send reset link', 'மீட்டமைப்பு இணைப்பை அனுப்பவும்')}
           </button>
         </form>}
-        {error && <p className="onb-sub" role="alert">{error}</p>}
-        {notice && <p className="onb-sub" role="status">{notice}</p>}
+        {error && <p className="onb-notice onb-notice-warn" role="alert">{error}</p>}
+        {notice && <p className="onb-notice" role="status">{notice}</p>}
         {mode !== 'loading' && <div className="onb-actions">
           {isSignin && <>
             <button className="btn btn-outline" onClick={() => navigate('member-recover')}>{copy('Forgot password?', 'கடவுச்சொல் மறந்துவிட்டதா?')}</button>
