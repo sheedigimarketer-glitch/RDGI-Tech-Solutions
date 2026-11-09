@@ -33,9 +33,9 @@ export const PersonalSpaceView: React.FC = () => {
         {/* Hero Welcome */}
         <div className="rounded-2xl backdrop-blur-xl bg-white/80 border border-white/60 shadow-xs p-6 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-[#5E2750] mb-1 tabular-nums">
-              {t('spaceTrialActive')} · {daysRemaining} {t('spaceTrialDaysRemaining')}
-            </p>
+            {daysRemaining > 0 && <p className="text-xs font-semibold text-[#5E2750] mb-1 tabular-nums">
+              {daysRemaining} {t('spaceTrialDaysRemaining')}
+            </p>}
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">
               {isTa
                 ? `வணக்கம், ${user?.fullName?.split(' ')[0] || user?.username || 'தோழி'}!`

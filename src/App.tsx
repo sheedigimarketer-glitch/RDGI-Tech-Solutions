@@ -14,6 +14,8 @@ import { PolicyModal } from './components/PolicyModal';
 import { HomeView } from './views/HomeView';
 import { SupportView } from './views/SupportView';
 import { WellbeingView } from './views/WellbeingView';
+import { CycleView } from './views/CycleView';
+import { MemberAccessView } from './views/MemberAccessView';
 import { CalmView } from './views/CalmView';
 import { SingersView } from './views/SingersView';
 import { DashboardView } from './views/DashboardView';
@@ -21,11 +23,9 @@ import { PersonalSpaceView } from './views/PersonalSpaceView';
 import { PricingView } from './views/PricingView';
 import { ContactView } from './views/ContactView';
 import {
-  RegisterView,
   TourView,
   MembershipView,
-  BookStepView,
-  SigninView
+  BookStepView
 } from './views/OnboardingViews';
 import { AdminPortal } from './views/AdminPortal';
 
@@ -39,11 +39,19 @@ export const App: React.FC = () => {
     'onb-tour',
     'onb-membership',
     'onb-book',
-    'signin'
+    'signin',
+    'member-recover',
+    'member-reset',
+    'member-confirm',
+    'member-profile',
+    'member-loading',
+    'member-error'
   ].includes(activeRoute);
 
   const getStepNumber = () => {
     switch (activeRoute) {
+      case 'member-profile':
+      case 'member-confirm':
       case 'onb-register': return 1;
       case 'onb-tour': return 2;
       case 'onb-membership': return 3;
@@ -55,7 +63,7 @@ export const App: React.FC = () => {
   const renderMainView = () => {
     switch (activeRoute) {
       case 'onb-register':
-        return <RegisterView />;
+        return <MemberAccessView key="register" mode="register" />;
       case 'onb-tour':
         return <TourView />;
       case 'onb-membership':
@@ -63,7 +71,19 @@ export const App: React.FC = () => {
       case 'onb-book':
         return <BookStepView />;
       case 'signin':
-        return <SigninView />;
+        return <MemberAccessView key="signin" mode="signin" />;
+      case 'member-recover':
+        return <MemberAccessView key="recover" mode="recover" />;
+      case 'member-reset':
+        return <MemberAccessView key="reset" mode="reset" />;
+      case 'member-confirm':
+        return <MemberAccessView key="confirm" mode="confirm" />;
+      case 'member-profile':
+        return <MemberAccessView key="profile" mode="profile" />;
+      case 'member-loading':
+        return <MemberAccessView key="loading" mode="loading" />;
+      case 'member-error':
+        return <MemberAccessView key="error" mode="error" />;
       case 'space':
         return <PersonalSpaceView />;
       case 'support':
@@ -71,7 +91,7 @@ export const App: React.FC = () => {
       case 'wellbeing':
         return <WellbeingView />;
       case 'cycle':
-        return <RegisterView />;
+        return <CycleView />;
       case 'calm':
         return <CalmView />;
       case 'singers':
@@ -195,7 +215,7 @@ export const App: React.FC = () => {
 
               {getStepNumber() > 0 && (
                 <div className="onb-progress">
-                  <div className="onb-progress-label">Step {getStepNumber()} of 4</div>
+                  <div className="onb-progress-label">{lang === 'ta' ? `படி ${getStepNumber()} / 4` : `Step ${getStepNumber()} of 4`}</div>
                   <div className="onb-progress-track">
                     <span style={{ width: `${(getStepNumber() / 4) * 100}%` }}></span>
                   </div>

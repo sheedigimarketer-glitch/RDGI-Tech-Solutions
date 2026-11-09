@@ -10,7 +10,7 @@ export const BookingModal: React.FC = () => {
     entitlement,
     bookingModalExpert,
     setBookingModalExpert,
-    bookAppointment,
+    addToast,
     navigate
   } = useApp();
 
@@ -86,17 +86,7 @@ export const BookingModal: React.FC = () => {
       return;
     }
 
-    bookAppointment({
-      expertId: exp.id,
-      date: selectedDate,
-      time: selectedSlot,
-      mode: selectedMode,
-      isComplimentary: isComplimentaryEligible,
-      tierTitle: isSinger ? currentSingerTier.name : undefined,
-      customPrice: effectivePrice
-    });
-    setBookingModalExpert(null);
-    navigate('dashboard');
+    addToast(isTa ? 'முன்பதிவு தற்போது கிடைக்கவில்லை.' : 'Session booking is currently unavailable.', 'info');
   };
 
   return (

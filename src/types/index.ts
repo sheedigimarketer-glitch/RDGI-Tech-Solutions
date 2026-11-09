@@ -9,8 +9,8 @@ export interface User {
   isAuthenticated?: boolean;
   phone: string;
   email: string;
-  age: number;
-  identity: 'woman' | 'trans_woman';
+  age: number | null;
+  identity: 'woman' | 'trans_woman' | null;
   role: UserRole;
   createdAt: string;
 }

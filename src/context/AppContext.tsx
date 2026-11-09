@@ -16,10 +16,12 @@ import {
 import { DEFAULT_EXPERTS } from '../data/experts';
 import { LIVE_SINGERS } from '../data/singers';
 import { TRANSLATIONS } from '../data/translations';
+import { memberResetPath, memberSigninPath, supabase } from '../services/auth';
+import { memberConfirmPath } from '../services/member';
+import { useMemberSession } from './useMemberSession';
 import { calmAudioEngine } from '../data/audioEngine';
 import {
   generateSecureId,
-  generateSecureBookingId,
   generateSecureParkCode,
   sanitizeInput
 } from '../utils/security';
@@ -37,7 +39,8 @@ interface AppContextType {
   activeRoute: string;
   navigate: (route: string) => void;
 
-  signOut: () => void;
+  signOut: (returnTo?: 'signin' | 'home') => Promise<void>;
+  memberSession: ReturnType<typeof useMemberSession>;
   updateOnboardingStep: (step: 'register' | 'tour' | 'membership' | 'book', markComplete?: boolean) => void;
 
   experts: Expert[];
@@ -48,15 +51,6 @@ interface AppContextType {
   setActiveRoleFilter: (role: string) => void;
 
   appointments: Appointment[];
-  bookAppointment: (params: {
-    expertId: string;
-    date: string;
-    time: string;
-    mode: string;
-    isComplimentary: boolean;
-    tierTitle?: string;
-    customPrice?: number;
-  }) => Appointment;
   rescheduleAppointment: (appointmentId: string, newDate: string, newTime: string) => void;
 
   cycle: {
@@ -120,12 +114,7 @@ interface AppContextType {
   setIsDrawerOpen: (open: boolean) => void;
   isMaintenanceMode: boolean;
   setIsMaintenanceMode: (val: boolean) => void;
-  billingStats: {
-    activeTrials: number;
-    activePromo60: number;
-    monthlyAutoRenewals: number;
-  };
-  simulateSubscription: (type: 'trial' | 'promo60' | 'monthly' | 'cancel') => void;
+
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -233,14 +222,41 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addToast(next === 'ta' ? 'தமிழ் மொழி தேர்ந்தெடுக்கப்பட்டது' : 'Language switched to English', 'info');
   };
 
-  // User State
-  const [user, setUser] = useState<User | null>(null);
-  const [entitlement, setEntitlement] = useState<Entitlement | null>(null);
-  const [onboarding, setOnboarding] = useState<OnboardingState>({
+  const memberSession = useMemberSession();
+  const user = memberSession.member?.user || null;
+  const entitlement = memberSession.member?.entitlement || null;
+  const [progress, setProgress] = useState<OnboardingState>({
     step: 'register', tourSeen: false, tourSkipped: false,
     completed: false, completedAt: null, tourReplay: false
   });
-  const [activeRoute, setActiveRoute] = useState('home');
+  const [localCompletion, setLocalCompletion] = useState<{ id: string; date: string } | null>(null);
+  let completedAt = memberSession.member?.completedAt || null;
+  if (user && !completedAt) {
+    try {
+      completedAt = localCompletion?.id === user.id ? localCompletion.date :
+        localStorage.getItem('herspace_onboarding_completed:' + user.id);
+    } catch {}
+  }
+  const onboarding = { ...progress, completed: Boolean(completedAt), completedAt };
+  const [requestedRoute, setActiveRoute] = useState(() => {
+    if (window.location.pathname === memberResetPath) return 'member-reset';
+    if (window.location.pathname === memberConfirmPath) return 'member-confirm';
+    if (window.location.pathname === memberSigninPath) return 'signin';
+    return 'home';
+  });
+  const protectedRoutes = ['cycle', 'space', 'dashboard', 'onb-tour', 'onb-membership', 'onb-book'];
+  const accountEntry = ['signin', 'onb-register', 'member-confirm'].includes(requestedRoute);
+  let activeRoute = requestedRoute;
+  if ((accountEntry || protectedRoutes.includes(requestedRoute)) && memberSession.loading) {
+    activeRoute = 'member-loading';
+  } else if ((accountEntry || protectedRoutes.includes(requestedRoute)) && memberSession.error) {
+    activeRoute = 'member-error';
+  } else if (user && (accountEntry || (requestedRoute === 'space' && !onboarding.completed))) {
+    activeRoute = onboarding.completed ? 'space' : 'onb-tour';
+  } else if (!user && (accountEntry || protectedRoutes.includes(requestedRoute))) {
+    if (memberSession.accountId) activeRoute = 'member-profile';
+    else if (protectedRoutes.includes(requestedRoute)) activeRoute = 'signin';
+  }
 
   const [experts, setExperts] = useState<Expert[]>(DEFAULT_EXPERTS);
   const [singers, setSingers] = useState<LiveSinger[]>(LIVE_SINGERS);
@@ -297,19 +313,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     );
   };
 
-  // Operational Billing Stats
-  const [billingStats, setBillingStats] = useState(() => {
-    try {
-      const saved = localStorage.getItem('herspace_billing_stats');
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return {
-      activeTrials: 482,
-      activePromo60: 194,
-      monthlyAutoRenewals: 326
-    };
-  });
-
   // Calm Web Audio state
   const [calmState, setCalmState] = useState({
     activeTrackId: 'calm_01_tamil_breath',
@@ -354,108 +357,42 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  // Route Navigation Guard
-  const navigate = (requestedRoute: string) => {
-    let target = requestedRoute;
-    if (['cycle', 'onb-tour', 'onb-membership', 'onb-book'].includes(target) && !user) {
-      target = 'onb-register';
-    }
-    if (requestedRoute === 'admin') { window.location.assign('/admin/login'); return; }
-    if (requestedRoute === 'onb-register') {
-      if (user) target = onboarding.completed ? 'space' : 'onb-tour';
-    } else if (requestedRoute === 'signin') {
-      if (user) target = onboarding.completed ? 'space' : 'onb-tour';
-    } else if (requestedRoute === 'space' || requestedRoute === 'dashboard') {
-      if (!user) target = 'onb-register';
-    }
+  useEffect(() => {
+    setAppointments([]);
+    setCycle({ optInConsent: false, logs: [], remindersEnabled: false });
+    setBookingModalExpertState(null);
+    setTelephonySession(null);
+  }, [user?.id]);
 
-    setActiveRoute(target);
+  const navigate = (route: string) => {
+    if (route === 'admin') { window.location.assign('/admin/login'); return; }
+    if (window.location.pathname === memberResetPath && route !== 'member-reset') return;
+    setActiveRoute(route);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const signOut = () => {
-    setUser(null);
-    setEntitlement(null);
-    setOnboarding({
-      step: 'register',
-      tourSeen: false,
-      tourSkipped: false,
-      completed: false,
-      completedAt: null,
-      tourReplay: false
-    });
-    addToast(isTa ? 'கணக்கிலிருந்து வெளியேறிவிட்டீர்கள்.' : 'Signed out safely.', 'info');
-    navigate('home');
-  };
-
-  const updateOnboardingStep = (step: 'register' | 'tour' | 'membership' | 'book', markComplete: boolean = false) => {
-    setOnboarding(prev => ({
-      ...prev,
-      step,
-      completed: markComplete ? true : prev.completed,
-      completedAt: markComplete ? new Date().toISOString() : prev.completedAt
-    }));
-  };
-
-  // Appointment Booking
-  const bookAppointment = ({
-    expertId,
-    date,
-    time,
-    mode,
-    isComplimentary,
-    tierTitle,
-    customPrice
-  }: {
-    expertId: string;
-    date: string;
-    time: string;
-    mode: string;
-    isComplimentary: boolean;
-    tierTitle?: string;
-    customPrice?: number;
-  }): Appointment => {
-    const exp = experts.find(e => e.id === expertId);
-    const singer = singers.find(s => s.id === expertId);
-    const target = exp || singer || experts[0];
-
-    const computedPrice = isComplimentary
-      ? 0
-      : customPrice !== undefined
-      ? customPrice
-      : 'priceDisplay' in target
-      ? target.priceDisplay
-      : 0;
-
-    const newApt: Appointment = {
-      id: generateSecureId('apt', 8),
-      expertId: target.id,
-      expertName: isTa && 'nameTa' in target ? target.nameTa : target.name,
-      expertRole: target.role,
-      expertAvatar: 'avatar' in target ? target.avatar : 'assets/images/01_HerSpace_Hero_Sunrise.png',
-      date,
-      time,
-      mode,
-      priceDisplay: computedPrice,
-      isComplimentary,
-      status: 'scheduled',
-      bookingId: generateSecureBookingId(),
-      createdAt: new Date().toISOString(),
-      rescheduleCount: 0,
-      selectedTierTitle: tierTitle
-    };
-
-    setAppointments(prev => [newApt, ...prev]);
-
-    if (isComplimentary && entitlement) {
-      setEntitlement({
-        ...entitlement,
-        welcomeCallStatus: 'used'
-      });
+  const signOut = async (returnTo: 'signin' | 'home' = 'home') => {
+    try {
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error) throw error;
+      if (window.location.pathname === memberResetPath) {
+        window.location.replace(memberSigninPath);
+        return;
+      }
+      if (window.location.pathname === memberConfirmPath) window.history.replaceState(null, '', '/');
+      addToast(isTa ? 'கணக்கிலிருந்து வெளியேறிவிட்டீர்கள்.' : 'Signed out safely.', 'info');
+      navigate(returnTo);
+    } catch {
+      addToast(isTa ? 'வெளியேற முடியவில்லை. மீண்டும் முயலுங்கள்.' : 'Sign-out failed. Please try again.', 'error');
     }
+  };
 
-    addToast(isTa ? 'அமர்வு வெற்றிகரமாக முன்பதிவு செய்யப்பட்டது!' : 'Session booked successfully!', 'success');
-    return newApt;
+  const updateOnboardingStep = (step: 'register' | 'tour' | 'membership' | 'book', markComplete = false) => {
+    setProgress(previous => ({ ...previous, step }));
+    if (!user || !markComplete) return;
+    const date = new Date().toISOString();
+    setLocalCompletion({ id: user.id, date });
+    try { localStorage.setItem('herspace_onboarding_completed:' + user.id, date); } catch {}
   };
 
   const rescheduleAppointment = (appointmentId: string, newDate: string, newTime: string) => {
@@ -807,73 +744,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
-  const simulateSubscription = (type: 'trial' | 'promo60' | 'monthly' | 'cancel') => {
-    const now = new Date();
-    if (type === 'trial') {
-      const trialEnd = new Date(now.getTime() + 7 * 86400000).toISOString();
-      setEntitlement({
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: trialEnd,
-        welcomeCallExpiresAt: trialEnd,
-        welcomeCallStatus: 'available',
-        paidThrough: null,
-        autoRenew: true,
-        isReturning: false
-      });
-      setBillingStats(prev => {
-        const updated = { ...prev, activeTrials: prev.activeTrials + 1 };
-        try { localStorage.setItem('herspace_billing_stats', JSON.stringify(updated)); } catch {}
-        return updated;
-      });
-      addToast('Simulated Webhook: Activated 7-Day Free Trial (@ ₹0) with 1 complimentary call.', 'success');
-    } else if (type === 'promo60') {
-      const promoEnd = new Date(now.getTime() + 60 * 86400000).toISOString();
-      setEntitlement({
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: now.toISOString(),
-        welcomeCallExpiresAt: promoEnd,
-        welcomeCallStatus: 'available',
-        paidThrough: promoEnd,
-        autoRenew: true,
-        isReturning: false
-      });
-      setBillingStats(prev => {
-        const updated = { ...prev, activePromo60: prev.activePromo60 + 1 };
-        try { localStorage.setItem('herspace_billing_stats', JSON.stringify(updated)); } catch {}
-        return updated;
-      });
-      addToast('Simulated Webhook: Paid ₹149 for 60 Days validity successfully applied.', 'success');
-    } else if (type === 'monthly') {
-      const renewEnd = new Date(now.getTime() + 30 * 86400000).toISOString();
-      setEntitlement({
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: now.toISOString(),
-        welcomeCallExpiresAt: renewEnd,
-        welcomeCallStatus: 'used',
-        paidThrough: renewEnd,
-        autoRenew: true,
-        isReturning: true
-      });
-      setBillingStats(prev => {
-        const updated = { ...prev, monthlyAutoRenewals: prev.monthlyAutoRenewals + 1 };
-        try { localStorage.setItem('herspace_billing_stats', JSON.stringify(updated)); } catch {}
-        return updated;
-      });
-      addToast('Simulated Webhook: Monthly auto-renewal processed (@ ₹149/mo).', 'success');
-    } else if (type === 'cancel') {
-      setEntitlement({
-        trialStartedAt: now.toISOString(),
-        trialEndsAt: now.toISOString(),
-        welcomeCallExpiresAt: now.toISOString(),
-        welcomeCallStatus: 'expired',
-        paidThrough: null,
-        autoRenew: false,
-        isReturning: false
-      });
-      addToast('Simulated Webhook: Membership canceled. Access reverted to non-member tier.', 'warning');
-    }
-  };
-
   // Policies Modal
   const openPolicyModal = (type: 'privacy' | 'terms' | 'cancellation') => {
     setPolicyModalType(type);
@@ -899,6 +769,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         navigate,
 
         signOut,
+        memberSession,
         updateOnboardingStep,
 
         experts,
@@ -909,7 +780,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setActiveRoleFilter,
 
         appointments,
-        bookAppointment,
         rescheduleAppointment,
 
         cycle,
@@ -963,9 +833,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isDrawerOpen,
         setIsDrawerOpen,
         isMaintenanceMode,
-        setIsMaintenanceMode,
-        billingStats,
-        simulateSubscription
+        setIsMaintenanceMode
       }}
     >
       {children}
