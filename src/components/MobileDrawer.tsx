@@ -106,7 +106,7 @@ export const MobileDrawer: React.FC = () => {
             <span>{t('navPricing')} (₹)</span>
           </button>
           <button className={`drawer-link ${activeRoute === 'contact' ? 'active' : ''}`} onClick={() => handleNav('contact')}>
-            <span>Support & Contact</span>
+            <span>{lang === 'ta' ? 'ஆதரவு & தொடர்பு' : 'Support & Contact'}</span>
           </button>
           <button className={`drawer-link ${activeRoute === 'how' ? 'active' : ''}`} onClick={() => handleNav('how')}>
             <span>{t('navFAQs')}</span>
@@ -124,7 +124,7 @@ export const MobileDrawer: React.FC = () => {
                 className="btn btn-primary btn-block"
                 onClick={() => handleNav('onb-register')}
               >
-                Create Account
+                {lang === 'ta' ? 'கணக்கை உருவாக்குங்கள்' : 'Create Account'}
               </button>
               <button className="btn btn-outline btn-sm btn-block" onClick={() => handleNav('signin')}>
                 {t('btnSignInShort')}

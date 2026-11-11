@@ -18,6 +18,8 @@ export const AdminPortal: React.FC = () => {
   const [overview,setOverview] = useState<AdminOverview | null>(null);
   const [tab,setTab] = useState<'overview'|'members'>('overview');
   const revision = useRef(0);
+  const staffUser = useRef<string | null>(null);
+  const pendingEnrollment = useRef<{ userId: string; id: string; qr: string } | null>(null);
   const activation = useRef(window.location.pathname === '/admin/setup');
   const recovery = useRef(false);
   const mounted = useRef(true);
@@ -27,6 +29,9 @@ export const AdminPortal: React.FC = () => {
     try {
       const status = await staffStatus();
       if (!mounted.current || current !== revision.current) return;
+      const userId = status?.is_staff ? status.user_id : null;
+      if (staffUser.current !== userId || !userId) pendingEnrollment.current = null;
+      staffUser.current = userId;
       if (!status) { setStage('signin');setQr('');setFactor(null);return; }
       if (!status.is_staff) {
         setQr('');
@@ -36,8 +41,13 @@ export const AdminPortal: React.FC = () => {
       if (!status.has_admin_access) {
         const id=await verifiedFactor();
         if (!mounted.current || current !== revision.current) return;
-        setFactor(id);setStage('mfa');return;
+        if (id) pendingEnrollment.current = null;
+        const pending = pendingEnrollment.current;
+        setFactor(id ?? pending?.id ?? null);
+        setQr(pending?.qr ?? '');
+        setStage('mfa');return;
       }
+      pendingEnrollment.current = null;
       setQr('');setCode('');
       if (recovery.current || activation.current) { setStage('reset');return; }
       const data=await adminOverview();
@@ -53,6 +63,7 @@ export const AdminPortal: React.FC = () => {
     const {data:{subscription}}=supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') recovery.current=true;
       if (event === 'SIGNED_OUT') {
+        pendingEnrollment.current=null;staffUser.current=null;
         revision.current++; recovery.current=false;activation.current=false;setOverview(null);setQr('');setFactor(null);setStage('signin');setPassword('');setCode('');return;
       }
       // Never perform nested auth calls while the Supabase callback lock is held.
@@ -65,6 +76,15 @@ export const AdminPortal: React.FC = () => {
     setError('');setNotice('');setBusy(true);
     try {await work();} catch(err:any) {setError(err.message || 'Please try again.');} finally {setBusy(false);}
   };
+  const setupAuthenticator = () => action(async () => {
+    const userId = staffUser.current;
+    if (!userId) return;
+    const enrollment = await enrollAdminFactor();
+    if (!mounted.current || staffUser.current !== userId) return;
+    pendingEnrollment.current = { userId, ...enrollment };
+    setFactor(enrollment.id);
+    setQr(enrollment.qr);
+  });
   const logout=()=>action(async()=>{await signOutAdmin();setOverview(null);setStage('signin');});
   const logo=<a href="/" className="admin-brand" aria-label="HerSpace home"><img src="/logo.png" alt="HerSpace Logo" /></a>;
   if(stage === 'dashboard' && overview) return <div className="admin-shell">
@@ -85,7 +105,7 @@ export const AdminPortal: React.FC = () => {
         <label htmlFor="admin-password">Password</label><div className="admin-password"><input id="admin-password" name="password" type={showPassword?'text':'password'} autoComplete="current-password" required maxLength={128} value={password} onChange={e=>setPassword(e.target.value)}/><button type="button" onClick={()=>setShowPassword(!showPassword)} aria-label={showPassword?'Hide password':'Show password'}>{showPassword?'Hide':'Show'}</button></div>
         <button type="button" className="admin-link admin-forgot" onClick={()=>{setStage('recovery');setPassword('');setError('');}}>Forgot password?</button><button className="admin-primary" disabled={busy} type="submit">{busy?'Signing in…':'Sign in'}</button><p className="admin-security">◇ Two-step verification follows sign-in</p>
       </form>}
-      {stage==='mfa' && <>{!factor && <><p>First time here? Set up an authenticator app to protect your admin account.</p><button className="admin-primary" disabled={busy} onClick={()=>action(async()=>{const data=await enrollAdminFactor();setFactor(data.id);setQr(data.qr);})}>Set up authenticator</button></>}{qr && <div className="admin-qr"><img src={qr} alt="Scan this QR code using your authenticator app"/><p>Scan this code using your authenticator app. Keep it private.</p></div>}{factor && <form onSubmit={e=>{e.preventDefault();void action(async()=>{await verifyAdminFactor(factor,code);setCode('');setQr('');await refresh();});}}><label htmlFor="admin-code">Authenticator code</label><input id="admin-code" autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,''))}/><button className="admin-primary" disabled={busy}>{busy?'Verifying…':'Verify and continue'}</button></form>}<button className="admin-link" disabled={busy} onClick={logout}>Sign out</button></>}
+      {stage==='mfa' && <>{!factor && <><p>First time here? Set up an authenticator app to protect your admin account.</p><button className="admin-primary" disabled={busy} onClick={setupAuthenticator}>Set up authenticator</button></>}{qr && <div className="admin-qr"><img src={qr} alt="Scan this QR code using your authenticator app"/><p>Scan this code using your authenticator app. Keep it private.</p></div>}{factor && <form onSubmit={e=>{e.preventDefault();void action(async()=>{await verifyAdminFactor(factor,code);setCode('');setQr('');await refresh();});}}><label htmlFor="admin-code">Authenticator code</label><input id="admin-code" autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,''))}/><button className="admin-primary" disabled={busy}>{busy?'Verifying…':'Verify and continue'}</button></form>}<button className="admin-link" disabled={busy} onClick={logout}>Sign out</button></>}
       {stage==='recovery' && <form onSubmit={e=>{e.preventDefault();void action(async()=>{await recoverAdmin(email);setNotice('If an account exists for that email, a recovery link will be sent.');});}}><label htmlFor="recovery-email">Private staff email</label><input id="recovery-email" type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)}/><button className="admin-primary" disabled={busy}>{busy?'Please wait…':'Send recovery link'}</button><button className="admin-link" type="button" onClick={()=>{setStage('signin');setError('');setNotice('');}}>Back to sign in</button></form>}
       {stage==='reset' && <form onSubmit={e=>{e.preventDefault();void action(async()=>{await resetAdminPassword(password,confirm);recovery.current=false;activation.current=false;setPassword('');setConfirm('');setStage('signin');setNotice('Password changed. Sign in with your new password.');});}}><label htmlFor="new-password">New password</label><input id="new-password" type="password" autoComplete="new-password" minLength={12} maxLength={128} required value={password} onChange={e=>setPassword(e.target.value)}/><label htmlFor="confirm-password">Confirm new password</label><input id="confirm-password" type="password" autoComplete="new-password" required value={confirm} onChange={e=>setConfirm(e.target.value)}/><button className="admin-primary" disabled={busy}>Save new password</button></form>}
       {stage==='denied' && <button className="admin-primary" disabled={busy} onClick={logout}>Sign out and use another account</button>}

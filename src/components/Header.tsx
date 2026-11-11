@@ -25,7 +25,7 @@ export const Header: React.FC = () => {
     <header className="app-header h-16 md:h-18 px-4 flex items-center justify-between">
       <div className="container header-inner flex items-center justify-between">
         <a
-          className="brand-logo flex items-center shrink-0"
+          className="brand-logo flex items-center"
           href="#home"
           onClick={e => {
             e.preventDefault();
@@ -35,13 +35,6 @@ export const Header: React.FC = () => {
           <img
             src="/logo.png"
             alt="HerSpace Logo"
-            className="h-11 md:h-13 w-auto object-contain"
-            style={{
-              height: '48px',
-              maxHeight: '52px',
-              width: 'auto',
-              objectFit: 'contain'
-            }}
           />
         </a>
 
@@ -242,13 +235,13 @@ export const Header: React.FC = () => {
           </nav>
         )}
 
-        <div className="nav-actions flex items-center gap-2.5 shrink-0">
+        <div className="nav-actions flex items-center">
           {/* Dongle / Theme / Mode Switcher */}
           <button
             id="dongle-toggle"
             type="button"
             onClick={toggleLanguage}
-            aria-label="Toggle Mode"
+            aria-label={lang === 'en' ? 'Switch to Tamil' : 'ஆங்கிலத்திற்கு மாறுங்கள்'}
             className="px-3 py-1.5 min-h-[38px] text-xs font-medium border border-slate-300 bg-white text-slate-800 rounded-full hover:bg-slate-100 transition-colors cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -256,7 +249,7 @@ export const Header: React.FC = () => {
               <line x1="2" y1="12" x2="22" y2="12"></line>
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
             </svg>
-            <span>{lang === 'en' ? 'தமிழ்' : 'Toggle · EN'}</span>
+            <span>{lang === 'en' ? 'தமிழ்' : 'EN'}</span>
           </button>
 
           {/* Top Line Sign Up Button (Always Visible when signed out) */}
@@ -265,7 +258,7 @@ export const Header: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('space')}
-                className="px-4 py-2 min-h-[38px] text-xs sm:text-sm font-semibold bg-[#5E2750] text-white rounded-full shadow-sm hover:bg-[#4c1f40] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                className="nav-account-button px-4 py-2 min-h-[38px] text-xs sm:text-sm font-semibold bg-[#5E2750] text-white rounded-full shadow-sm hover:bg-[#4c1f40] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
               >
                 @{user.username || (user.fullName ? user.fullName.split(' ')[0] : 'Member')}
               </button>
@@ -281,7 +274,7 @@ export const Header: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('onb-register')}
-              className="px-4 py-2 min-h-[38px] text-xs sm:text-sm font-semibold bg-[#5E2750] text-white rounded-full shadow-sm hover:bg-[#4c1f40] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+              className="nav-account-button px-4 py-2 min-h-[38px] text-xs sm:text-sm font-semibold bg-[#5E2750] text-white rounded-full shadow-sm hover:bg-[#4c1f40] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
             >
               {lang === 'en' ? 'Sign Up' : 'பதிவு செய்க'}
             </button>
