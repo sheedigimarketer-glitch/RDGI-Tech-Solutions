@@ -35,3 +35,17 @@ it('lets an invited verified account set its own password without granting or lo
  window.history.replaceState({},'', '/admin/setup');mocks.status.mockResolvedValue({is_staff:false,has_admin_access:false});render(<AdminPortal/>);
  expect(await screen.findByLabelText('New password')).toBeTruthy();expect(mocks.overview).not.toHaveBeenCalled();
 });
+
+it('keeps a pending QR and code form visible when the same staff session refreshes', async () => {
+  mocks.status.mockResolvedValue({ user_id: 'staff-test', is_staff: true, has_admin_access: false });
+  mocks.factor.mockResolvedValue(null);
+  mocks.enroll.mockResolvedValue({ id: 'pending-factor', qr: 'data:image/svg+xml,test' });
+  render(<AdminPortal />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Set up authenticator' }));
+  await screen.findByLabelText('Authenticator code');
+  const { act } = await import('@testing-library/react');
+  await act(async () => mocks.callback('TOKEN_REFRESHED'));
+  expect(await screen.findByLabelText('Authenticator code')).toBeTruthy();
+  expect(screen.getByRole('img', { name: 'Scan this QR code using your authenticator app' })).toBeTruthy();
+  expect(mocks.overview).not.toHaveBeenCalled();
+});

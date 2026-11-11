@@ -1,5 +1,5 @@
 import { requireClient, validatePassword } from './auth';
-export interface StaffStatus { is_staff: boolean; has_admin_access: boolean }
+export interface StaffStatus { user_id: string; is_staff: boolean; has_admin_access: boolean }
 export interface AdminOverview {
   member_count: number;
   active_trial_count: number;
@@ -13,7 +13,7 @@ export async function staffStatus(): Promise<StaffStatus | null> {
   if (!user.email_confirmed_at) throw new Error('Verify your staff email before signing in.');
   const { data, error: roleError } = await client.rpc('herspace_staff_status');
   if (roleError || !data) throw new Error('Staff permissions could not be verified. Please contact the platform owner.');
-  return { is_staff: data.is_staff === true, has_admin_access: data.has_admin_access === true };
+  return { user_id: user.id, is_staff: data.is_staff === true, has_admin_access: data.has_admin_access === true };
 }
 export async function signInAdmin(email: string, password: string) {
   const { error } = await requireClient().auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
