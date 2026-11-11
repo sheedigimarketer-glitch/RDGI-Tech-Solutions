@@ -10,4 +10,17 @@ This is a schema-only reconstruction with a restricted insert grant and eligibil
 checks. Existing nullable profile fields remain readable. Compare the live ledger,
 column grants and policies before designing an additive production migration.
 Entitlements are readable by their owner and writable only by trusted roles.
-A verified phone, benefit issuance and redemption are separate launch requirements.
+After the member and admin baselines, apply these in order for a staging rehearsal:
+
+1. `issue-member-entitlements.sql`
+2. `welcome-session-booking.sql`
+3. `member-identity-claims.sql`
+4. `welcome-slot-overlap.sql`
+
+The identity migration uses the Supabase `pgcrypto` extension in the `extensions`
+schema. Retain the private fingerprint key with database backups. The migration
+records current verified identities for existing entitlements. Reconcile any
+historical verified identities that changed before applying it in production.
+
+Only trusted operators may publish slots for approved trained human listeners.
+Use staging test phones and approved synthetic listener accounts for rehearsals.

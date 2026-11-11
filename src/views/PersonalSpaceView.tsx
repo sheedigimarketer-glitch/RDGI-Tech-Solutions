@@ -1,4 +1,5 @@
 import React from 'react';
+import { MemberPhoneVerification } from '../components/MemberPhoneVerification';
 import { WelcomeSessionBooking } from '../components/WelcomeSessionBooking';
 import { useApp } from '../context/AppContext';
 import { WELLBEING_ARTICLES } from '../data/wellbeingData';
@@ -9,6 +10,7 @@ export const PersonalSpaceView: React.FC = () => {
     isTa,
     user,
     entitlement,
+    memberSession,
     appointments,
     savedArticleIds,
     navigate
@@ -51,6 +53,11 @@ export const PersonalSpaceView: React.FC = () => {
             {t('navBookings')} ({upcoming.length})
           </button>
         </div>
+
+        {user && !entitlement && (
+          <MemberPhoneVerification key={user.id} isTa={isTa} verifiedPhone={user.phone || ''}
+            onClaim={memberSession.refresh} />
+        )}
 
         {/* Complimentary Voucher Banner */}
         {voucherAvailable && (
@@ -102,7 +109,7 @@ export const PersonalSpaceView: React.FC = () => {
                 <line x1="8" y1="23" x2="16" y2="23"></line>
               </svg>
             </div>
-            <span className="text-xs font-semibold text-slate-800">Live Melodies</span>
+            <span className="text-xs font-semibold text-slate-800">{isTa ? 'நேரலை இசை' : 'Live Melodies'}</span>
           </button>
 
           <button
@@ -164,7 +171,7 @@ export const PersonalSpaceView: React.FC = () => {
                 onClick={() => navigate('dashboard')}
                 className="min-h-[40px] px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer"
               >
-                View All
+                {isTa ? 'அனைத்தையும் பார்க்கவும்' : 'View all'}
               </button>
             </div>
 
@@ -192,20 +199,20 @@ export const PersonalSpaceView: React.FC = () => {
           <div className="rounded-2xl backdrop-blur-xl bg-white/80 border border-white/60 shadow-xs p-6">
             <div className="flex items-center justify-between gap-2 mb-4">
               <h3 className="text-base font-bold text-slate-900 tabular-nums">
-                Saved Wellbeing Topics ({savedArticles.length})
+                {isTa ? 'சேமித்த நல்வாழ்வுத் தலைப்புகள்' : 'Saved Wellbeing Topics'} ({savedArticles.length})
               </h3>
               <button
                 type="button"
                 onClick={() => navigate('wellbeing')}
                 className="min-h-[40px] px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer"
               >
-                Browse Hub
+                {isTa ? 'தலைப்புகளைப் பார்க்கவும்' : 'Browse topics'}
               </button>
             </div>
 
             {savedArticles.length === 0 ? (
               <p className="text-xs md:text-sm text-slate-500">
-                No articles bookmarked yet. Bookmark any topic in the Life & Wellbeing Hub for quick access.
+                {isTa ? 'நீங்கள் இன்னும் எந்தத் தலைப்பையும் சேமிக்கவில்லை.' : 'No articles bookmarked yet. Bookmark any topic in the Life & Wellbeing Hub for quick access.'}
               </p>
             ) : (
               <div className="divide-y divide-slate-200/70">
