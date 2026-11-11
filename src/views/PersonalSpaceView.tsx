@@ -1,4 +1,5 @@
 import React from 'react';
+import { WelcomeSessionBooking } from '../components/WelcomeSessionBooking';
 import { useApp } from '../context/AppContext';
 import { WELLBEING_ARTICLES } from '../data/wellbeingData';
 
@@ -10,9 +11,7 @@ export const PersonalSpaceView: React.FC = () => {
     entitlement,
     appointments,
     savedArticleIds,
-    navigate,
-    setBookingModalExpert,
-    experts
+    navigate
   } = useApp();
 
   const trialEnds = entitlement?.trialEndsAt ? new Date(entitlement.trialEndsAt).getTime() : 0;
@@ -24,8 +23,6 @@ export const PersonalSpaceView: React.FC = () => {
 
   const savedArticles = WELLBEING_ARTICLES.filter(a => savedArticleIds.includes(a.id));
   const upcoming = appointments.filter(a => a.status === 'scheduled');
-
-  const defaultListener = experts.find(e => e.role === 'listener') || experts[0];
 
   return (
     <div className="min-h-dvh bg-[#FAF7F5] text-slate-900 pb-24">
@@ -60,7 +57,7 @@ export const PersonalSpaceView: React.FC = () => {
           <div className="rounded-2xl backdrop-blur-xl bg-white/80 border border-[#5E2750]/25 shadow-xs p-6 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold text-[#5E2750] mb-1">
-                Complimentary Sanctuary Session
+                {isTa ? 'இலவச கவனிப்பு அமர்வு' : 'Complimentary Sanctuary Session'}
               </p>
               <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-1">
                 {t('spaceVoucherHeading')}
@@ -70,13 +67,7 @@ export const PersonalSpaceView: React.FC = () => {
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setBookingModalExpert(defaultListener)}
-              className="min-h-[44px] px-5 py-2.5 rounded-xl bg-[#5E2750] hover:bg-[#4c1f40] active:scale-[0.98] text-white text-xs md:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0"
-            >
-              {t('spaceBtnRedeemVoucher')} →
-            </button>
+            <WelcomeSessionBooking key={user?.id} isTa={isTa} />
           </div>
         )}
 
