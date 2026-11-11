@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '../services/auth';
 import { staffStatus, signInAdmin, adminOverview, verifiedFactor, enrollAdminFactor, verifyAdminFactor, recoverAdmin, resetAdminPassword, signOutAdmin, type AdminOverview } from '../services/admin';
+import { AdminWelcomeSessions } from '../components/AdminWelcomeSessions';
 import './admin-portal.css';
 type Stage = 'loading' | 'signin' | 'denied' | 'mfa' | 'dashboard' | 'recovery' | 'reset';
 export const AdminPortal: React.FC = () => {
@@ -93,6 +94,12 @@ export const AdminPortal: React.FC = () => {
     {error && <p className="admin-error" role="alert">{error}</p>}
     <div className="admin-stats"><article><p>Registered members</p><strong>{overview.member_count}</strong></article><article><p>Active free trials</p><strong>{overview.active_trial_count}</strong></article><article><p>Welcome calls used</p><strong>{overview.welcome_calls_used}</strong></article></div>
     <section className="admin-card"><h2>{tab==='overview'?'Recently joined members':'Member directory'}</h2><p>Latest 100 registrations. Private emails and health records are not displayed here.</p>{overview.members.length === 0 ? <div className="admin-empty">No members have registered yet.</div> : <div className="admin-table-wrap"><table><thead><tr><th>Member</th><th>Joined</th><th>Trial ends</th></tr></thead><tbody>{overview.members.map(member=><tr key={member.user_id}><td>{member.display_name}</td><td>{new Date(member.joined_at).toLocaleDateString()}</td><td>{member.trial_ends_at ? new Date(member.trial_ends_at).toLocaleDateString() : '—'}</td></tr>)}</tbody></table></div>}</section>
+    {tab === 'overview' && <AdminWelcomeSessions onRedeemed={() => {
+      const current = revision.current;
+      void adminOverview().then(data => {
+        if (mounted.current && current === revision.current) setOverview(data);
+      }, () => {});
+    }} />}
     <section className="admin-card"><h2>Service management</h2><div className="admin-service-list">{['Professional approvals','Bookings','Payments','Calls & notifications'].map(label=><div key={label}><span>{label}</span><span className="admin-badge">Not enabled yet</span></div>)}</div></section></main></div>;
   return <main className="admin-login-page"><section className="admin-story">{logo}<div><p className="admin-eyebrow">A SPACE BUILT WITH CARE</p><h1>Care begins<br/>with trust.</h1><p>A private workspace for your care team.</p></div><span className="admin-story-foot">HerSpace · Emotional wellbeing</span></section>
     <section className="admin-form-panel"><div className="admin-login-card">{logo}<p className="admin-eyebrow">ADMIN PORTAL</p>

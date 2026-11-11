@@ -24,3 +24,12 @@ historical verified identities that changed before applying it in production.
 
 Only trusted operators may publish slots for approved trained human listeners.
 Use staging test phones and approved synthetic listener accounts for rehearsals.
+
+Apply `member-onboarding-completion.sql` to persist tour completion in the existing
+member profile. The browser syncs an existing local completion when the same
+member returns. The RPC accepts only the signed-in member's ID and preserves
+the original server completion timestamp on retries.
+
+Apply `welcome-session-staff-queue.sql` after the welcome booking baseline to
+enable the staff review queue. Only an enabled staff account with an AAL2
+session may read the queue or mark a welcome session complete.

@@ -193,6 +193,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch {}
   }
   const onboarding = { ...progress, completed: Boolean(completedAt), completedAt };
+  const memberId = user?.id;
+  const serverCompletedAt = memberSession.member?.completedAt;
+  const hasLocalCompletion = Boolean(completedAt);
+  useEffect(() => {
+    if (!memberId || !hasLocalCompletion || serverCompletedAt) return;
+    let active = true;
+    void supabase.rpc('herspace_complete_member_onboarding', { expected_member: memberId })
+      .then(({ data, error }) => {
+        if (active && !error && typeof data === 'string') {
+          setLocalCompletion({ id: memberId, date: data });
+          try { localStorage.setItem('herspace_onboarding_completed:' + memberId, data); } catch {}
+        }
+      }, () => {});
+    return () => { active = false; };
+  }, [memberId, hasLocalCompletion, serverCompletedAt]);
+
   const [requestedRoute, setActiveRoute] = useState(() => {
     if (window.location.pathname === memberResetPath) return 'member-reset';
     if (window.location.pathname === memberConfirmPath) return 'member-confirm';
