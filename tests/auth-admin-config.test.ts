@@ -1,10 +1,22 @@
-import { it, expect, vi } from 'vitest';
-it('initialises the verified public client even when hosting contains a malformed URL', async () => {
-  vi.stubEnv('VITE_SUPABASE_URL', 'VITE_SUPABASE_URL=not-a-valid-url');
-  vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'sb_secret_must_never_be_used');
-  const {supabase} = await import('../src/services/auth');
-  expect(new URL(supabase.supabaseUrl).origin).toBe('https://tzbkjvvkhxxobqsbtsdq.supabase.co');
-  expect(supabase.supabaseKey.startsWith('sb_publishable_')).toBe(true);
-  supabase.auth.stopAutoRefresh();
-  vi.unstubAllEnvs();
+import { expect, it } from 'vitest';
+import { readSupabaseConfig } from '../src/services/supabaseConfig';
+
+const good = {
+  VITE_SUPABASE_URL: 'https://fixture.supabase.co',
+  VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_synthetic',
+};
+
+it('accepts an explicitly configured public project', () => {
+  expect(readSupabaseConfig(good)).toEqual({
+    url: good.VITE_SUPABASE_URL,
+    key: good.VITE_SUPABASE_PUBLISHABLE_KEY,
+  });
+});
+
+it.each([
+  {},
+  { ...good, VITE_SUPABASE_URL: 'not-a-valid-url' },
+  { ...good, VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_secret_synthetic' },
+])('rejects missing, malformed or privileged configuration', config => {
+  expect(() => readSupabaseConfig(config)).toThrow('Configure a valid');
 });

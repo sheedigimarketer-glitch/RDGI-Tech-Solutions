@@ -28,3 +28,14 @@ dist/
 # Local development symlink and Supabase CLI cache
 /node_modules
 supabase/.temp/
+
+# Environment variants and private signing files
+.env.*
+!.env.example
+*.pem
+*.key
+*.jks
+*.keystore
+
+# Local design-session media
+.aistudio/

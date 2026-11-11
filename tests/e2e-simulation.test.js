@@ -47,7 +47,7 @@ async function run() {
 
   // Test 1: Phone OTP Dispatch
   test('Step 1: Dispatch phone OTP to valid Indian number', () => {
-    const res = auth.sendPhoneOtp('9840198401');
+    const res = auth.sendPhoneOtp('0000008401');
     assert(res.success);
     assert(res.demoOtp.length === 6);
   });
@@ -56,7 +56,7 @@ async function run() {
   await (async () => {
     test('Step 2: Complete member registration with OTP & Age verification', async () => {
       const res = await auth.verifyPhoneOtpAndRegister({
-        phone: '9840198401',
+        phone: '0000008401',
         otp: auth.generatedOtp,
         fullName: 'Soundarya M.',
         email: 'soundarya@example.in',
@@ -77,7 +77,7 @@ async function run() {
   await (async () => {
     test('Step 3: Prevent duplicate free trial on repeat registration with same phone', async () => {
       const repeatRes = await auth.verifyPhoneOtpAndRegister({
-        phone: '9840198401',
+        phone: '0000008401',
         otp: auth.generatedOtp,
         fullName: 'Soundarya M.',
         age: '26',
@@ -163,8 +163,8 @@ async function run() {
     const initialExpertsCount = store.state.experts.length;
     const newApp = admin.submitApplication({
       name: 'Dr. Keerthi V.',
-      email: 'keerthi@chennaipsych.org',
-      phone: '9840298402',
+      email: 'provider@example.test',
+      phone: '0000008402',
       role: 'counsellor',
       qualification: 'Ph.D. in Clinical Psychology, Madras University',
       rciNumber: 'CRR-B90234',

@@ -1,0 +1,23 @@
+name: Verify HerSpace
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: https://fixture.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_synthetic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm exec -- cap copy android
+      - run: cmp dist/index.html android/app/src/main/assets/public/index.html

@@ -90,7 +90,7 @@ export const ProApplyModal: React.FC = () => {
                 id="proEmail"
                 type="email"
                 className="form-control"
-                placeholder="sangeetha@psych.in"
+                placeholder="name@example.test"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required

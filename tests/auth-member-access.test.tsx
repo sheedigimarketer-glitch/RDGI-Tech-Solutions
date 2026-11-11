@@ -240,3 +240,16 @@ it('allows a password update only after a recovery event', async () => {
   expect(await main().findByText(/Password updated/)).toBeTruthy();
   expect(backend.updateUser).toHaveBeenCalledWith({ password: 'replacement-password' });
 });
+
+it('gates a direct dashboard URL and restores the requested view after authentication', async () => {
+  window.history.replaceState(null, '', '/dashboard');
+  backend.profile = profile;
+  launch();
+  await waitForHeading('Welcome back');
+  expect(backend.read).not.toHaveBeenCalled();
+
+  backend.account = account;
+  backend.emit('SIGNED_IN');
+  expect(await screen.findByText('MEMBER SESSIONS & PRIVILEGES')).toBeTruthy();
+  expect(backend.read).toHaveBeenCalledWith('member_profiles', 'user_id', account.id);
+});

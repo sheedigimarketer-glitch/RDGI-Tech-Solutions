@@ -4,22 +4,22 @@ import { HERSPACE_CONFIG } from '../data/config';
 
 const PLANS_FAQS = [
   {
-    q: 'How does the 7-Day Free Trial work?',
-    qTa: '7 நாள் இலவச சோதனை எப்படி செயல்படுகிறது?',
-    a: 'Every new member receives 7 days of full sanctuary access at ₹0, including 1 complimentary 30-minute session with a Trained Listener, the encrypted My Cycle tracker, and the Calm Audio Sanctuary.',
-    aTa: 'ஒவ்வொரு புதிய உறுப்பினரும் ₹0 கட்டணத்தில் 7 நாட்கள் முழு அணுகலைப் பெறுவார்கள், இதில் பயிற்சி பெற்ற கேட்பவருடன் 1 இலவச 30 நிமிட அமர்வும் அடங்கும்.'
+    q: 'How does the Three-Month Free Trial work?',
+    qTa: 'மூன்று மாத இலவச சோதனை எப்படி செயல்படுகிறது?',
+    a: 'Eligible first-time members receive three free months. The one-time 30-minute listener session has a separate seven-day redemption window from registration once bookings are available.',
+    aTa: 'தகுதியுள்ள புதிய உறுப்பினர்களுக்கு மூன்று மாதங்கள் இலவசம். முன்பதிவு வசதி தொடங்கியதும், ஒருமுறை கிடைக்கும் 30 நிமிட இலவச அமர்வைப் பதிவு செய்த நாளிலிருந்து ஏழு நாட்களுக்குள் பயன்படுத்த வேண்டும்.'
   },
   {
-    q: 'What happens after my 7-day free trial?',
-    qTa: '7 நாள் இலவச சோதனைக்குப் பிறகு என்ன நடக்கும்?',
-    a: 'You can continue with our Extended Validity Plan at ₹149 for your first 60 days of validity, followed by ₹149/month auto-renewal. You can cancel anytime in one tap with zero penalty.',
-    aTa: 'முதல் 60 நாட்களுக்கு ₹149 கட்டணத்தில் தொடரலாம், அதைத் தொடர்ந்து மாதம் ₹149 மட்டுமே. எப்போது வேண்டுமானாலும் ஒரே கிளிக்கில் ரத்து செய்யலாம்.'
+    q: 'What happens after my three-month free trial?',
+    qTa: 'மூன்று மாத இலவச சோதனைக்குப் பிறகு என்ன நடக்கும்?',
+    a: 'After the trial, the membership price is ₹149 per month. Auto-renewal requires your consent. Paid membership is currently unavailable.',
+    aTa: 'இலவச காலத்திற்குப் பிறகு சந்தா மாதம் ₹149. தானாகப் புதுப்பிக்க உங்கள் ஒப்புதல் தேவை. கட்டணச் சந்தா தற்போது கிடைக்கவில்லை.'
   },
   {
     q: 'Is my phone number really hidden during calls?',
     qTa: 'அழைப்பின் போது எனது தொலைபேசி எண் உண்மையிலேயே மறைக்கப்படுமா?',
-    a: 'Yes, 100%. All sessions connect through our 2-way Exotel virtual telephony bridge. Neither you nor the listener/counsellor ever sees each other’s personal phone number.',
-    aTa: 'ஆம், 100%. அனைத்து அழைப்புகளும் எங்கள் இருவழி மறைக்கப்பட்ட தொலைபேசி பாலம் வழியாக இணைக்கப்படுகின்றன. உங்கள் எண் யாருக்கும் தெரியாது.'
+    a: 'Masked calling is currently unavailable.',
+    aTa: 'எண்ணை மறைத்து அழைக்கும் வசதி தற்போது கிடைக்கவில்லை.'
   },
   {
     q: 'What is the difference between a Trained Listener (₹399) and a Counsellor (₹999)?',
@@ -30,26 +30,14 @@ const PLANS_FAQS = [
   {
     q: 'Can I reschedule or cancel a booked session?',
     qTa: 'முன்பதிவு செய்த அமர்வை மாற்றியமைக்க முடியுமா?',
-    a: 'One reschedule is permitted per booking up to 4 hours prior to the appointment start time. If your care provider fails to join, you receive a 100% full refund automatically.',
-    aTa: 'அமர்வு தொடங்குவதற்கு 4 மணி நேரத்திற்கு முன்பு வரை ஒரு முறை நேரத்தை மாற்றிக்கொள்ளலாம். நிபுணர் வரவில்லை என்றால் 100% முழு பணமும் திரும்பப் பெறப்படும்.'
+    a: 'Appointments can be rescheduled once booking is available. Confirmed appointments cannot be cancelled. A refund applies only if the counsellor fails to attend.',
+    aTa: 'முன்பதிவு வசதி தொடங்கியதும் அமர்வு நேரத்தை மாற்றலாம். உறுதி செய்த அமர்வை ரத்து செய்ய முடியாது. ஆலோசகர் வரவில்லை என்றால் மட்டுமே பணம் திரும்ப வழங்கப்படும்.'
   }
 ];
 
 export const PricingView: React.FC = () => {
   const { t, isTa, user, navigate, openPolicyModal } = useApp();
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
-
-  const today = new Date();
-  const trialEndDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
-  const extendedValidityDate = new Date(today.getTime() + 67 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
 
   return (
     <div className="min-h-dvh bg-[#FAF7F5] text-slate-900 pb-24">
@@ -64,14 +52,14 @@ export const PricingView: React.FC = () => {
           </h1>
           <p className="text-sm md:text-base text-slate-600 leading-relaxed">
             {isTa
-              ? 'மறைமுக கட்டணங்கள் இன்றி, 7 நாட்கள் இலவச சோதனையுடன் தொடங்குங்கள். உங்கள் தனியுரிமை மற்றும் பாதுகாப்பே எங்கள் முதன்மை நோக்கம்.'
-              : 'Begin with 7 days completely free at ₹0. Continue with ₹149 for your first 60 days validity, followed by simple monthly renewal. Cancel anytime in one tap.'}
+              ? 'தகுதியுள்ள புதிய உறுப்பினர்களுக்கு மூன்று மாதங்கள் இலவசம். பதிவு செய்யக் கட்டண விவரங்கள் தேவையில்லை.'
+              : 'Eligible first-time members get three months free. Registration requires no payment details.'}
           </p>
         </div>
 
         {/* 2. Primary Subscription Plans — 2-Column Equalized Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch mb-10">
-          {/* Tier 1: 7-Day Free Trial */}
+          {/* Tier 1: Three-Month Free Trial */}
           <div className="rounded-2xl backdrop-blur-xl bg-white/80 border border-[#5E2750]/25 shadow-xs p-6 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between gap-2 mb-3 text-xs">
@@ -79,12 +67,12 @@ export const PricingView: React.FC = () => {
                   New Member Sanctuary Trial
                 </span>
                 <span className="text-slate-500 tabular-nums">
-                  Valid until {trialEndDate}
+                  For eligible first-time members
                 </span>
               </div>
 
               <h2 className="text-xl font-bold text-slate-900 tracking-tight mb-2">
-                7 Days Free Trial
+                Three Months Free
               </h2>
 
               <div className="flex items-baseline gap-2 my-4 tabular-nums">
@@ -92,12 +80,12 @@ export const PricingView: React.FC = () => {
                   ₹0
                 </span>
                 <span className="text-xs font-medium text-slate-500">
-                  for your first 7 days
+                  for three months
                 </span>
               </div>
 
               <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Zero-commitment trial to experience HerSpace emotional sanctuary, explore expert directories, and verify caller masking.
+                Explore HerSpace without entering payment details.
               </p>
 
               <div className="border-t border-slate-200/70 pt-4 mb-3">
@@ -108,11 +96,11 @@ export const PricingView: React.FC = () => {
                 <ul className="flex flex-col gap-2.5 text-sm text-slate-700">
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#5E2750] font-bold shrink-0">✓</span>
-                    <span><strong>1 Complimentary 30-Min Session</strong> with a Trained Listener (₹399 value)</span>
+                    <span><strong>1 Complimentary 30-Min Session</strong> with a trained listener, within seven days of registration when booking is available</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#5E2750] font-bold shrink-0">✓</span>
-                    <span><strong>Private My Cycle Tracker</strong> with local device encryption</span>
+                    <span><strong>Private My Cycle Tracker</strong> with session-only tracking</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#5E2750] font-bold shrink-0">✓</span>
@@ -124,7 +112,7 @@ export const PricingView: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#5E2750] font-bold shrink-0">✓</span>
-                    <span><strong>2-Way Masked Calling</strong> so your phone number stays 100% private</span>
+                    <span><strong>2-Way Masked Calling</strong> currently unavailable</span>
                   </li>
                 </ul>
               </div>
@@ -136,7 +124,7 @@ export const PricingView: React.FC = () => {
                 onClick={() => navigate(user ? 'space' : 'onb-register')}
                 className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-[#5E2750] hover:bg-[#4c1f40] active:scale-[0.98] text-white text-sm font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap"
               >
-                <span>{user ? 'Open My Personal Space' : 'Start 7-Day Trial @ ₹0'}</span>
+                <span>{user ? 'Open My Personal Space' : 'Register for Free'}</span>
                 <span aria-hidden="true">→</span>
               </button>
               <div className="text-center text-xs text-slate-500 mt-2">
@@ -145,20 +133,20 @@ export const PricingView: React.FC = () => {
             </div>
           </div>
 
-          {/* Tier 2: First 60 Days Validity Plan */}
+          {/* Tier 2: Monthly Membership */}
           <div className="rounded-2xl backdrop-blur-xl bg-white/80 border border-white/60 shadow-xs p-6 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between gap-2 mb-3 text-xs">
                 <span className="font-semibold text-slate-700">
-                  Extended Validity Plan
+                  Monthly Membership
                 </span>
                 <span className="text-slate-500 tabular-nums">
-                  Valid through {extendedValidityDate}
+                  After the trial
                 </span>
               </div>
 
               <h2 className="text-xl font-bold text-slate-900 tracking-tight mb-2">
-                First 60 Days Validity
+                Monthly Membership
               </h2>
 
               <div className="flex items-baseline gap-2 my-4 tabular-nums">
@@ -166,12 +154,12 @@ export const PricingView: React.FC = () => {
                   ₹149
                 </span>
                 <span className="text-xs font-medium text-slate-500">
-                  for 60 days validity
+                  per month
                 </span>
               </div>
 
               <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Followed by simple monthly renewal at ₹149/month after the initial 60 days. Cancel anytime with a single tap in your account.
+                Auto-renewal requires your consent. Paid membership is currently unavailable.
               </p>
 
               <div className="border-t border-slate-200/70 pt-4 mb-3">
@@ -190,15 +178,15 @@ export const PricingView: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#5E2750] font-bold shrink-0">✓</span>
-                    <span><strong>Dedicated Live Melodies</strong> booking at ₹99 for 15 mins</span>
+                    <span><strong>Dedicated Live Melodies</strong> booking currently unavailable</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#5E2750] font-bold shrink-0">✓</span>
-                    <span><strong>Permanent Cycle History</strong> stored encrypted on your device</span>
+                    <span><strong>My Cycle</strong> tracks entries for the current session</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#5E2750] font-bold shrink-0">✓</span>
-                    <span><strong>One-Tap Reschedule</strong> up to 4 hours before session</span>
+                    <span><strong>One-Tap Reschedule</strong> available when booking opens</span>
                   </li>
                 </ul>
               </div>
@@ -213,7 +201,7 @@ export const PricingView: React.FC = () => {
                 Review Cancellation & Reschedule Terms
               </button>
               <div className="text-center text-xs text-slate-500 mt-2">
-                Zero penalty, instant online cancellation anytime.
+                Confirmed appointments cannot be cancelled.
               </div>
             </div>
           </div>
@@ -229,7 +217,7 @@ export const PricingView: React.FC = () => {
               Transparent Session Fees
             </h3>
             <p className="text-xs md:text-sm text-slate-500">
-              Every session takes place over our secure two-way masked phone bridge. No video cameras, no personal contact sharing.
+              Booking and masked calling are currently unavailable.
             </p>
           </div>
 
@@ -290,15 +278,15 @@ export const PricingView: React.FC = () => {
                   <td className="py-4 px-4 text-slate-600">
                     Live soothing vocal therapy, acoustic lullabies & comfort songs
                   </td>
-                  <td className="py-4 px-4 text-slate-600 whitespace-nowrap">15 mins</td>
-                  <td className="py-4 px-4 font-bold text-slate-900 whitespace-nowrap">₹99</td>
+                  <td className="py-4 px-4 text-slate-600 whitespace-nowrap">To be confirmed</td>
+                  <td className="py-4 px-4 font-bold text-slate-900 whitespace-nowrap">To be confirmed</td>
                   <td className="py-4 pl-4 text-right">
                     <button
                       type="button"
                       onClick={() => navigate('singers')}
                       className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap"
                     >
-                      Book Singer
+                      View Singers
                     </button>
                   </td>
                 </tr>
@@ -317,7 +305,7 @@ export const PricingView: React.FC = () => {
               Fair Scheduling & Reschedule Guarantee
             </h3>
             <p className="text-xs md:text-sm text-slate-600 leading-relaxed">
-              <strong>One reschedule allowed</strong> per session up to 4 hours prior to appointment time. If an expert is unable to attend, you receive a 100% full refund automatically.
+              Confirmed appointments support rescheduling. A refund applies only if the counsellor fails to attend.
             </p>
           </div>
 

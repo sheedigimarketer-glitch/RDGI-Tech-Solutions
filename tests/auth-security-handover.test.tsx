@@ -36,7 +36,7 @@ it.each([
   ['../api/telephony/connect.js', 503],
 ])('fails closed on %s even when request data is supplied', (path, expectedStatus) => {
   const res = { setHeader: vi.fn(), status: vi.fn().mockReturnThis(), json: vi.fn() };
-  require(path)({ method: 'POST', body: { action: 'send', phone: '+919999999999', bookingId: 'fake' } }, res);
+  require(path)({ method: 'POST', body: { action: 'send', phone: '+12025550199', bookingId: 'fake' } }, res);
   expect(res.status).toHaveBeenCalledWith(expectedStatus);
   expect(res.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-store');
   expect(res.json.mock.calls[0][0]).toEqual({ error: expect.any(String) });

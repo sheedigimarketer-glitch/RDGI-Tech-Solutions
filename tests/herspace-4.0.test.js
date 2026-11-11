@@ -265,8 +265,8 @@ test('Live Singers have verified profiles and Pending Client Approval fee status
 console.log('\n--- 6. Exotel Two-Way Masked Telephone Calling Tests ---');
 
 test('Two-way number masking hides personal mobile numbers and routes to role-specific virtual bridge', () => {
-  const masked = window.HerSpaceTelephonyEngine.maskPhoneNumber('9840123456');
-  assert.strictEqual(masked.includes('9840123456'), false);
+  const masked = window.HerSpaceTelephonyEngine.maskPhoneNumber('0000003456');
+  assert.strictEqual(masked.includes('0000003456'), false);
   assert.strictEqual(masked, '+91-98XXXXXX56 (Masked)');
 
   const sess = window.HerSpaceTelephonyEngine.initiateMaskedCall({
@@ -275,7 +275,7 @@ test('Two-way number masking hides personal mobile numbers and routes to role-sp
     partnerRole: 'counsellor'
   });
   assert.strictEqual(sess.queueId, 'queue_counsellor_tn');
-  assert.strictEqual(sess.virtualBridgeNumber, '+91-44-4813-1002');
+  assert.strictEqual(sess.virtualBridgeNumber, '+1-202-555-0102');
   assert.strictEqual(sess.realNumbersExposed, false);
   assert.strictEqual(sess.audioRecordingActive, false);
 });

@@ -142,51 +142,6 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   }
 ];
 
-const INITIAL_PRO_APPLICATIONS: ProApplication[] = [
-  {
-    id: 'app-01',
-    name: 'Dr. Gayathri R.',
-    role: 'counsellor',
-    qualification: 'M.Phil Clinical Psychology, NIMHANS',
-    rciNumber: 'CRR-A78942',
-    experienceYears: 14,
-    specialties: ['Trauma & Depression', 'Anxiety'],
-    bio: 'Clinical psychologist with extensive experience in evidence-based cognitive trauma recovery.',
-    status: 'pending',
-    submittedAt: '2026-10-26T14:30:00Z',
-    email: 'gayathri.r@psych.in',
-    phone: '+91 98401 12345'
-  },
-  {
-    id: 'app-02',
-    name: 'Kavitha S.',
-    role: 'listener',
-    qualification: 'Certified Peer Support Specialist · Empathy First Aid',
-    rciNumber: null,
-    experienceYears: 4,
-    specialties: ['Postpartum & Family Transitions'],
-    bio: 'Empathetic listener focusing on maternal mental health and navigating new parenthood.',
-    status: 'pending',
-    submittedAt: '2026-10-27T09:15:00Z',
-    email: 'kavitha.listener@care.in',
-    phone: '+91 98412 67890'
-  },
-  {
-    id: 'app-03',
-    name: 'Subhashini Natarajan',
-    role: 'singer',
-    qualification: 'M.A. Carnatic Classical Vocals · Madras Music Academy',
-    rciNumber: 'MMA-VOC-8841',
-    experienceYears: 7,
-    specialties: ['Calm Ragas', 'Insomnia Relief', 'Lullabies'],
-    bio: 'Vocal therapist and classical singer providing soothing evening ragas and gentle bedtime lullabies.',
-    status: 'pending',
-    submittedAt: '2026-10-28T16:45:00Z',
-    email: 'subhashini.vocals@herspace.in',
-    phone: '+91 98405 55678'
-  }
-];
-
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [lang, setLangState] = useState<Language>(() => {
     try {
@@ -242,6 +197,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (window.location.pathname === memberResetPath) return 'member-reset';
     if (window.location.pathname === memberConfirmPath) return 'member-confirm';
     if (window.location.pathname === memberSigninPath) return 'signin';
+    if (window.location.pathname === '/dashboard') return 'dashboard';
+    if (window.location.pathname === '/space') return 'space';
+    if (window.location.pathname === '/cycle') return 'cycle';
     return 'home';
   });
   const protectedRoutes = ['cycle', 'space', 'dashboard', 'onb-tour', 'onb-membership', 'onb-book'];
