@@ -256,7 +256,7 @@ export const Header: React.FC = () => {
               <line x1="2" y1="12" x2="22" y2="12"></line>
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
             </svg>
-            <span>{lang === 'en' ? 'Toggle · தமிழ்' : 'Toggle · EN'}</span>
+            <span>{lang === 'en' ? 'தமிழ்' : 'Toggle · EN'}</span>
           </button>
 
           {/* Top Line Sign Up Button (Always Visible when signed out) */}
