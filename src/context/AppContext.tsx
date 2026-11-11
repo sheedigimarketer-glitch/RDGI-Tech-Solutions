@@ -135,8 +135,8 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     type: 'entitlement',
     titleEn: 'Complimentary 30-Min Listener Session (₹0)',
     titleTa: 'இலவச 30-நிமிட கவனிப்பாளர் அமர்வு (₹0)',
-    bodyEn: 'First-time members enjoy a 7-Day Free Trial (₹0) followed by ₹149 for the first 60 days validity, plus 1 complimentary 30-minute Trained Listener session valid for 7 days.',
-    bodyTa: 'புதிய உறுப்பினர்களுக்கு 7 நாள் இலவச சோதனை (₹0) மற்றும் 7 நாட்களுக்குச் செல்லுபடியாகும் 1 இலவச 30-நிமிட கவனிப்பாளர் அமர்வு வழங்கப்படுகிறது.',
+    bodyEn: 'Eligible first-time members receive three free months without payment details. The complimentary 30-minute session with a trained human listener must be used within seven days of registration.',
+    bodyTa: 'தகுதியுள்ள புதிய உறுப்பினர்களுக்கு கட்டண விவரங்கள் இன்றி மூன்று மாதங்கள் இலவசம். பயிற்சி பெற்ற மனிதக் கவனிப்பாளருடனான இலவச 30 நிமிட அமர்வைப் பதிவு செய்ததிலிருந்து ஏழு நாட்களுக்குள் பயன்படுத்த வேண்டும்.',
     time: 'Today',
     read: false
   }

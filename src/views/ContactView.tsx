@@ -20,8 +20,8 @@ export const ContactView: React.FC = () => {
         </h1>
         <p style={{ fontSize: '1.05rem', color: 'var(--color-ink-muted)', lineHeight: 1.6, margin: 0 }}>
           {isTa
-            ? 'முன்பதிவு, 7 நாள் இலவச சோதனை அல்லது தொழில்நுட்ப உதவிக்கு எங்கள் சென்னைக் குழுவைத் தொடர்பு கொள்ளுங்கள்.'
-            : 'Have questions regarding your 7-day free trial, booking a counsellor, or 2-way masked calling? We are here to support you 7 days a week.'}
+            ? 'முன்பதிவு, மூன்று மாத இலவச உறுப்பினர் அணுகல் அல்லது தொழில்நுட்ப உதவிக்கு எங்கள் சென்னைக் குழுவைத் தொடர்பு கொள்ளுங்கள்.'
+            : 'Have questions regarding your three-month membership trial, booking a counsellor, or 2-way masked calling? We are here to support you 7 days a week.'}
         </p>
       </div>
 
