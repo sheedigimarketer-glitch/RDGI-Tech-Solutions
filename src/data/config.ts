@@ -42,10 +42,8 @@ export const HERSPACE_CONFIG = {
   pricing: {
     currency: 'INR',
     firstTimeRegistrationFee: 0,
-    freeTrialDays: 7, // 7 days free trial @ ₹0
-    firstPeriodValidityDays: 60, // Followed by ₹149 for the first 60 days
-    firstPeriodFeeINR: 149,
-    monthlyRenewalFeeINR: 149, // Followed by monthly auto-renewal @ ₹149
+    freeTrialMonths: 3,
+    monthlyRenewalFeeINR: 149,
     trainedListenerPerSession: 399, // 60 mins
     professionalCounsellorPerSession: 999, // 60 mins
     loveMelodyPerSession: 99, // Love melody at 15 mins ₹99

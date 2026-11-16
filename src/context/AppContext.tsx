@@ -119,74 +119,6 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'notif-1',
-    type: 'security',
-    titleEn: '2-Way Phone Number Masking Active',
-    titleTa: 'இருவழி தொலைபேசி எண் மறைப்பு செயலில் உள்ளது',
-    bodyEn: 'Your personal mobile number is strictly hidden on all Listener, Counsellor, and Live Singer calls via Exotel Virtual Bridge.',
-    bodyTa: 'கவனிப்பாளர், ஆலோசகர் மற்றும் பாடகர் அழைப்புகளில் உங்கள் மொபைல் எண் 100% மறைக்கப்பட்டுப் பாதுகாக்கப்படுகிறது.',
-    time: 'Just now',
-    read: false
-  },
-  {
-    id: 'notif-2',
-    type: 'entitlement',
-    titleEn: 'Complimentary 30-Min Listener Session (₹0)',
-    titleTa: 'இலவச 30-நிமிட கவனிப்பாளர் அமர்வு (₹0)',
-    bodyEn: 'First-time members enjoy a 7-Day Free Trial (₹0) followed by ₹149 for the first 60 days validity, plus 1 complimentary 30-minute Trained Listener session valid for 7 days.',
-    bodyTa: 'புதிய உறுப்பினர்களுக்கு 7 நாள் இலவச சோதனை (₹0) மற்றும் 7 நாட்களுக்குச் செல்லுபடியாகும் 1 இலவச 30-நிமிட கவனிப்பாளர் அமர்வு வழங்கப்படுகிறது.',
-    time: 'Today',
-    read: false
-  }
-];
-
-const INITIAL_PRO_APPLICATIONS: ProApplication[] = [
-  {
-    id: 'app-01',
-    name: 'Dr. Gayathri R.',
-    role: 'counsellor',
-    qualification: 'M.Phil Clinical Psychology, NIMHANS',
-    rciNumber: 'CRR-A78942',
-    experienceYears: 14,
-    specialties: ['Trauma & Depression', 'Anxiety'],
-    bio: 'Clinical psychologist with extensive experience in evidence-based cognitive trauma recovery.',
-    status: 'pending',
-    submittedAt: '2026-10-26T14:30:00Z',
-    email: 'gayathri.r@psych.in',
-    phone: '+91 98401 12345'
-  },
-  {
-    id: 'app-02',
-    name: 'Kavitha S.',
-    role: 'listener',
-    qualification: 'Certified Peer Support Specialist · Empathy First Aid',
-    rciNumber: null,
-    experienceYears: 4,
-    specialties: ['Postpartum & Family Transitions'],
-    bio: 'Empathetic listener focusing on maternal mental health and navigating new parenthood.',
-    status: 'pending',
-    submittedAt: '2026-10-27T09:15:00Z',
-    email: 'kavitha.listener@care.in',
-    phone: '+91 98412 67890'
-  },
-  {
-    id: 'app-03',
-    name: 'Subhashini Natarajan',
-    role: 'singer',
-    qualification: 'M.A. Carnatic Classical Vocals · Madras Music Academy',
-    rciNumber: 'MMA-VOC-8841',
-    experienceYears: 7,
-    specialties: ['Calm Ragas', 'Insomnia Relief', 'Lullabies'],
-    bio: 'Vocal therapist and classical singer providing soothing evening ragas and gentle bedtime lullabies.',
-    status: 'pending',
-    submittedAt: '2026-10-28T16:45:00Z',
-    email: 'subhashini.vocals@herspace.in',
-    phone: '+91 98405 55678'
-  }
-];
-
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [lang, setLangState] = useState<Language>(() => {
     try {
@@ -238,10 +170,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch {}
   }
   const onboarding = { ...progress, completed: Boolean(completedAt), completedAt };
+  const memberId = user?.id;
+  const serverCompletedAt = memberSession.member?.completedAt;
+  const hasLocalCompletion = Boolean(completedAt);
+  useEffect(() => {
+    if (!memberId || !hasLocalCompletion || serverCompletedAt) return;
+    let active = true;
+    void supabase.rpc('herspace_complete_member_onboarding', { expected_member: memberId })
+      .then(({ data, error }) => {
+        if (active && !error && typeof data === 'string') {
+          setLocalCompletion({ id: memberId, date: data });
+          try { localStorage.setItem('herspace_onboarding_completed:' + memberId, data); } catch {}
+        }
+      }, () => {});
+    return () => { active = false; };
+  }, [memberId, hasLocalCompletion, serverCompletedAt]);
+
   const [requestedRoute, setActiveRoute] = useState(() => {
     if (window.location.pathname === memberResetPath) return 'member-reset';
     if (window.location.pathname === memberConfirmPath) return 'member-confirm';
     if (window.location.pathname === memberSigninPath) return 'signin';
+    if (window.location.pathname === '/dashboard') return 'dashboard';
+    if (window.location.pathname === '/space') return 'space';
+    if (window.location.pathname === '/cycle') return 'cycle';
     return 'home';
   });
   const protectedRoutes = ['cycle', 'space', 'dashboard', 'onb-tour', 'onb-membership', 'onb-book'];
@@ -280,7 +231,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   });
 
-  const [notifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [notifications] = useState<NotificationItem[]>([]);
   const [proApplications, setProApplications] = useState<ProApplication[]>([]);
 
   const [toasts, setToasts] = useState<Toast[]>([]);

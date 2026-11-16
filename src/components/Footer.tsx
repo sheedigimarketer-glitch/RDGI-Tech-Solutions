@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 
 export const Footer: React.FC = () => {
-  const { t, navigate, openPolicyModal } = useApp();
+  const { t, isTa, navigate, openPolicyModal } = useApp();
 
   // Mobile accordion states
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -102,7 +102,7 @@ export const Footer: React.FC = () => {
                 cursor: 'pointer'
               }}
             >
-              Plans (7-Day Trial)
+              {isTa ? 'உறுப்பினர் திட்டங்கள்' : 'Membership Plans'}
             </button>
           </div>
         </div>
@@ -144,7 +144,7 @@ export const Footer: React.FC = () => {
                 <li><button className="footer-link-btn" onClick={() => navigate('wellbeing')}>11 Wellbeing Topics (EN & தமிழ்)</button></li>
                 <li><button className="footer-link-btn" onClick={() => navigate('cycle')}>My Cycle Period Tracker</button></li>
                 <li><button className="footer-link-btn" onClick={() => navigate('how')}>How It Works</button></li>
-                <li><button className="footer-link-btn" onClick={() => navigate('pricing')}>7-Day Trial & ₹149 Plans</button></li>
+                <li><button className="footer-link-btn" onClick={() => navigate('pricing')}>{isTa ? 'இலவச காலம் மற்றும் ₹149 மாதச் சந்தா' : 'Free Trial & ₹149 Monthly Plan'}</button></li>
               </ul>
             </div>
           </div>

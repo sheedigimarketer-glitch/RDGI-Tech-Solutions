@@ -11,6 +11,7 @@ const backend = vi.hoisted(() => {
     account: null as any,
     profile: null as any,
     entitlement: null as any,
+    rpc: vi.fn(),
     signUp: vi.fn(),
     signInWithPassword: vi.fn(),
     getUser: vi.fn(),
@@ -39,6 +40,7 @@ vi.mock('../src/services/auth', () => ({
     if (value.length < 12 || value.length > 128) throw new Error('weak_password');
   },
   supabase: {
+    rpc: backend.rpc,
     auth: {
       signUp: backend.signUp, signInWithPassword: backend.signInWithPassword, getUser: backend.getUser,
       resetPasswordForEmail: backend.resetPasswordForEmail, updateUser: backend.updateUser, signOut: backend.signOut,
@@ -70,6 +72,7 @@ function launch() {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  backend.rpc.mockResolvedValue({ data: '2026-11-11T12:00:00Z', error: null });
   window.history.replaceState(null, '', '/');
   window.scrollTo = vi.fn();
   backend.account = null;
@@ -178,7 +181,8 @@ it('resumes a verified signup, validates eligibility and completes all four onbo
 
   submit('Go to My Personal Space →');
   await waitForHeading('Welcome, Member');
-  expect(localStorage.getItem('herspace_onboarding_completed:' + account.id)).toBeTruthy();
+  await waitFor(() => expect(backend.rpc).toHaveBeenCalledWith('herspace_complete_member_onboarding', { expected_member: account.id }));
+  await waitFor(() => expect(localStorage.getItem('herspace_onboarding_completed:' + account.id)).toBe('2026-11-11T12:00:00Z'));
   app.unmount();
   window.history.replaceState(null, '', '/member/sign-in');
   launch();

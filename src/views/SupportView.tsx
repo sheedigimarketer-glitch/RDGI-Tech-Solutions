@@ -214,7 +214,7 @@ export const SupportView: React.FC = () => {
                 {t('supportEnquiryTitle')}
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed mb-6">
-                Need assistance with your booking, 7-day free trial, or number-masked telephony? Our Chennai support desk is ready to assist you confidentially.
+                {isTa ? 'மூன்று மாத இலவச உறுப்பினர் அணுகல் அல்லது உங்கள் கணக்கு குறித்து உதவி வேண்டுமா? எங்கள் சென்னைக் குழுவைத் தொடர்பு கொள்ளுங்கள்.' : 'Need help with the three-month membership trial or your account? Contact our Chennai support desk.'}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
