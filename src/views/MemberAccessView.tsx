@@ -13,6 +13,7 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
   const [email, setEmail] = useState('');
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
+  const [passwordError, setPasswordError] = useState<'length' | 'weak' | null>(null);
   const [busy, setBusy] = useState(false);
   const isProfile = mode === 'profile';
   const isRegister = mode === 'register';
@@ -46,6 +47,17 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
     const address = email.trim().toLowerCase();
     setError('');
     setNotice('');
+    setPasswordError(null);
+    const passwordInput = form.querySelector<HTMLInputElement>('#member-password');
+    if (isRegister || canReset) {
+      try {
+        validatePassword(password);
+      } catch {
+        setPasswordError('length');
+        passwordInput?.focus();
+        return;
+      }
+    }
     setBusy(true);
     try {
       if (isProfile && memberSession.accountId) {
@@ -59,7 +71,6 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
         memberSession.refresh();
         navigate('onb-register');
       } else if (isRegister) {
-        validatePassword(password);
         if (!fields.has('consent')) throw new Error('invalid_profile');
         const { data, error } = await supabase.auth.signUp({
           email: address, password,
@@ -77,7 +88,6 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
         if (error && !['user_not_found', 'email_not_confirmed'].includes(error.code || '')) throw error;
         setNotice(copy('If the email belongs to an eligible account, a reset link will be sent.', 'தகுதியான கணக்குடன் மின்னஞ்சல் இணைந்திருந்தால், மீட்டமைப்பு இணைப்பு அனுப்பப்படும்.'));
       } else if (canReset) {
-        validatePassword(password);
         if (password !== fields.get('confirmation')) throw new Error('password_mismatch');
         const { error } = await supabase.auth.updateUser({ password });
         if (error) throw error;
@@ -90,8 +100,9 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
         setError(copy('Check your details, age eligibility and consent.', 'உங்கள் விவரங்கள், வயதுத் தகுதி மற்றும் ஒப்புதலைச் சரிபார்க்கவும்.'));
       } else if (message === 'password_mismatch') {
         setError(copy('Passwords must match.', 'கடவுச்சொற்கள் ஒன்றாக இருக்க வேண்டும்.'));
-      } else if (showPassword && !isSignin && (password.length < 12 || password.length > 128 || code === 'weak_password')) {
-        setError(copy('Choose a strong password of 12–128 characters.', '12–128 எழுத்துகள் கொண்ட வலுவான கடவுச்சொல்லைத் தேர்ந்தெடுக்கவும்.'));
+      } else if ((isRegister || canReset) && code === 'weak_password') {
+        setPasswordError('weak');
+        passwordInput?.focus();
       } else if (isSignin && (code === 'invalid_credentials' || code === 'email_not_confirmed')) {
         setError(copy('Check your email and password, and verify your email before signing in.', 'மின்னஞ்சல், கடவுச்சொல் மற்றும் மின்னஞ்சல் சரிபார்ப்பைச் சரிபார்க்கவும்.'));
       } else if (typeof code === 'string' && code.startsWith('over_')) {
@@ -127,8 +138,15 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
           {showPassword && <div className="form-group">
             <label className="form-label" htmlFor="member-password">{copy(isSignin ? 'Password' : 'Password (12–128 characters)', isSignin ? 'கடவுச்சொல்' : 'கடவுச்சொல் (12–128 எழுத்துகள்)')}</label>
             <input id="member-password" name="password" className="form-control" type="password"
-              autoComplete={isSignin ? 'current-password' : 'new-password'} minLength={isSignin ? undefined : 12}
-              maxLength={isSignin ? undefined : 128} required />
+              autoComplete={isSignin ? 'current-password' : 'new-password'} required={isSignin}
+              aria-required={!isSignin || undefined} aria-invalid={passwordError ? true : undefined}
+              aria-describedby={passwordError ? 'member-password-error' : undefined}
+              onChange={() => setPasswordError(null)} />
+            {passwordError && <p id="member-password-error" className="onb-notice onb-notice-warn" role="alert">
+              {passwordError === 'length'
+                ? copy('Enter a password with 12–128 characters.', '12–128 எழுத்துகள் கொண்ட கடவுச்சொல்லை உள்ளிடுங்கள்.')
+                : copy('Choose a stronger password with 12–128 characters.', '12–128 எழுத்துகள் கொண்ட இன்னும் வலுவான கடவுச்சொல்லைத் தேர்ந்தெடுங்கள்.')}
+            </p>}
           </div>}
           {canReset && <div className="form-group">
             <label className="form-label" htmlFor="member-confirm-password">{copy('Confirm new password', 'புதிய கடவுச்சொல்லை உறுதிசெய்யுங்கள்')}</label>

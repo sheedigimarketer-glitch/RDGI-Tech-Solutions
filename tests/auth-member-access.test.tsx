@@ -122,6 +122,31 @@ it('registers with Supabase, gives duplicates the same message and requires veri
   expect(backend.signUp).toHaveBeenCalledTimes(2);
 });
 
+it('shows linked password length errors in English and Tamil without submitting signup', async () => {
+  launch();
+  fireEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+  await waitForHeading('Create your HerSpace account');
+  enter('Email address', 'member@example.test');
+  fireEvent.click(main().getByRole('checkbox'));
+  const password = main().getByLabelText('Password (12–128 characters)');
+  fireEvent.change(password, { target: { value: 'a'.repeat(11) } });
+  submit('Create account');
+  const englishError = await main().findByRole('alert');
+  expect(englishError.textContent?.trim()).toBe('Enter a password with 12–128 characters.');
+  expect(document.activeElement).toBe(password);
+  expect(password.getAttribute('aria-invalid')).toBe('true');
+  expect(password.getAttribute('aria-describedby')).toBe(englishError.id);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Switch Language' }));
+  expect((await main().findByRole('alert')).textContent?.trim())
+    .toBe('12–128 எழுத்துகள் கொண்ட கடவுச்சொல்லை உள்ளிடுங்கள்.');
+  fireEvent.change(password, { target: { value: 'a'.repeat(129) } });
+  expect(main().queryByRole('alert')).toBeNull();
+  fireEvent.submit(password.closest('form')!);
+  expect(await main().findByRole('alert')).toBeTruthy();
+  expect(backend.signUp).not.toHaveBeenCalled();
+});
+
 it('resumes a verified signup, validates eligibility and completes all four onboarding steps', async () => {
   window.history.replaceState(null, '', '/member/confirm');
   backend.account = account;
@@ -229,6 +254,12 @@ it('allows a password update only after a recovery event', async () => {
   expect(backend.getUser).not.toHaveBeenCalled();
   backend.emit('PASSWORD_RECOVERY');
   await main().findByLabelText('Password (12–128 characters)');
+  enter('Password (12–128 characters)', 'short');
+  enter('Confirm new password', 'short');
+  submit('Save new password');
+  expect((await main().findByRole('alert')).textContent?.trim())
+    .toBe('Enter a password with 12–128 characters.');
+  expect(backend.updateUser).not.toHaveBeenCalled();
   enter('Password (12–128 characters)', 'replacement-password');
   enter('Confirm new password', 'different-password');
   submit('Save new password');
