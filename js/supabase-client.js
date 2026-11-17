@@ -7,8 +7,8 @@
   'use strict';
 
   const cfg = (window.HERSPACE_CONFIG && window.HERSPACE_CONFIG.supabase) || {
-    url: (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.url) || 'https://placeholder-herspace.supabase.co',
-    publishableKey: (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.publishableKey) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy-anon-key-herspace'
+    url: (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.url) || '',
+    publishableKey: (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.publishableKey) || ''
   };
   let client = null;
   let isLive = false;

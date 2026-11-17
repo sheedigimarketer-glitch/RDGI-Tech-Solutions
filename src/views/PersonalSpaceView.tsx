@@ -1,4 +1,6 @@
 import React from 'react';
+import { MemberPhoneVerification } from '../components/MemberPhoneVerification';
+import { WelcomeSessionBooking } from '../components/WelcomeSessionBooking';
 import { useApp } from '../context/AppContext';
 import { WELLBEING_ARTICLES } from '../data/wellbeingData';
 
@@ -8,11 +10,10 @@ export const PersonalSpaceView: React.FC = () => {
     isTa,
     user,
     entitlement,
+    memberSession,
     appointments,
     savedArticleIds,
-    navigate,
-    setBookingModalExpert,
-    experts
+    navigate
   } = useApp();
 
   const trialEnds = entitlement?.trialEndsAt ? new Date(entitlement.trialEndsAt).getTime() : 0;
@@ -24,8 +25,6 @@ export const PersonalSpaceView: React.FC = () => {
 
   const savedArticles = WELLBEING_ARTICLES.filter(a => savedArticleIds.includes(a.id));
   const upcoming = appointments.filter(a => a.status === 'scheduled');
-
-  const defaultListener = experts.find(e => e.role === 'listener') || experts[0];
 
   return (
     <div className="min-h-dvh bg-[#FAF7F5] text-slate-900 pb-24">
@@ -55,12 +54,17 @@ export const PersonalSpaceView: React.FC = () => {
           </button>
         </div>
 
+        {user && !entitlement && (
+          <MemberPhoneVerification key={user.id} isTa={isTa} verifiedPhone={user.phone || ''}
+            onClaim={memberSession.refresh} />
+        )}
+
         {/* Complimentary Voucher Banner */}
         {voucherAvailable && (
           <div className="rounded-2xl backdrop-blur-xl bg-white/80 border border-[#5E2750]/25 shadow-xs p-6 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold text-[#5E2750] mb-1">
-                Complimentary Sanctuary Session
+                {isTa ? 'இலவச கவனிப்பு அமர்வு' : 'Complimentary Sanctuary Session'}
               </p>
               <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-1">
                 {t('spaceVoucherHeading')}
@@ -70,13 +74,7 @@ export const PersonalSpaceView: React.FC = () => {
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setBookingModalExpert(defaultListener)}
-              className="min-h-[44px] px-5 py-2.5 rounded-xl bg-[#5E2750] hover:bg-[#4c1f40] active:scale-[0.98] text-white text-xs md:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0"
-            >
-              {t('spaceBtnRedeemVoucher')} →
-            </button>
+            <WelcomeSessionBooking key={user?.id} isTa={isTa} />
           </div>
         )}
 
@@ -111,7 +109,7 @@ export const PersonalSpaceView: React.FC = () => {
                 <line x1="8" y1="23" x2="16" y2="23"></line>
               </svg>
             </div>
-            <span className="text-xs font-semibold text-slate-800">Live Melodies</span>
+            <span className="text-xs font-semibold text-slate-800">{isTa ? 'நேரலை இசை' : 'Live Melodies'}</span>
           </button>
 
           <button
@@ -173,7 +171,7 @@ export const PersonalSpaceView: React.FC = () => {
                 onClick={() => navigate('dashboard')}
                 className="min-h-[40px] px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer"
               >
-                View All
+                {isTa ? 'அனைத்தையும் பார்க்கவும்' : 'View all'}
               </button>
             </div>
 
@@ -201,20 +199,20 @@ export const PersonalSpaceView: React.FC = () => {
           <div className="rounded-2xl backdrop-blur-xl bg-white/80 border border-white/60 shadow-xs p-6">
             <div className="flex items-center justify-between gap-2 mb-4">
               <h3 className="text-base font-bold text-slate-900 tabular-nums">
-                Saved Wellbeing Topics ({savedArticles.length})
+                {isTa ? 'சேமித்த நல்வாழ்வுத் தலைப்புகள்' : 'Saved Wellbeing Topics'} ({savedArticles.length})
               </h3>
               <button
                 type="button"
                 onClick={() => navigate('wellbeing')}
                 className="min-h-[40px] px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer"
               >
-                Browse Hub
+                {isTa ? 'தலைப்புகளைப் பார்க்கவும்' : 'Browse topics'}
               </button>
             </div>
 
             {savedArticles.length === 0 ? (
               <p className="text-xs md:text-sm text-slate-500">
-                No articles bookmarked yet. Bookmark any topic in the Life & Wellbeing Hub for quick access.
+                {isTa ? 'நீங்கள் இன்னும் எந்தத் தலைப்பையும் சேமிக்கவில்லை.' : 'No articles bookmarked yet. Bookmark any topic in the Life & Wellbeing Hub for quick access.'}
               </p>
             ) : (
               <div className="divide-y divide-slate-200/70">

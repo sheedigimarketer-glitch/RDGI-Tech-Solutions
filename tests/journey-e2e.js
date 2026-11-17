@@ -86,28 +86,28 @@ const getJson = url => new Promise((res, rej) => http.get(url, r => { let d = ''
   ok('A5 onboarding is a focused flow: no bottom tabs, no footer', !(await has('.mobile-bottom-nav')) && !(await has('.app-footer')));
   ok('A6 progress shows Step 1 of 4', /1/.test(await text('.onb-progress-label')));
 
-  await type('#regName', 'Anitha R'); await type('#regPhone', '9840011111');
+  await type('#regName', 'Anitha R'); await type('#regPhone', '0000001111');
   await click('#regSubmit');
   ok('A7 cannot submit before a mobile code is requested', (await route()) === 'onb-register' && !(await state()).user);
   await click('#regSendCode');
   ok('A8 mobile code is labelled TEST mode / not live verification', /not live verification/i.test(await text('#regTestBanner')));
 
-  await register({ name: 'Anitha R', phone: '9840011111', email: 'anitha@example.com', badOtp: '000000' });
+  await register({ name: 'Anitha R', phone: '0000001111', email: 'anitha@example.com', badOtp: '000000' });
   ok('A9 wrong mobile code is rejected', (await route()) === 'onb-register' && !(await state()).user);
-  await register({ name: 'Anitha R', phone: '9840011111', email: 'anitha@example.com', age: 17 });
+  await register({ name: 'Anitha R', phone: '0000001111', email: 'anitha@example.com', age: 17 });
   ok('A10 under-18 is rejected', (await route()) === 'onb-register' && !(await state()).user);
-  await register({ name: 'Anitha R', phone: '9840011111', email: 'not-an-email' });
+  await register({ name: 'Anitha R', phone: '0000001111', email: 'not-an-email' });
   ok('A11 invalid email is rejected', !(await state()).user);
-  await register({ name: 'Anitha R', phone: '9840011111', email: 'anitha@example.com', password: 'short' });
+  await register({ name: 'Anitha R', phone: '0000001111', email: 'anitha@example.com', password: 'short' });
   ok('A12 short password is rejected', !(await state()).user);
-  await register({ name: 'Anitha R', phone: '9840011111', email: 'anitha@example.com', noConsent: true });
+  await register({ name: 'Anitha R', phone: '0000001111', email: 'anitha@example.com', noConsent: true });
   ok('A13 missing consent is rejected', !(await state()).user);
 
-  await register({ name: 'Anitha R', phone: '9840011111', email: 'anitha@example.com' });
+  await register({ name: 'Anitha R', phone: '0000001111', email: 'anitha@example.com' });
   let s = await state();
   ok('A14 valid registration moves to the App Tour', (await route()) === 'onb-tour');
   ok('A15 profile saved (name, +91 phone, email, age, eligibility, language)',
-    s.user && s.user.fullName === 'Anitha R' && s.user.phone === '+91 9840011111' && s.user.email === 'anitha@example.com' && s.user.age === 28 && s.user.identity === 'woman' && s.user.preferredLang);
+    s.user && s.user.fullName === 'Anitha R' && s.user.phone === '+91 0000001111' && s.user.email === 'anitha@example.com' && s.user.age === 28 && s.user.identity === 'woman' && s.user.preferredLang);
   ok('A16 mobile is NOT represented as verified; email not claimed sent in local mode',
     s.user.phoneVerification === 'test_code_only' && s.user.emailVerification === 'not_sent_local_mode');
   const days = Math.round((new Date(s.ent.trialEndsAt) - Date.now()) / 86400000);
@@ -198,10 +198,10 @@ const getJson = url => new Promise((res, rej) => http.get(url, r => { let d = ''
   ok('A54 sign-out clears the session and returns Home', (await route()) === 'home' && s.user === null && s.apts.length === 0);
   await reload();
   ok('A55 after sign-out the app opens as a guest', (await route()) === 'home');
-  await register({ name: 'Anitha R', phone: '9840011111', email: 'anitha@example.com' });
+  await register({ name: 'Anitha R', phone: '0000001111', email: 'anitha@example.com' });
   ok('A56 re-registering the same number is refused (no second trial)', !(await state()).user && (await route()) === 'onb-register');
   await nav('signin');
-  await type('#siPhone', '9840011111'); await click('#siSendCode');
+  await type('#siPhone', '0000001111'); await click('#siSendCode');
   await type('#siOtp', await ev('window.herSpaceAuth.generatedOtp'));
   await click('#siSubmit'); await sleep(400);
   s = await state();
@@ -213,13 +213,13 @@ const getJson = url => new Promise((res, rej) => http.get(url, r => { let d = ''
 
   // Wrong sign-in
   await click('#spaceSignOut');
-  await nav('signin'); await type('#siPhone', '9000000000'); await click('#siSendCode');
+  await nav('signin'); await type('#siPhone', '0000000090'); await click('#siSendCode');
   await type('#siOtp', await ev('window.herSpaceAuth.generatedOtp')); await click('#siSubmit');
   ok('A61 unknown number cannot sign in', (await route()) === 'signin' && !(await state()).user);
 
   // ===== Scenario B: existing member within trial (skips tour, books later) ========================
   console.log('\n=== B. EXISTING MEMBER WITHIN THE FREE TRIAL ===');
-  await register({ name: 'Bhuvana S', phone: '9840022222', email: 'bhuvana@example.com', identity: 'trans_woman', age: 41 });
+  await register({ name: 'Bhuvana S', phone: '0000002222', email: 'bhuvana@example.com', identity: 'trans_woman', age: 41 });
   ok('B1 second member registers; eligibility category stored', (await state()).user.identity === 'trans_woman' && (await route()) === 'onb-tour');
   await reload();
   ok('B2 unfinished onboarding resumes at the tour after reload (not Home)', (await route()) === 'onb-tour');
@@ -249,7 +249,7 @@ const getJson = url => new Promise((res, rej) => http.get(url, r => { let d = ''
 
   // ===== Scenario C: returning member after trial expiry ==========================================
   console.log('\n=== C. RETURNING MEMBER AFTER TRIAL EXPIRY (dates back-dated) ===');
-  await register({ name: 'Chitra M', phone: '9840033333', email: 'chitra@example.com' });
+  await register({ name: 'Chitra M', phone: '0000003333', email: 'chitra@example.com' });
   await click('#tourNext'); await click('#tourNext'); await click('#tourSkip'); await click('#memContinue'); await click('#bookLater');
   await ev(`(function(){var st=window.herSpaceStore;var past=new Date(Date.now()-3*86400000).toISOString();var e=Object.assign({},st.state.entitlement,{trialEndsAt:past,welcomeCallExpiresAt:past,welcomeCallStatus:'expired'});st.setEntitlement(e);})()`);
   await reload();
@@ -276,7 +276,7 @@ const getJson = url => new Promise((res, rej) => http.get(url, r => { let d = ''
   await ev('localStorage.clear(); localStorage.setItem("herspace_force_offline","1");');
   await reload();
   ok('P1 wiped storage (simulated reinstall / new device) opens as a guest', (await route()) === 'home');
-  await register({ name: 'Chitra M', phone: '9840033333', email: 'chitra@example.com' });
+  await register({ name: 'Chitra M', phone: '0000003333', email: 'chitra@example.com' });
   const reissued = (await state()).user !== null && Math.round((new Date((await state()).ent.trialEndsAt) - Date.now()) / 86400000) >= 88;
   if (reissued) knownGap('Trial eligibility does NOT survive reinstall / new device in local mode', 'a fresh trial was issued for a number that already used one. Needs the live Supabase claim_first_trial() server check (member_identity/member_entitlement) with real sign-in.');
   else ok('P2 duplicate trial refused after reinstall', true);
@@ -296,7 +296,7 @@ const getJson = url => new Promise((res, rej) => http.get(url, r => { let d = ''
     ok(`O-${lang}-guest guest routes clean at ${widths.join('/')}px`, bad.length === 0, bad.slice(0, 8).join(' | '));
   }
   await viewport(390); await ev(`window.herSpaceStore.setLanguage('en')`);
-  await register({ name: 'Divya K', phone: '9840044444', email: 'divya@example.com' });
+  await register({ name: 'Divya K', phone: '0000004444', email: 'divya@example.com' });
   for (const lang of ['en', 'ta']) {
     await ev(`window.herSpaceStore.setLanguage('${lang}')`);
     let bad = [];

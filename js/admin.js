@@ -10,10 +10,10 @@
   const initialApplications = [
     {
       id: 'app-01',
-      name: 'Dr. Gayathri R.',
+      name: 'Fixture Counsellor',
       role: 'counsellor',
       qualification: 'M.Phil Clinical Psychology, NIMHANS',
-      rciNumber: 'CRR-A78942',
+      rciNumber: 'TEST-LICENSE-01',
       experienceYears: 14,
       specialties: ['Trauma & Depression', 'Anxiety'],
       status: 'pending',
@@ -22,7 +22,7 @@
     },
     {
       id: 'app-02',
-      name: 'Kavitha S.',
+      name: 'Fixture Listener',
       role: 'listener',
       qualification: 'Certified Peer Support Specialist · Empathy First Aid',
       rciNumber: null,

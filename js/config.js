@@ -7,10 +7,10 @@ const envMeta = (typeof import !== 'undefined' && typeof import.meta !== 'undefi
 const envGlobal = (typeof window !== 'undefined' && window.__ENV__) ? window.__ENV__ : {};
 
 const APP_TITLE = envMeta.VITE_APP_TITLE || envGlobal.VITE_APP_TITLE || 'HerSpace';
-const RAZORPAY_KEY_ID = envMeta.VITE_RAZORPAY_KEY_ID || envGlobal.VITE_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag';
+const RAZORPAY_KEY_ID = envMeta.VITE_RAZORPAY_KEY_ID || envGlobal.VITE_RAZORPAY_KEY_ID || '';
 const TELEPHONY_BRIDGE = envMeta.VITE_TELEPHONY_BRIDGE || envGlobal.VITE_TELEPHONY_BRIDGE || 'https://api.herspace.local/telephony';
-const SUPABASE_URL = envMeta.VITE_SUPABASE_URL || envGlobal.VITE_SUPABASE_URL || (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.url) || 'https://placeholder-herspace.supabase.co';
-const SUPABASE_ANON_KEY = envMeta.VITE_SUPABASE_ANON_KEY || envGlobal.VITE_SUPABASE_ANON_KEY || (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.publishableKey) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummy-anon-key-herspace';
+const SUPABASE_URL = envMeta.VITE_SUPABASE_URL || envGlobal.VITE_SUPABASE_URL || (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.url) || '';
+const SUPABASE_ANON_KEY = envMeta.VITE_SUPABASE_ANON_KEY || envGlobal.VITE_SUPABASE_ANON_KEY || (window.HERSPACE_SUPABASE && window.HERSPACE_SUPABASE.publishableKey) || '';
 
 window.HERSPACE_CONFIG = {
   // Brand & Market
@@ -101,28 +101,28 @@ window.HERSPACE_CONFIG = {
       listener: {
         id: 'queue_listener_tn',
         nameKey: 'queue_listener_name',
-        virtualNumber: '+91-44-4813-1001',
+        virtualNumber: '+1-202-555-0101',
         role: 'listener',
         maxWaitSeconds: 180
       },
       counsellor: {
         id: 'queue_counsellor_tn',
         nameKey: 'queue_counsellor_name',
-        virtualNumber: '+91-44-4813-1002',
+        virtualNumber: '+1-202-555-0102',
         role: 'counsellor',
         maxWaitSeconds: 180
       },
       singer: {
         id: 'queue_singer_tn',
         nameKey: 'queue_singer_name',
-        virtualNumber: '+91-44-4813-1003',
+        virtualNumber: '+1-202-555-0103',
         role: 'singer',
         maxWaitSeconds: 240
       },
       admin_escalation: {
         id: 'queue_admin_escalation',
         nameKey: 'queue_admin_name',
-        virtualNumber: '+91-44-4813-1009',
+        virtualNumber: '+1-202-555-0109',
         role: 'admin',
         maxWaitSeconds: 60
       }

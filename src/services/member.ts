@@ -29,7 +29,7 @@ export async function readMember(account: AuthUser) {
     id: account.id,
     fullName: row.full_name,
     email: account.email || '',
-    phone: account.phone || '',
+    phone: account.phone_confirmed_at ? account.phone || '' : '',
     age: row.date_of_birth ? ageAt(row.date_of_birth) : null,
     identity: row.eligibility_category === 'transgender_woman' ? 'trans_woman' :
       row.eligibility_category === 'woman' ? 'woman' : null,

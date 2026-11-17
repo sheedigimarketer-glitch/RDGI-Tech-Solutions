@@ -20,6 +20,7 @@ const backend = vi.hoisted(() => {
     signOut: vi.fn(),
     insert: vi.fn(),
     read: vi.fn(),
+    rpc: vi.fn(),
     subscribe(listener: (event: string, session: unknown) => void) {
       listeners.push(listener);
       queueMicrotask(() => {
@@ -274,4 +275,17 @@ it('allows a password update only after a recovery event', async () => {
   submit('Save new password');
   expect(await main().findByText(/Password updated/)).toBeTruthy();
   expect(backend.updateUser).toHaveBeenCalledWith({ password: 'replacement-password' });
+});
+
+it('gates a direct dashboard URL and restores the requested view after authentication', async () => {
+  window.history.replaceState(null, '', '/dashboard');
+  backend.profile = profile;
+  launch();
+  await waitForHeading('Welcome back');
+  expect(backend.read).not.toHaveBeenCalled();
+
+  backend.account = account;
+  backend.emit('SIGNED_IN');
+  expect(await screen.findByText('MEMBER SESSIONS & PRIVILEGES')).toBeTruthy();
+  expect(backend.read).toHaveBeenCalledWith('member_profiles', 'user_id', account.id);
 });

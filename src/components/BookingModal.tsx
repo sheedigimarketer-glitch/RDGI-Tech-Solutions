@@ -60,9 +60,7 @@ export const BookingModal: React.FC = () => {
 
   const currentSingerTier = singerTiers.find(tr => tr.id === selectedTierId) || singerTiers[0];
 
-  const effectivePrice = isComplimentaryEligible
-    ? 0
-    : isSinger
+  const effectivePrice = isSinger
     ? currentSingerTier.priceDisplay
     : 'priceDisplay' in exp
     ? exp.priceDisplay
@@ -206,7 +204,15 @@ export const BookingModal: React.FC = () => {
               fontWeight: 600
             }}
           >
-            🎁 1 Complimentary 30-Min Listening Session Applied (₹0 Today)
+            <p>{isTa
+              ? 'உங்கள் 30 நிமிட இலவச அமர்வை தனியாக முன்பதிவு செய்யலாம்.'
+              : 'Your complimentary 30-minute listener session is booked separately.'}</p>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => {
+              setBookingModalExpert(null);
+              navigate('space');
+            }}>
+              {isTa ? 'இலவச அமர்வுக்கான நேரங்களைப் பார்க்கவும்' : 'See welcome session times'}
+            </button>
           </div>
         )}
 
@@ -288,7 +294,7 @@ export const BookingModal: React.FC = () => {
               {isSinger ? `${currentSingerTier.name} (${currentSingerTier.durationMinutes} mins)` : 'Session Fee (60 mins)'}
             </div>
             <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-primary-dark)' }}>
-              {isComplimentaryEligible ? '₹0 (Free Trial)' : formatINR(effectivePrice)}
+              {formatINR(effectivePrice)}
             </div>
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--color-ink-muted)', textAlign: 'right' }}>
