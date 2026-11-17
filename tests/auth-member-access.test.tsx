@@ -11,7 +11,6 @@ const backend = vi.hoisted(() => {
     account: null as any,
     profile: null as any,
     entitlement: null as any,
-    rpc: vi.fn(),
     signUp: vi.fn(),
     signInWithPassword: vi.fn(),
     getUser: vi.fn(),
@@ -37,6 +36,10 @@ const backend = vi.hoisted(() => {
 vi.mock('../src/services/auth', () => ({
   memberResetPath: '/member/reset',
   memberSigninPath: '/member/sign-in',
+  signInMember: async (email: string, password: string) => {
+    const { error } = await backend.signInWithPassword({ email, password });
+    if (error) throw error;
+  },
   validatePassword: (value: string) => {
     if (value.length < 12 || value.length > 128) throw new Error('weak_password');
   },
@@ -157,6 +160,7 @@ it('resumes a verified signup, validates eligibility and completes all four onbo
   const app = launch();
   await waitForHeading('Complete your member profile');
   enter('Your name or preferred alias', 'Member Alias');
+  enter('Choose a username', 'fixture_member');
   enter('Date of birth (18+)', '2017-01-01');
   enter('Eligibility', 'woman');
   fireEvent.click(main().getByRole('checkbox'));
@@ -203,12 +207,12 @@ it('protects the dashboard, handles invalid credentials, restores a session and 
   await waitForHeading('Welcome back');
   expect(backend.read).not.toHaveBeenCalled();
   const fill = (password: string) => {
-    enter('Email address', account.email);
+    enter('Username or email address', account.email);
     enter('Password', password);
     submit('Sign In');
   };
   fill('bad-password');
-  expect(await main().findByRole('alert')).toHaveProperty('textContent', 'Check your email and password, and verify your email before signing in.');
+  expect(await main().findByRole('alert')).toHaveProperty('textContent', 'Check your sign-in details and verify your recovery email before signing in.');
   fill('existing-password');
   expect(await screen.findByText('MEMBER SESSIONS & PRIVILEGES')).toBeTruthy();
   expect(backend.read).toHaveBeenCalledWith('member_profiles', 'user_id', account.id);
@@ -238,7 +242,7 @@ it('switches the member form to Tamil and requests a generic reset email', async
   fireEvent.click(main().getByRole('button', { name: 'Sign In' }));
   await waitForHeading('Welcome back');
   fireEvent.click(screen.getByRole('button', { name: 'Switch Language' }));
-  expect(main().getByLabelText('மின்னஞ்சல் முகவரி')).toBeTruthy();
+  expect(main().getByLabelText('பயனர்பெயர் அல்லது மின்னஞ்சல் முகவரி')).toBeTruthy();
   expect(main().getByLabelText('கடவுச்சொல்')).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Switch Language' }));
   submit('Forgot password?');

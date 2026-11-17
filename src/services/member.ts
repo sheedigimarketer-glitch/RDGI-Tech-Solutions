@@ -5,7 +5,7 @@ import type { User as AuthUser } from '@supabase/supabase-js';
 export const memberConfirmPath = '/member/confirm';
 export const memberCallback = (path: string) => window.location.origin + path;
 
-const profileColumns = 'full_name, date_of_birth, eligibility_category, preferred_language, onboarding_completed_at';
+const profileColumns = 'full_name, date_of_birth, eligibility_category, preferred_language, onboarding_completed_at, username';
 
 export function ageAt(date: string, today = new Date()) {
   const [year, month, day] = date.split('-').map(Number);
@@ -27,6 +27,7 @@ export async function readMember(account: AuthUser) {
   const row = profile.data;
   const user: User = {
     id: account.id,
+    username: row.username || undefined,
     fullName: row.full_name,
     email: account.email || '',
     phone: account.phone_confirmed_at ? account.phone || '' : '',
@@ -53,11 +54,14 @@ export async function readMember(account: AuthUser) {
 
 export async function createMemberProfile(accountId: string, fields: {
   name: string;
+  username: string;
   birthDate: string;
   identity: string;
   lang: Language;
 }) {
   const name = fields.name.trim();
+  const username = fields.username.trim().toLowerCase();
+  if (!/^[a-z][a-z0-9_]{2,31}$/.test(username)) throw new Error('invalid_username');
   const date = new Date(fields.birthDate + 'T00:00:00Z');
   if (name.length < 2 || name.length > 100 || !Number.isFinite(date.getTime()) ||
     date.toISOString().slice(0, 10) !== fields.birthDate || ageAt(fields.birthDate) < 18 ||
@@ -67,10 +71,16 @@ export async function createMemberProfile(accountId: string, fields: {
   const { error } = await supabase.from('member_profiles').insert({
     user_id: accountId,
     full_name: name,
+    username,
     date_of_birth: fields.birthDate,
     eligibility_category: fields.identity,
     preferred_language: fields.lang
   });
-  // A retry after a completed insert, or another tab, can already own this primary key.
-  if (error && error.code !== '23505') throw error;
+  if (!error) return;
+  if (error.code !== '23505') throw error;
+  // A previous successful request may already own this profile. Another member's
+  // username conflict must remain visible so the member can choose another value.
+  const existing = await supabase.from('member_profiles').select('user_id').eq('user_id', accountId).maybeSingle();
+  if (existing.error) throw existing.error;
+  if (!existing.data) throw new Error('username_unavailable');
 }

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { supabase } from '../services/auth';
 import { MemberPhoneVerification } from '../components/MemberPhoneVerification';
 import { WelcomeSessionBooking } from '../components/WelcomeSessionBooking';
 import { useApp } from '../context/AppContext';
@@ -15,6 +16,31 @@ export const PersonalSpaceView: React.FC = () => {
     savedArticleIds,
     navigate
   } = useApp();
+
+  const [usernamePending, setUsernamePending] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const copy = (en: string, ta: string) => isTa ? ta : en;
+
+  async function saveUsername(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (usernamePending) return;
+    const name = String(new FormData(event.currentTarget).get('username') ?? '').trim().toLowerCase();
+    setUsernameError('');
+    if (!/^[a-z][a-z0-9_]{2,31}$/.test(name)) {
+      setUsernameError(copy('Start with a letter and use 3–32 letters, digits or underscores.', 'எழுத்தில் தொடங்கி 3–32 ஆங்கில எழுத்துகள், எண்கள் அல்லது அடிக்கோடுகளைப் பயன்படுத்துங்கள்.'));
+      return;
+    }
+    setUsernamePending(true);
+    try {
+      const { error } = await supabase.rpc('herspace_set_member_username', { requested_username: name });
+      if (error) throw error;
+      memberSession.refresh();
+    } catch {
+      setUsernameError(copy('Could not save this username. Try another username or contact support.', 'இந்தப் பயனர்பெயரைச் சேமிக்க முடியவில்லை. வேறு பெயரை முயற்சிக்கவும் அல்லது உதவிக் குழுவைத் தொடர்பு கொள்ளவும்.'));
+    } finally {
+      setUsernamePending(false);
+    }
+  }
 
   const trialEnds = entitlement?.trialEndsAt ? new Date(entitlement.trialEndsAt).getTime() : 0;
   const daysRemaining = Math.max(0, Math.ceil((trialEnds - Date.now()) / (1000 * 60 * 60 * 24)));
@@ -53,6 +79,16 @@ export const PersonalSpaceView: React.FC = () => {
             {t('navBookings')} ({upcoming.length})
           </button>
         </div>
+
+        {user && !user.username && (
+          <form key={user.id} onSubmit={saveUsername} className="rounded-2xl bg-white border border-slate-300 p-6 mb-6 grid gap-3">
+            <label htmlFor="claim-username" className="font-semibold">{copy('Choose a username for future sign-ins', 'அடுத்த முறை உள்நுழைய ஒரு பயனர்பெயரைத் தேர்வு செய்யுங்கள்')}</label>
+            <input id="claim-username" name="username" className="form-control" autoComplete="username"
+              autoCapitalize="none" spellCheck={false} minLength={3} maxLength={32} required />
+            {usernameError && <p role="alert" className="text-sm">{usernameError}</p>}
+            <button type="submit" className="btn btn-primary" disabled={usernamePending}>{copy('Save username', 'பயனர்பெயரைச் சேமிக்கவும்')}</button>
+          </form>
+        )}
 
         {user && !entitlement && (
           <MemberPhoneVerification key={user.id} isTa={isTa} verifiedPhone={user.phone || ''}

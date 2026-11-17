@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { memberResetPath, supabase, validatePassword } from '../services/auth';
+import { memberResetPath, signInMember, supabase, validatePassword } from '../services/auth';
 import { createMemberProfile, memberCallback, memberConfirmPath } from '../services/member';
 
 type Mode = 'register' | 'signin' | 'recover' | 'reset' | 'confirm' | 'profile' | 'loading' | 'error';
@@ -64,6 +64,7 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
         if (!fields.has('consent')) throw new Error('invalid_profile');
         await createMemberProfile(memberSession.accountId, {
           name: String(fields.get('name') || ''),
+          username: String(fields.get('username') || ''),
           birthDate: String(fields.get('birthDate') || ''),
           identity: String(fields.get('identity') || ''),
           lang
@@ -79,8 +80,7 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
         if (error && !accountExistsCodes.includes(error.code || '')) throw error;
         if (!data?.session) setNotice(verificationNotice);
       } else if (isSignin) {
-        const { error } = await supabase.auth.signInWithPassword({ email: address, password });
-        if (error) throw error;
+        await signInMember(address, password);
       } else if (mode === 'recover') {
         const { error } = await supabase.auth.resetPasswordForEmail(address, {
           redirectTo: memberCallback(memberResetPath)
@@ -98,13 +98,15 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
       const message = cause instanceof Error ? cause.message : '';
       if (message === 'invalid_profile') {
         setError(copy('Check your details, age eligibility and consent.', 'உங்கள் விவரங்கள், வயதுத் தகுதி மற்றும் ஒப்புதலைச் சரிபார்க்கவும்.'));
+      } else if (message === 'username_unavailable' || message === 'invalid_username') {
+        setError(copy('Choose another username with 3–32 letters, digits or underscores, starting with a letter.', 'எழுத்தில் தொடங்கும், 3–32 ஆங்கில எழுத்துகள், எண்கள் அல்லது அடிக்கோடுகள் கொண்ட வேறு பயனர்பெயரைத் தேர்வு செய்யுங்கள்.'));
       } else if (message === 'password_mismatch') {
         setError(copy('Passwords must match.', 'கடவுச்சொற்கள் ஒன்றாக இருக்க வேண்டும்.'));
       } else if ((isRegister || canReset) && code === 'weak_password') {
         setPasswordError('weak');
         passwordInput?.focus();
       } else if (isSignin && (code === 'invalid_credentials' || code === 'email_not_confirmed')) {
-        setError(copy('Check your email and password, and verify your email before signing in.', 'மின்னஞ்சல், கடவுச்சொல் மற்றும் மின்னஞ்சல் சரிபார்ப்பைச் சரிபார்க்கவும்.'));
+        setError(copy('Check your sign-in details and verify your recovery email before signing in.', 'உள்நுழைவு விவரங்களையும் மீட்பு மின்னஞ்சல் சரிபார்ப்பையும் சரிபார்க்கவும்.'));
       } else if (typeof code === 'string' && code.startsWith('over_')) {
         setError(copy('Too many attempts. Wait a few minutes and try again.', 'அதிக முயற்சிகள். சில நிமிடங்கள் கழித்து மீண்டும் முயலுங்கள்.'));
       } else {
@@ -122,7 +124,7 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
       <div className="container onb-narrow">
         <h1 className="onb-title">{titles[mode]}</h1>
         {isRegister && <p className="onb-sub">{t('regSub')}</p>}
-        {isSignin && <p className="onb-sub">{copy('Sign in with your registered email address.', 'பதிவு செய்த மின்னஞ்சல் முகவரியுடன் உள்நுழையுங்கள்.')}</p>}
+        {isSignin && <p className="onb-sub">{copy('Use your username, or use your verified email if you signed up before usernames were introduced.', 'பயனர்பெயரைப் பயன்படுத்துங்கள். பழைய கணக்காக இருந்தால் சரிபார்க்கப்பட்ட மின்னஞ்சலைப் பயன்படுத்தலாம்.')}</p>}
         {mode === 'confirm' && <p className="onb-sub">{copy('If your link has expired, return to sign in or request password recovery.', 'இணைப்பு காலாவதியானால் மீண்டும் உள்நுழையுங்கள் அல்லது கடவுச்சொல்லை மீட்டமைக்கவும்.')}</p>}
         {isReset && !memberSession.loading && !canReset && <p className="onb-sub">{copy('Request a fresh reset link to continue.', 'தொடர புதிய மீட்டமைப்பு இணைப்பைக் கோருங்கள்.')}</p>}
         {mode === 'error' && <div className="onb-actions">
@@ -131,8 +133,9 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
         </div>}
         {showForm && <form className="onb-card onb-form" onSubmit={submit}>
           {showEmail && <div className="form-group">
-            <label className="form-label" htmlFor="member-email">{copy('Email address', 'மின்னஞ்சல் முகவரி')}</label>
-            <input id="member-email" name="email" className="form-control" type="email" autoComplete="username"
+            <label className="form-label" htmlFor="member-email">{isSignin ? copy('Username or email address', 'பயனர்பெயர் அல்லது மின்னஞ்சல் முகவரி') : copy('Email address', 'மின்னஞ்சல் முகவரி')}</label>
+            <input id="member-email" name="identifier" className="form-control" type={isSignin ? 'text' : 'email'}
+              autoComplete={isSignin ? 'username' : 'email'} autoCapitalize="none" spellCheck={false}
               value={email} onChange={event => setEmail(event.target.value)} maxLength={254} required />
           </div>}
           {showPassword && <div className="form-group">
@@ -156,6 +159,12 @@ export function MemberAccessView({ mode }: { mode: Mode }) {
             <div className="form-group">
               <label className="form-label" htmlFor="member-name">{t('fldName')}</label>
               <input id="member-name" name="name" className="form-control" autoComplete="nickname" minLength={2} maxLength={100} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="member-username">{copy('Choose a username', 'பயனர்பெயரைத் தேர்வு செய்யுங்கள்')}</label>
+              <input id="member-username" name="username" className="form-control" autoComplete="username"
+                autoCapitalize="none" spellCheck={false} minLength={3} maxLength={32} required />
+              <p className="text-sm text-slate-600">{copy('Use 3–32 letters, digits or underscores. Start with a letter.', '3–32 ஆங்கில எழுத்துகள், எண்கள் அல்லது அடிக்கோடுகளைப் பயன்படுத்துங்கள். எழுத்தில் தொடங்குங்கள்.')}</p>
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="member-birth">{copy('Date of birth (18+)', 'பிறந்த தேதி (18+)')}</label>
